@@ -123,6 +123,10 @@ const (
 	// authentication credentials for the operation.
 	Unauthenticated Code = -16
 
+	// RateLimited indicates some flow control algorithm is running and applied.
+	// = HTTP Code 429
+	RateLimited = -17
+
 	// MinErrorCode is the lower bound
 	MinErrorCode = -1000
 )
@@ -145,7 +149,9 @@ var strToCode = map[string]Code{
 	`UNAVAILABLE`:         Unavailable,
 	`DATA_LOSS`:           DataLoss,
 	`UNAUTHENTICATED`:     Unauthenticated,
+	`RATE_LIMITED`:        RateLimited,
 }
+
 var codeToStr = map[Code]string{
 	OK:                 `OK`,
 	Canceled:           `CANCELLED`,
@@ -164,6 +170,7 @@ var codeToStr = map[Code]string{
 	Unavailable:        `UNAVAILABLE`,
 	DataLoss:           `DATA_LOSS`,
 	Unauthenticated:    `UNAUTHENTICATED`,
+	RateLimited:        `RATE_LIMITED`,
 }
 
 func (c Code) String() string {
