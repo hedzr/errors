@@ -122,6 +122,9 @@ const (
 	// Unauthenticated indicates the request does not have valid
 	// authentication credentials for the operation.
 	Unauthenticated Code = -16
+
+	// MinErrorCode is the lower bound
+	MinErrorCode = -1000
 )
 
 var strToCode = map[string]Code{
@@ -173,11 +176,13 @@ func (c Code) String() string {
 // Register register a code and its token string for using later
 func (c Code) Register(token string) (errno Code) {
 	errno = AlreadyExists
-	if _, ok := strToCode[token]; !ok {
-		if _, ok = codeToStr[c]; !ok {
-			strToCode[token] = c
-			codeToStr[c] = token
-			errno = OK
+	if c <= MinErrorCode || c > 0 {
+		if _, ok := strToCode[token]; !ok {
+			if _, ok = codeToStr[c]; !ok {
+				strToCode[token] = c
+				codeToStr[c] = token
+				errno = OK
+			}
 		}
 	}
 	return
