@@ -169,3 +169,16 @@ func (c Code) String() string {
 	}
 	return codeToStr[Unknown]
 }
+
+// Register register a code and its token string for using later
+func (c Code) Register(token string) (errno Code) {
+	errno = AlreadyExists
+	if _, ok := strToCode[token]; !ok {
+		if _, ok = codeToStr[c]; !ok {
+			strToCode[token] = c
+			codeToStr[c] = token
+			errno = OK
+		}
+	}
+	return
+}
