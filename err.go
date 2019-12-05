@@ -54,6 +54,19 @@ type ExtErr struct {
 	msg      string
 }
 
+// Unwrap returns the result of calling the Unwrap method on err, if err's
+// type contains an Unwrap method returning error.
+// Otherwise, Unwrap returns nil.
+func (e *ExtErr) Unwrap() error {
+	if e.innerErr != nil {
+		return e.innerErr
+	}
+	if e.innerEE != nil {
+		return e.innerEE
+	}
+	return nil
+}
+
 func (e *ExtErr) Error() string {
 	var buf bytes.Buffer
 	if len(e.msg) == 0 {

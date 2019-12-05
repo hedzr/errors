@@ -43,4 +43,16 @@ func TestAll(t *testing.T) {
 	t.Log(err3)
 	t.Log(err4)
 
+	e := err4.Unwrap()
+	t.Log(e)
+	e = err3.Unwrap()
+	t.Log(e)
+	e = err2.Unwrap()
+	t.Log(e)
+	e = err.Unwrap()
+	t.Log(e)
+
+	err = errors.New("something", io.ErrClosedPipe)
+	e = err.Unwrap()
+	t.Log(e)
 }

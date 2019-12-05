@@ -97,6 +97,13 @@ BUG1001
 ```
 
 
+## replacement of go `errors`
+
+As a replacement, the functions are copied from go `errors`, such as:
+
+- `Is(err, target) bool`
+- `As(err, target) bool`
+- `Unwrap(err) error`
 
 ## LICENSE
 
