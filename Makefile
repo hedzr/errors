@@ -33,7 +33,8 @@ coverage:
 codecov:
 	@echo "  >  codecov ..."
 	go test -v -race -coverprofile=coverage.txt -covermode=atomic
-	@bash <(curl -s https://codecov.io/bash) -t $(CODECOV_TOKEN)
+	#@bash <(curl -s https://codecov.io/bash) -t $(CODECOV_TOKEN)
+	curl -s https://codecov.io/bash | bash -s
 
 ## test: run go coverage test
 test:
