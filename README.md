@@ -47,11 +47,18 @@ var(
 )
 ```
 
+### Predefined error codes
+
+The builtin error codes are copied from Google gRPC codes but negatived.
+
+**The numbers -1..-999 are reserved.**
+
+
 ### register your error codes:
 
-The user-defined error codes could be registered into `errors.Code` with its codename.
+The user-defined error codes (must be < -1000, or > 0) could be registered into `errors.Code` with its codename.
 
-For example (run it at paly-ground: https://play.golang.org/p/N-P7lqdJPzy):
+For example (run it at play-ground: https://play.golang.org/p/N-P7lqdJPzy):
 
 ```go
 package main

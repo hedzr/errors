@@ -2,7 +2,7 @@
 
 package errors
 
-// A Code is an signed 32-bit error code copied from gRPC spec but negative.
+// A Code is an signed 32-bit error code copied from gRPC spec but negatived.
 type Code int32
 
 const (
