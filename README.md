@@ -9,7 +9,7 @@
 
 Nestable errors for golang dev.
 
-Take a look at: https://play.golang.org/p/bsGjRAWJDOA
+Take a look at: <https://play.golang.org/p/Yt-9dCSHX1Z>
 
 ## Import
 
@@ -24,7 +24,7 @@ import "gtihub.com/hedzr/errors"
 ```go
 var (
   errBug1 = errors.New("bug 1")
-  errBug2 = errors.New("bug 2")
+  errBug2 = errors.New("bug 2, %v, %d", []string{"a","b"}, 5)
   errBug3 = errors.New("bug 3")
 )
 
