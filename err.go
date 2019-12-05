@@ -13,6 +13,12 @@ func New(msg string, args ...interface{}) *ExtErr {
 	return e
 }
 
+// NewTemplate ExtErr error object with string template and allows attach more nested errors
+func NewTemplate(tmpl string) *ExtErr {
+	e := &ExtErr{tmpl: tmpl}
+	return e
+}
+
 // NewWithError ExtErr error object with nested errors
 func NewWithError(errors ...error) *ExtErr {
 	return New("unknown error").Attach(errors...)
@@ -53,6 +59,7 @@ type ExtErr struct {
 	innerEE  *ExtErr
 	innerErr error
 	msg      string
+	tmpl     string
 }
 
 // Unwrap returns the result of calling the Unwrap method on err, if err's
@@ -68,9 +75,30 @@ func (e *ExtErr) Unwrap() error {
 	return nil
 }
 
+// Template setup a string format template.
+// Coder could compile the error object with formatting args later.
+func (e *ExtErr) Template(tmpl string) *ExtErr {
+	e.tmpl = tmpl
+	return e
+}
+
+// Format compiles the final msg with string template and args
+func (e *ExtErr) Format(args ...interface{}) *ExtErr {
+	if len(args) == 0 {
+		e.msg = e.tmpl
+	} else {
+		e.msg = fmt.Sprintf(e.tmpl, args)
+	}
+	return e
+}
+
 // Msg encodes a formattable msg with args into ExtErr
 func (e *ExtErr) Msg(msg string, args ...interface{}) *ExtErr {
-	e.msg = fmt.Sprintf(msg, args...)
+	if len(args) == 0 {
+		e.msg = msg
+	} else {
+		e.msg = fmt.Sprintf(msg, args...)
+	}
 	return e
 }
 
@@ -120,15 +148,36 @@ func (e *ExtErr) Error() string {
 	return buf.String()
 }
 
-// Msg encodes a formattable msg with args into ExtErr
-func (e *CodedErr) Msg(msg string, args ...interface{}) *CodedErr {
-	e.msg = fmt.Sprintf(msg, args...)
-	return e
-}
-
 // Code put another code into CodedErr
 func (e *CodedErr) Code(code Code) *CodedErr {
 	e.code = code
+	return e
+}
+
+// Template setup a string format template.
+// Coder could compile the error object with formatting args later.
+func (e *CodedErr) Template(tmpl string) *CodedErr {
+	e.tmpl = tmpl
+	return e
+}
+
+// Format compiles the final msg with string template and args
+func (e *CodedErr) Format(args ...interface{}) *CodedErr {
+	if len(args) == 0 {
+		e.msg = e.tmpl
+	} else {
+		e.msg = fmt.Sprintf(e.tmpl, args)
+	}
+	return e
+}
+
+// Msg encodes a formattable msg with args into ExtErr
+func (e *CodedErr) Msg(msg string, args ...interface{}) *CodedErr {
+	if len(args) == 0 {
+		e.msg = msg
+	} else {
+		e.msg = fmt.Sprintf(msg, args...)
+	}
 	return e
 }
 
