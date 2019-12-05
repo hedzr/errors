@@ -181,13 +181,13 @@ func (c Code) String() string {
 }
 
 // Register register a code and its token string for using later
-func (c Code) Register(token string) (errno Code) {
+func (c Code) Register(codeName string) (errno Code) {
 	errno = AlreadyExists
 	if c <= MinErrorCode || c > 0 {
-		if _, ok := strToCode[token]; !ok {
+		if _, ok := strToCode[codeName]; !ok {
 			if _, ok = codeToStr[c]; !ok {
-				strToCode[token] = c
-				codeToStr[c] = token
+				strToCode[codeName] = c
+				codeToStr[c] = codeName
 				errno = OK
 			}
 		}

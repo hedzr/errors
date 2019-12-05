@@ -42,25 +42,43 @@ var(
 
 The user-defined error codes could be registered into `errors.Code` with its codename.
 
+For example (run it at paly-ground: https://play.golang.org/p/N-P7lqdJPzy):
+
 ```go
-const (
-  BUG1001 errors.Code = 1001 
-  BUG1002 errors.Code = 1002 
+package main
+
+import (
+	"fmt"
+	"github.com/hedzr/errors"
+	"io"
 )
 
-func init(){
-  BUG1001.Register("BUG1001")
-  BUG1002.Register("BUG1002")
+const (
+	BUG1001 errors.Code = 1001
+	BUG1002 errors.Code = 1002
+)
+
+var (
+	errBug1001 = errors.NewWithCodeMsg(BUG1001, "something is wrong", io.EOF)
+)
+
+func init() {
+	BUG1001.Register("BUG1001")
+	BUG1002.Register("BUG1002")
 }
 
-func main(){
-  fmt.Println(BUG1001.String())
+func main() {
+	fmt.Println(BUG1001.String())
+	fmt.Println(errBug1001)
 }
-
-// Result:
-BUG1001
 ```
 
+Result:
+
+```
+BUG1001
+001001|BUG1001|something is wrong, EOF
+```
 
 
 
