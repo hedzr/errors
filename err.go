@@ -22,7 +22,7 @@ func NewWithCode(code Code, errors ...error) *CodedErr {
 	return &CodedErr{Code: code, ExtErr: *NewWithError(errors...)}
 }
 
-// NewWithCodMsge ExtErr error object with nested errors
+// NewWithCodeMsg ExtErr error object with nested errors
 func NewWithCodeMsg(code Code, msg string, errors ...error) *CodedErr {
 	return &CodedErr{Code: code, ExtErr: *New(msg, errors...)}
 }
