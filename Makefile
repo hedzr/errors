@@ -14,7 +14,7 @@ format: | $(GOBASE)
 ## lint: run golint tool
 lint: | $(GOBASE) $(GOLINT)
 	@echo "  >  golint ..."
-	$(GOLINT) ./...
+	golint ./...
 
 ## cov: =`coverage`, run go coverage test
 cov: coverage
