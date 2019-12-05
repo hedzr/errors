@@ -9,11 +9,12 @@ install:
 
 script:
   # - "./test.sh build-ci"
-  - make cov
-  - go test -coverprofile=coverage.txt -covermode=atomic
+  - make codecov
+  - #- make test
+  #- go test -coverprofile=coverage.txt -covermode=atomic
 
-after_success:
-  - bash <(curl -s https://codecov.io/bash)
+#after_success:
+#  - bash <(curl -s https://codecov.io/bash)
 
 #deploy:
 #  provider: releases

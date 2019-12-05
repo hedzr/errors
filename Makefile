@@ -23,20 +23,25 @@ cov: coverage
 gocov: coverage
 
 ## coverage: run go coverage test
-coverage: | $(GOBASE)
+coverage:
 	@echo "  >  gocov ..."
 	go test -v -race -coverprofile=coverage.txt -covermode=atomic
 	go tool cover -html=coverage.txt -o cover.html
 	@open cover.html
 
 ## codecov: run go test for codecov; (codecov.io)
-codecov: | $(GOBASE)
+codecov:
 	@echo "  >  codecov ..."
 	go test -v -race -coverprofile=coverage.txt -covermode=atomic
 	@bash <(curl -s https://codecov.io/bash) -t $(CODECOV_TOKEN)
 
+## test: run go coverage test
+test:
+	@echo "  >  test ..."
+	go test -v -race -coverprofile=coverage.txt -covermode=atomic
+
 ## cyclo: run gocyclo tool
-cyclo: | $(GOBASE) $(GOCYCLO)
+cyclo:
 	@echo "  >  gocyclo ..."
 	gocyclo -top 20 .
 
