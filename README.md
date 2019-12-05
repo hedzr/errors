@@ -17,7 +17,7 @@ Take a look at: <https://play.golang.org/p/Yt-9dCSHX1Z>
 import "gtihub.com/hedzr/errors"
 ```
 
-## ExtErr
+## `ExtErr` object
 
 ### `error` with message
 
@@ -36,7 +36,7 @@ func main() {
 }
 ```
 
-## CodedErr
+## `CodedErr` object
 
 ### `error` with a code
 
@@ -96,6 +96,35 @@ BUG1001
 001001|BUG1001|something is wrong, EOF
 ```
 
+## Template
+
+You could put a string template into both `ExtErr` and `CodedErr`, and format its till using:
+
+```go
+const (
+	BUG1004 errors.Code = -1004
+	BUG1005 errors.Code = -1005
+)
+
+var (
+	eb1  = errors.NewTemplate("xxbug 1, cause: %v")
+	eb11 = errors.New("").Msg("first, %v", "ok").Template("xxbug11, cause")
+	eb2  = errors.NewCodedError(BUG1004).Template("xxbug4, cause: %v")
+	eb3  = errors.NewCodedError(BUG1005).Template("xxbug5, cause: none")
+	eb31 = errors.NewCodedError(BUG1004).Msg("first, %v", "ok").Template("xxbug4.31, cause: %v")
+	eb4  = errors.NewCodedError(BUG1005).Template("xxbug54, cause: none")
+)
+
+func init() {
+	BUG1004.Register("BUG1004")
+	BUG1005.Register("BUG1005")
+}
+
+func TestAll(t *testing.T) {
+	err = eb1.Format("resources exhausted")
+	t.Log(err)
+}
+```
 
 ## replacement of go `errors`
 
