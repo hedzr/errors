@@ -15,7 +15,7 @@ const (
 )
 
 var (
-	errBug1001 = errors.NewWithCodeMsg(BUG1001, "something is wrong", io.EOF)
+	errBug1001 = errors.NewCodedError(BUG1001).Msg("something is wrong").Attach(io.EOF)
 )
 
 var (
@@ -34,14 +34,14 @@ func TestAll(t *testing.T) {
 	t.Log(errBug1001)
 	t.Log(BUG1003)
 
-	err := errors.New("something", errBug1, errBug2)
+	err := errors.New("something").Attach(errBug1, errBug2).Nest(errBug1, errBug2).Msg("anything")
 	err2 := errors.NewWithError(errBug3)
-	err3 := errors.NewWithCode(BUG1002, errBug1)
-	err4 := errors.NewWithCodeMsg(BUG1002, "xx", errBug1)
+	err3 := errors.NewCodedError(BUG1002).Attach(errBug1).Code(BUG1002)
+	err4 := errors.NewCodedError(BUG1002).Msg("xx").Nest(errBug1)
 	t.Log(err)
-	t.Log(err2)
+	t.Log(err2.Error())
 	t.Log(err3)
-	t.Log(err4)
+	t.Log(err4.Error())
 
 	e := err4.Unwrap()
 	t.Log(e)
@@ -52,7 +52,7 @@ func TestAll(t *testing.T) {
 	e = err.Unwrap()
 	t.Log(e)
 
-	err = errors.New("something", io.ErrClosedPipe)
+	err = errors.New("something").Attach(io.ErrClosedPipe)
 	e = err.Unwrap()
 	t.Log(e)
 }

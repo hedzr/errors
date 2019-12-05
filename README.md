@@ -29,7 +29,7 @@ var (
 )
 
 func main() {
-  err := errors.New("something", errBug1, errBug2)
+  err := errors.New("something").Attach(errBug1, errBug2)
   err2 := errors.New(errBug3)
 
   log.Println(err, err2)
@@ -42,8 +42,8 @@ func main() {
 
 ```go
 var(
-  errNotFound = errors.NewWithCode(errors.NotFound)
-  errNotFoundMsg = errors.NewWithCodeMsg(errors.NotFound, "not found")
+  errNotFound = errors.NewCodedError(errors.NotFound)
+  errNotFoundMsg = errors.NewCodedError(errors.NotFound).Msg("not found")
 )
 ```
 
@@ -58,7 +58,7 @@ The builtin error codes are copied from Google gRPC codes but negatived.
 
 The user-defined error codes (must be < -1000, or > 0) could be registered into `errors.Code` with its codename.
 
-For example (run it at play-ground: https://play.golang.org/p/N-P7lqdJPzy):
+For example (run it at play-ground: https://play.golang.org/p/ifUvABaPEoJ):
 
 ```go
 package main
@@ -75,7 +75,7 @@ const (
 )
 
 var (
-	errBug1001 = errors.NewWithCodeMsg(BUG1001, "something is wrong", io.EOF)
+	errBug1001 = errors.NewCodedError(BUG1001).Msg("something is wrong").Attach(io.EOF)
 )
 
 func init() {

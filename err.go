@@ -7,43 +7,44 @@ import (
 	"fmt"
 )
 
-// New ExtErr error object with message and nested errors
-func New(msg string, errors ...error) *ExtErr {
-	return add(msg, errors...)
+// New ExtErr error object with message and allows attach more nested errors
+func New(msg string, args ...interface{}) *ExtErr {
+	e := &ExtErr{msg: fmt.Sprintf(msg, args...)}
+	return e
 }
 
 // NewWithError ExtErr error object with nested errors
 func NewWithError(errors ...error) *ExtErr {
-	return add("unknown error", errors...)
+	return New("unknown error").Attach(errors...)
 }
 
-// NewWithCode ExtErr error object with nested errors
-func NewWithCode(code Code, errors ...error) *CodedErr {
-	return &CodedErr{Code: code, ExtErr: *NewWithError(errors...)}
+// NewCodedError error object with nested errors
+func NewCodedError(code Code) *CodedErr {
+	return &CodedErr{code: code}
 }
 
-// NewWithCodeMsg ExtErr error object with nested errors
-func NewWithCodeMsg(code Code, msg string, errors ...error) *CodedErr {
-	return &CodedErr{Code: code, ExtErr: *New(msg, errors...)}
-}
-
-func add(msg string, errs ...error) *ExtErr {
-	if len(errs) == 0 {
-		return &ExtErr{msg: msg}
-	} else if len(errs) == 1 {
-		err := errs[0]
-		if e, ok := err.(*ExtErr); ok {
-			return &ExtErr{msg: msg, innerEE: e}
-		}
-		return &ExtErr{msg: msg, innerErr: err}
-	}
-
-	return add("", errs[1:]...)
-}
+// // NewWithCodeMsg ExtErr error object with nested errors
+// func NewWithCodeMsg(code Code, msg string, errors ...error) *CodedErr {
+// 	return &CodedErr{Code: code, ExtErr: *New(msg, errors...)}
+// }
+//
+// func add(msg string, errs ...error) *ExtErr {
+// 	if len(errs) == 0 {
+// 		return &ExtErr{msg: msg}
+// 	} else if len(errs) == 1 {
+// 		err := errs[0]
+// 		if e, ok := err.(*ExtErr); ok {
+// 			return &ExtErr{msg: msg, innerEE: e}
+// 		}
+// 		return &ExtErr{msg: msg, innerErr: err}
+// 	}
+//
+// 	return add("", errs[1:]...)
+// }
 
 // CodedErr adds a error code
 type CodedErr struct {
-	Code Code
+	code Code
 	ExtErr
 }
 
@@ -67,6 +68,37 @@ func (e *ExtErr) Unwrap() error {
 	return nil
 }
 
+// Msg encodes a formattable msg with args into ExtErr
+func (e *ExtErr) Msg(msg string, args ...interface{}) *ExtErr {
+	e.msg = fmt.Sprintf(msg, args...)
+	return e
+}
+
+// Attach attaches the nested errors into ExtErr
+func (e *ExtErr) Attach(errors ...error) *ExtErr {
+	return e.add(errors...)
+}
+
+// Nest attaches the nested errors into ExtErr
+func (e *ExtErr) Nest(errors ...error) *ExtErr {
+	return e.add(errors...)
+}
+
+func (e *ExtErr) add(errs ...error) *ExtErr {
+	switch len(errs) {
+	case 0:
+	case 1:
+		err := errs[0]
+		if e, ok := err.(*ExtErr); ok {
+			return &ExtErr{innerEE: e}
+		}
+		e.innerErr = err
+	default:
+		return e.add(errs[1:]...)
+	}
+	return e
+}
+
 func (e *ExtErr) Error() string {
 	var buf bytes.Buffer
 	if len(e.msg) == 0 {
@@ -88,9 +120,33 @@ func (e *ExtErr) Error() string {
 	return buf.String()
 }
 
+// Msg encodes a formattable msg with args into ExtErr
+func (e *CodedErr) Msg(msg string, args ...interface{}) *CodedErr {
+	e.msg = fmt.Sprintf(msg, args...)
+	return e
+}
+
+// Code put another code into CodedErr
+func (e *CodedErr) Code(code Code) *CodedErr {
+	e.code = code
+	return e
+}
+
+// Attach attaches the nested errors into CodedErr
+func (e *CodedErr) Attach(errors ...error) *CodedErr {
+	_ = e.add(errors...)
+	return e
+}
+
+// Nest attaches the nested errors into CodedErr
+func (e *CodedErr) Nest(errors ...error) *CodedErr {
+	_ = e.add(errors...)
+	return e
+}
+
 func (e *CodedErr) Error() string {
 	var buf bytes.Buffer
-	buf.WriteString(fmt.Sprintf("%06d|%s|", e.Code, e.Code.String()))
+	buf.WriteString(fmt.Sprintf("%06d|%s|", e.code, e.code.String()))
 	buf.WriteString(e.ExtErr.Error())
 	return buf.String()
 }
