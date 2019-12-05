@@ -126,6 +126,27 @@ func TestAll(t *testing.T) {
 }
 ```
 
+Another sample:
+
+```go
+const (
+	ErrNoNotFound errors.Code = -9710
+)
+
+var (
+	ErrNotFound  = errors.NewCodedError(ErrNoNotFound).Template("'%v' not found")
+	ErrNotFound2 = errors.NewCodedError(-9711).Template("'%v' not found")
+)
+
+func init() {
+	ErrNoNotFound.Register("Not Found")
+	errors.Code(-9711).Register("Not Found 2")
+}
+
+// ...
+return ErrNoNotFound.Format(filename)
+```
+
 ## replacement of go `errors`
 
 As a replacement, the functions are copied from go `errors`, such as:
