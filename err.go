@@ -48,12 +48,6 @@ func NewCodedError(code Code) *CodedErr {
 // 	return add("", errs[1:]...)
 // }
 
-// CodedErr adds a error code
-type CodedErr struct {
-	code Code
-	ExtErr
-}
-
 // ExtErr is a nestable error object
 type ExtErr struct {
 	inner *ExtErr
@@ -193,57 +187,5 @@ func (e *ExtErr) Error() string {
 		buf.WriteString(e.inner.Error())
 		buf.WriteString("]")
 	}
-	return buf.String()
-}
-
-// Code put another code into CodedErr
-func (e *CodedErr) Code(code Code) *CodedErr {
-	e.code = code
-	return e
-}
-
-// Template setup a string format template.
-// Coder could compile the error object with formatting args later.
-func (e *CodedErr) Template(tmpl string) *CodedErr {
-	e.tmpl = tmpl
-	return e
-}
-
-// Format compiles the final msg with string template and args
-func (e *CodedErr) Format(args ...interface{}) *CodedErr {
-	if len(args) == 0 {
-		e.msg = e.tmpl
-	} else {
-		e.msg = fmt.Sprintf(e.tmpl, args)
-	}
-	return e
-}
-
-// Msg encodes a formattable msg with args into ExtErr
-func (e *CodedErr) Msg(msg string, args ...interface{}) *CodedErr {
-	if len(args) == 0 {
-		e.msg = msg
-	} else {
-		e.msg = fmt.Sprintf(msg, args...)
-	}
-	return e
-}
-
-// Attach attaches the nested errors into CodedErr
-func (e *CodedErr) Attach(errors ...error) *CodedErr {
-	_ = e.add(errors...)
-	return e
-}
-
-// Nest attaches the nested errors into CodedErr
-func (e *CodedErr) Nest(errors ...error) *CodedErr {
-	_ = e.nest(errors...)
-	return e
-}
-
-func (e *CodedErr) Error() string {
-	var buf bytes.Buffer
-	buf.WriteString(fmt.Sprintf("%06d|%s|", e.code, e.code.String()))
-	buf.WriteString(e.ExtErr.Error())
 	return buf.String()
 }

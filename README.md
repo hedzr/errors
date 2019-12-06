@@ -168,6 +168,15 @@ BUG1001
 001001|BUG1001|something is wrong, EOF
 ```
 
+### Extending from `ExtErr`
+
+You might want to extend from `ExtErr` with more fields, just like `CodedErr.code`.
+
+For better cascaded calls, it might be crazy had you had to 
+override some functions: `Template`, `Format`, `Msg`, `Attach`, and 
+`Nest`. But no more worries, simply copy them from `CodedErr` 
+and correct the return type for yourself.
+
 ## Template
 
 You could put a string template into both `ExtErr` and `CodedErr`, and format its till using:
