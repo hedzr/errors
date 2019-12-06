@@ -1,10 +1,12 @@
 // Copyright © 2019 Hedzr Yeh.
 
-//+build go1.13
+//+build !go1.13
 
 package errors
 
-import "errors"
+import (
+	"reflect"
+)
 
 // Is reports whether any error in err's chain matches target.
 //
@@ -14,7 +16,25 @@ import "errors"
 // An error is considered to match a target if it is equal to that target or if
 // it implements a method Is(error) bool such that Is(target) returns true.
 func Is(err, target error) bool {
-	return errors.Is(err, target)
+	if target == nil {
+		return err == target
+	}
+
+	isComparable := reflect.TypeOf(target).Comparable()
+	for {
+		if isComparable && err == target {
+			return true
+		}
+		if x, ok := err.(interface{ Is(error) bool }); ok && x.Is(target) {
+			return true
+		}
+		// TODO: consider supporing target.Is(err). This would allow
+		// user-definable predicates, but also may allow for coping with sloppy
+		// APIs, thereby making it easier to get away with them.
+		if err = Unwrap(err); err == nil {
+			return false
+		}
+	}
 }
 
 // As finds the first error in err's chain that matches target, and if so, sets
@@ -31,7 +51,29 @@ func Is(err, target error) bool {
 // As will panic if target is not a non-nil pointer to either a type that implements
 // error, or to any interface type. As returns false if err is nil.
 func As(err error, target interface{}) bool {
-	return errors.As(err, target)
+	if target == nil {
+		panic("errors: target cannot be nil")
+	}
+	val := reflect.ValueOf(target)
+	typ := val.Type()
+	if typ.Kind() != reflect.Ptr || val.IsNil() {
+		panic("errors: target must be a non-nil pointer")
+	}
+	if e := typ.Elem(); e.Kind() != reflect.Interface && !e.Implements(errorType) {
+		panic("errors: *target must be interface or implement error")
+	}
+	targetType := typ.Elem()
+	for err != nil {
+		if reflect.TypeOf(err).AssignableTo(targetType) {
+			val.Elem().Set(reflect.ValueOf(err))
+			return true
+		}
+		if x, ok := err.(interface{ As(interface{}) bool }); ok && x.As(target) {
+			return true
+		}
+		err = Unwrap(err)
+	}
+	return false
 }
 
 // Unwrap returns the result of calling the Unwrap method on err, if err's
@@ -46,3 +88,5 @@ func Unwrap(err error) error {
 	}
 	return u.Unwrap()
 }
+
+var errorType = reflect.TypeOf((*error)(nil)).Elem()

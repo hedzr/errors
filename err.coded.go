@@ -28,7 +28,7 @@ func (e *CodedErr) Error() string {
 
 // Template setup a string format template.
 // Coder could compile the error object with formatting args later.
-// 
+//
 // Note that `ExtErr.Template()` had been overrided here
 func (e *CodedErr) Template(tmpl string) *CodedErr {
 	e.tmpl = tmpl
@@ -36,7 +36,7 @@ func (e *CodedErr) Template(tmpl string) *CodedErr {
 }
 
 // Format compiles the final msg with string template and args
-// 
+//
 // Note that `ExtErr.Template()` had been overridden here
 func (e *CodedErr) Format(args ...interface{}) *CodedErr {
 	if len(args) == 0 {
@@ -48,7 +48,7 @@ func (e *CodedErr) Format(args ...interface{}) *CodedErr {
 }
 
 // Msg encodes a formattable msg with args into ExtErr
-// 
+//
 // Note that `ExtErr.Template()` had been overridden here
 func (e *CodedErr) Msg(msg string, args ...interface{}) *CodedErr {
 	if len(args) == 0 {
@@ -60,7 +60,7 @@ func (e *CodedErr) Msg(msg string, args ...interface{}) *CodedErr {
 }
 
 // Attach attaches the nested errors into CodedErr
-// 
+//
 // Note that `ExtErr.Template()` had been overridden here
 func (e *CodedErr) Attach(errors ...error) *CodedErr {
 	_ = e.add(errors...)
@@ -68,7 +68,7 @@ func (e *CodedErr) Attach(errors ...error) *CodedErr {
 }
 
 // Nest attaches the nested errors into CodedErr
-// 
+//
 // Note that `ExtErr.Template()` had been overridden here
 func (e *CodedErr) Nest(errors ...error) *CodedErr {
 	_ = e.nest(errors...)
