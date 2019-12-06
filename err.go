@@ -56,23 +56,65 @@ type CodedErr struct {
 
 // ExtErr is a nestable error object
 type ExtErr struct {
-	innerEE  *ExtErr
-	innerErr error
-	msg      string
-	tmpl     string
+	inner *ExtErr
+	errs  []error
+	msg   string
+	tmpl  string
 }
 
 // Unwrap returns the result of calling the Unwrap method on err, if err's
 // type contains an Unwrap method returning error.
 // Otherwise, Unwrap returns nil.
 func (e *ExtErr) Unwrap() error {
-	if e.innerErr != nil {
-		return e.innerErr
+	if e.inner != nil {
+		return e.inner
 	}
-	if e.innerEE != nil {
-		return e.innerEE
+
+	for _, ee := range e.errs {
+		if x, ok := ee.(interface{ Unwrap() error }); ok {
+			return x.Unwrap()
+		}
 	}
 	return nil
+}
+
+// Is reports whether any error in err's chain matches target.
+func (e *ExtErr) Is(err error) bool {
+	if e.inner != nil {
+		if e.inner == err {
+			return true
+		}
+		if e.inner.Is(err) {
+			return true
+		}
+	}
+
+	for _, ee := range e.errs {
+		if ee == err {
+			return true
+		}
+		if i, ok := ee.(interface{ Is(error) bool }); ok && i.Is(err) {
+			return true
+		}
+	}
+	return false
+}
+
+// As finds the first error in err's chain that matches target, and if so, sets
+// target to that error value and returns true.
+func (e *ExtErr) As(target interface{}) bool {
+	if e.inner != nil {
+		if As(e.inner, target) {
+			return true
+		}
+	}
+
+	for _, ee := range e.errs {
+		if i, ok := ee.(interface{ As(interface{}) bool }); ok && i.As(target) {
+			return true
+		}
+	}
+	return false
 }
 
 // Template setup a string format template.
@@ -102,28 +144,33 @@ func (e *ExtErr) Msg(msg string, args ...interface{}) *ExtErr {
 	return e
 }
 
-// Attach attaches the nested errors into ExtErr
+// Attach attaches a group of errors into ExtErr
 func (e *ExtErr) Attach(errors ...error) *ExtErr {
 	return e.add(errors...)
 }
 
 // Nest attaches the nested errors into ExtErr
 func (e *ExtErr) Nest(errors ...error) *ExtErr {
-	return e.add(errors...)
+	return e.nest(errors...)
+}
+
+func (e *ExtErr) nest(errs ...error) *ExtErr {
+	z := e
+	for {
+		if z.inner != nil {
+			z = z.inner
+		} else if len(z.errs) == 0 {
+			z.errs = errs
+			return e // z
+		} else {
+			z.inner = &ExtErr{errs: errs}
+			return e // z
+		}
+	}
 }
 
 func (e *ExtErr) add(errs ...error) *ExtErr {
-	switch len(errs) {
-	case 0:
-	case 1:
-		err := errs[0]
-		if e, ok := err.(*ExtErr); ok {
-			return &ExtErr{innerEE: e}
-		}
-		e.innerErr = err
-	default:
-		return e.add(errs[1:]...)
-	}
+	e.errs = errs
 	return e
 }
 
@@ -134,15 +181,16 @@ func (e *ExtErr) Error() string {
 	} else {
 		buf.WriteString(e.msg)
 	}
-	if e.innerErr != nil {
+
+	for _, ee := range e.errs {
 		// buf.WriteString("[")
 		buf.WriteString(", ")
-		buf.WriteString(e.innerErr.Error())
+		buf.WriteString(ee.Error())
 		// buf.WriteString("]")
 	}
-	if e.innerEE != nil {
+	if e.inner != nil {
 		buf.WriteString("[")
-		buf.WriteString(e.innerEE.Error())
+		buf.WriteString(e.inner.Error())
 		buf.WriteString("]")
 	}
 	return buf.String()
@@ -189,7 +237,7 @@ func (e *CodedErr) Attach(errors ...error) *CodedErr {
 
 // Nest attaches the nested errors into CodedErr
 func (e *CodedErr) Nest(errors ...error) *CodedErr {
-	_ = e.add(errors...)
+	_ = e.nest(errors...)
 	return e
 }
 

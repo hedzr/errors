@@ -89,3 +89,19 @@ func TestAll(t *testing.T) {
 	err = eb4.Format()
 	t.Log(err)
 }
+
+func TestIsAs(t *testing.T) {
+	var err error
+	err = errors.New("something").Attach(errBug1, errBug2).Nest(errBug1, errBug2).Msg("anything")
+	if !errors.Is(err, errBug1) {
+		t.Fatalf("wrong! expect err ==IS== errBug1")
+	}
+	if !errors.Is(err, errBug2) {
+		t.Fatalf("wrong! expect err ==IS== errBug2")
+	}
+
+	err2 := errors.NewWithError(io.ErrShortWrite)
+	if !errors.Is(err2, io.ErrShortWrite) {
+		t.Fatalf("wrong! expect err2 ==IS== io.ErrShortWrite")
+	}
+}

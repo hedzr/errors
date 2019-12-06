@@ -15,19 +15,6 @@ func Is(err, target error) bool {
 	return errors.Is(err, target)
 }
 
-// Unwrap returns the result of calling the Unwrap method on err, if err's
-// type contains an Unwrap method returning error.
-// Otherwise, Unwrap returns nil.
-func Unwrap(err error) error {
-	u, ok := err.(interface {
-		Unwrap() error
-	})
-	if !ok {
-		return nil
-	}
-	return u.Unwrap()
-}
-
 // As finds the first error in err's chain that matches target, and if so, sets
 // target to that error value and returns true.
 //
@@ -43,4 +30,17 @@ func Unwrap(err error) error {
 // error, or to any interface type. As returns false if err is nil.
 func As(err error, target interface{}) bool {
 	return errors.As(err, target)
+}
+
+// Unwrap returns the result of calling the Unwrap method on err, if err's
+// type contains an Unwrap method returning error.
+// Otherwise, Unwrap returns nil.
+func Unwrap(err error) error {
+	u, ok := err.(interface {
+		Unwrap() error
+	})
+	if !ok {
+		return nil
+	}
+	return u.Unwrap()
 }
