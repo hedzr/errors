@@ -1,5 +1,7 @@
 // Copyright © 2019 Hedzr Yeh.
 
+//+build go1.13
+
 package errors_test
 
 import (
@@ -49,4 +51,3 @@ func TestIsAs113(t *testing.T) {
 	}
 
 }
-
