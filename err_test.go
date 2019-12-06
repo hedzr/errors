@@ -100,9 +100,12 @@ func TestIsAs(t *testing.T) {
 		t.Fatalf("wrong! expect err ==IS== errBug2")
 	}
 
-	err2 := errors.NewWithError(io.ErrShortWrite)
+	err2 := errors.NewWithError(io.ErrShortWrite).Nest(io.EOF)
 	if !errors.Is(err2, io.ErrShortWrite) {
 		t.Fatalf("wrong! expect err2 ==IS== io.ErrShortWrite")
+	}
+	if !errors.Is(err2, io.EOF) {
+		t.Fatalf("wrong! expect err2 ==IS== io.EOF")
 	}
 }
 

@@ -33,6 +33,8 @@ func main() {
   err1 := errors.New("something nested").Nest(errBug1, errBug2)
   err2 := errors.New(errBug3)
 
+  err2.Msg("a %d", 1)
+
   log.Println(err, err1, err2)
 }
 ```
@@ -224,6 +226,28 @@ Adapted for golang 1.13:
 - `Is(err, target) bool`
 - `As(err, target) bool`
 - `Unwrap(err) error`
+
+
+```go
+func TestIsAs(t *testing.T) {
+	var err error
+	err = errors.New("something").Attach(errBug1, errBug2).Nest(errBug3, errBug4).Msg("anything")
+	if errors.Is(err, errBug1) {
+		fmt.Println(" err ==IS== errBug1")
+	}
+	if errors.Is(err, errBug3) {
+		fmt.Println(" err ==IS== errBug3")
+	}
+
+	err2 := errors.NewWithError(io.ErrShortWrite).Nest(io.EOF)
+	if errors.Is(err2, io.ErrShortWrite) {
+		fmt.Println(" err2 ==IS== io.ErrShortWrite")
+	}
+	if errors.Is(err2, io.EOF) {
+		fmt.Println(" err2 ==IS== io.EOF")
+	}
+}
+```
 
 ## LICENSE
 
