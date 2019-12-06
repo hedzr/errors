@@ -170,7 +170,7 @@ func (e *ExtErr) nest(errs ...error) *ExtErr {
 }
 
 func (e *ExtErr) add(errs ...error) *ExtErr {
-	e.errs = errs
+	e.errs = append(e.errs, errs...)
 	return e
 }
 

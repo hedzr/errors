@@ -37,6 +37,75 @@ func main() {
 }
 ```
 
+### Attachable, and Nestable
+
+#### Attach
+
+`Attach(...)` could wrap a group of errors into the receiver `ExtErr`.
+
+For example:
+
+```go
+// or: errors.New("1").Attach(io.EOF,io.ErrShortWrite, io.ErrShortBuffer)
+err := errors.New("1").Attach(io.EOF).Attach(io.ErrShortWrite).Attach(io.ErrShortBuffer)
+fmt.Println(err)
+fmt.Printf("%#v\n", err)
+// result:
+// 1, EOF, short write, short buffer
+// &errors.ExtErr{inner:(*errors.ExtErr)(nil), errs:[]error{(*errors.errorString)(0xc000042040), (*errors.errorString)(0xc000042020), (*errors.errorString)(0xc000042030)}, msg:"1", tmpl:""}
+```
+
+The structure is:
+
+```
+&ExtErr{
+  msg: "1",
+  errs: [
+    io.EOF,
+    io.ErrShortWrite,
+    io.ErrShortBuffer
+  ],
+}
+```
+
+#### Nest
+
+`Nest(...)` could wrap the errors as a deep descendant child `ExtErr` of the receiver `ExtError`.
+
+For example:
+
+```go
+err := errors.New("1").Nest(io.EOF).Nest(io.ErrShortWrite).Nest(io.ErrShortBuffer)
+fmt.Println(err)
+fmt.Printf("%#v\n", err)
+// result:
+// 1, EOF[error, short write[error, short buffer]]
+// &errors.ExtErr{inner:(*errors.ExtErr)(0x43e2e0), errs:[]error{(*errors.errorString)(0x40c040)}, msg:"1", tmpl:""}
+```
+
+To make it clear:
+
+```
+&ExtErr{
+  msg: "1",
+  inner: &ExtErr {
+    inner: &ExtErr {
+      errs: [
+        io.ErrShortBuffer
+      ],
+    },
+    errs: [
+      io.ErrShortWrite,
+    ],
+  },
+  errs: [
+    io.EOF,
+  ],
+}
+```
+
+
+
 ## `CodedErr` object
 
 ### `error` with a code

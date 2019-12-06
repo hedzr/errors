@@ -105,3 +105,15 @@ func TestIsAs(t *testing.T) {
 		t.Fatalf("wrong! expect err2 ==IS== io.ErrShortWrite")
 	}
 }
+
+func TestNest(t *testing.T) {
+	var err error
+
+	err = errors.New("1").Nest(io.EOF).Nest(io.ErrShortWrite).Nest(io.ErrShortBuffer)
+	t.Log(err)
+	t.Logf("%#v\n", err)
+
+	err = errors.New("1").Attach(io.EOF).Attach(io.ErrShortWrite).Attach(io.ErrShortBuffer)
+	t.Log(err)
+	t.Logf("%#v\n", err)
+}
