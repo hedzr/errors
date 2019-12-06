@@ -30,10 +30,14 @@ const (
 	// returned even if the operation has completed successfully. For
 	// example, a successful response from a server could have been delayed
 	// long enough for the deadline to expire.
+	//
+	// = HTTP 408 Timeout
 	DeadlineExceeded Code = -4
 
 	// NotFound means some requested entity (e.g., file or directory) was
 	// not found.
+	//
+	// = HTTP 404
 	NotFound Code = -5
 
 	// AlreadyExists means an attempt to create an entity failed because one
@@ -121,11 +125,30 @@ const (
 
 	// Unauthenticated indicates the request does not have valid
 	// authentication credentials for the operation.
+	//
+	// = HTTP 401 Unauthorized
 	Unauthenticated Code = -16
 
 	// RateLimited indicates some flow control algorithm is running and applied.
 	// = HTTP Code 429
 	RateLimited = -17
+
+	// BadRequest generates a 400 error.
+	// = HTTP 400
+	BadRequest = -18
+
+	// Conflict generates a 409 error.
+	// = hTTP 409
+	Conflict = -19
+
+	// Forbidden generates a 403 error.
+	Forbidden = -20
+
+	// InternalServerError generates a 500 error.
+	InternalServerError = -21
+
+	// MethodNotAllowed generates a 405 error.
+	MethodNotAllowed = -22
 
 	// MinErrorCode is the lower bound
 	MinErrorCode = -1000
