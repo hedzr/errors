@@ -3,6 +3,7 @@
 package errors_test
 
 import (
+	"fmt"
 	"github.com/hedzr/errors"
 	"io"
 	"testing"
@@ -107,6 +108,28 @@ func TestIsAs(t *testing.T) {
 	if !errors.Is(err2, io.EOF) {
 		t.Fatalf("wrong! expect err2 ==IS== io.EOF")
 	}
+
+	var ase error = io.EOF
+	err = errors.New("x").Attach(fmt.Errorf("error is %w", io.EOF), errors.NewWithError(io.EOF))
+	if !errors.Is(err, io.EOF) {
+		t.Fatalf("wrong! expect err ==IS== io.EOF")
+	}
+	if !errors.As(err, &ase) {
+		t.Fatalf("wrong! can't extract EOF from err")
+	}
+
+	ex := errors.NewWithError(io.EOF)
+	err = errors.New("x").Nest(fmt.Errorf("error is %w", io.EOF), ex)
+	if !errors.Is(err, io.EOF) {
+		t.Fatalf("wrong! expect err ==IS== io.EOF")
+	}
+	if !errors.Is(err, ex) {
+		t.Fatalf("wrong! expect err ==IS== ExtErr{io.EOF}")
+	}
+	if !errors.As(err, &ase) {
+		t.Fatalf("wrong! can't extract EOF from err")
+	}
+
 }
 
 func TestNest(t *testing.T) {
