@@ -29,10 +29,11 @@ var (
 )
 
 func main() {
-  err := errors.New("something").Attach(errBug1, errBug2)
+  err := errors.New("something grouped").Attach(errBug1, errBug2)
+  err1 := errors.New("something nested").Nest(errBug1, errBug2)
   err2 := errors.New(errBug3)
 
-  log.Println(err, err2)
+  log.Println(err, err1, err2)
 }
 ```
 
@@ -149,7 +150,7 @@ return ErrNoNotFound.Format(filename)
 
 ## replacement of go `errors`
 
-As a replacement, the functions are copied from go `errors`, such as:
+Adapted for golang 1.13:
 
 - `Is(err, target) bool`
 - `As(err, target) bool`
