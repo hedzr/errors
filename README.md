@@ -7,7 +7,7 @@
 [![codecov](https://codecov.io/gh/hedzr/errors/branch/master/graph/badge.svg)](https://codecov.io/gh/hedzr/errors)
 
 
-Nestable errors for golang dev.
+Nestable errors for golang dev (both go1.13+ and lower now).
 
 Take a look at: <https://play.golang.org/p/Yt-9dCSHX1Z>
 
@@ -230,7 +230,7 @@ return ErrNoNotFound.Format(filename)
 
 ## replacement of go `errors`
 
-Adapted for golang 1.13:
+Adapted for golang 1.13+:
 
 - `Is(err, target) bool`
 - `As(err, target) bool`
@@ -257,6 +257,10 @@ func TestIsAs(t *testing.T) {
 	}
 }
 ```
+
+> since v1.1.7, we works for golang 1.12 and lower.
+
+
 
 ## LICENSE
 
