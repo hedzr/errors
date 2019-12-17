@@ -19,6 +19,16 @@ func (e *CodedErr) Code(code Code) *CodedErr {
 	return e
 }
 
+// Equal compares code
+func (e *CodedErr) Equal(code Code) bool {
+	return e.code == code
+}
+
+// Number returns the code number
+func (e *CodedErr) Number() Code {
+	return e.code
+}
+
 func (e *CodedErr) Error() string {
 	var buf bytes.Buffer
 	buf.WriteString(fmt.Sprintf("%06d|%s|", e.code, e.code.String()))
