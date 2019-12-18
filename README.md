@@ -39,11 +39,11 @@ func main() {
 }
 ```
 
-### Attachable, and Nestable
+### Attachable, and Nestable (Wrapable)
 
 #### Attach
 
-`Attach(...)` could wrap a group of errors into the receiver `ExtErr`.
+`Attach(...)` can package a group of errors into the receiver `ExtErr`.
 
 For example:
 
@@ -57,7 +57,7 @@ fmt.Printf("%#v\n", err)
 // &errors.ExtErr{inner:(*errors.ExtErr)(nil), errs:[]error{(*errors.errorString)(0xc000042040), (*errors.errorString)(0xc000042020), (*errors.errorString)(0xc000042030)}, msg:"1", tmpl:""}
 ```
 
-The structure is:
+The structure looks like:
 
 ```
 &ExtErr{
@@ -110,10 +110,10 @@ To make it clear:
 
 ## `CodedErr` object
 
-### `error` with a code
+### `error` with a code number
 
 ```go
-var(
+var (
   errNotFound = errors.NewCodedError(errors.NotFound)
   errNotFoundMsg = errors.NewCodedError(errors.NotFound).Msg("not found")
 )
@@ -157,7 +157,10 @@ func init() {
 
 func main() {
 	fmt.Println(BUG1001.String())
+	fmt.Println(BUG1001.Number())
 	fmt.Println(errBug1001)
+	fmt.Println(errBug1001.Equal(BUG1001))
+	fmt.Println(errBug1001.EqualRecursive(BUG1001))
 }
 ```
 
@@ -168,9 +171,9 @@ BUG1001
 001001|BUG1001|something is wrong, EOF
 ```
 
-### Extending from `ExtErr`
+### Extending from `ExtErr` or `CodedErr`
 
-You might want to extend from `ExtErr` with more fields, just like `CodedErr.code`.
+You might want to extend from `ExtErr`/`CodedErr` with more fields, just like `CodedErr.code`.
 
 For better cascaded calls, it might be crazy had you had to 
 override some functions: `Template`, `Format`, `Msg`, `Attach`, and 
@@ -178,6 +181,8 @@ override some functions: `Template`, `Format`, `Msg`, `Attach`, and
 and correct the return type for yourself.
 
 For example:
+
+<details>
 
 ```go
 // newError formats a ErrorForCmdr object
@@ -248,12 +253,17 @@ func (e *ErrorForCmdr) Nest(errors ...error) *ErrorForCmdr {
 }
 ```
 
+</details>
 
 
 
 ## Template
 
-You could put a string template into both `ExtErr` and `CodedErr`, and format its till using:
+You could put a string template into both `ExtErr` and `CodedErr`, and format its till using.
+
+For example:
+
+<details>
 
 ```go
 const (
@@ -302,6 +312,11 @@ func init() {
 return ErrNoNotFound.Format(filename)
 ```
 
+</details>
+
+
+
+
 ## replacement of go `errors`
 
 Adapted for golang 1.13+:
@@ -333,6 +348,13 @@ func TestIsAs(t *testing.T) {
 ```
 
 > since v1.1.7, we works for golang 1.12 and lower.
+
+
+## enhancements for go `errors`
+
+1. Walkable: `errors.Walk(fn)`
+2. Ranged: `errors.Range(fn)`
+3. Tests: `CanWalk(err)`, `CanRange(err)`, `CanIs(err)`, `CanAs(err)`, `CanUnwrap(target)`
 
 
 
