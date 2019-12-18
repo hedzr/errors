@@ -41,6 +41,25 @@ func init() {
 	BUG1005.Register("BUG1005")
 }
 
+func TestExtErr(t *testing.T) {
+
+	var err error
+	err = errors.New("something").Attach(errBug1, errBug2).Nest(errBug1, errBug2).Msg("anything")
+	t.Log(err.(*errors.ExtErr).NoCannedError())
+	t.Log(err.(*errors.ExtErr).Is(err))
+
+	e1 := BUG1003.New("z")
+	e2 := BUG1001.New("z1").Nest(e1)
+	e3 := BUG1002.New("z2").Attach(e2).Nest(e1)
+
+	errors.Attach(err, e3)
+	errors.Nest(err, e1)
+
+	err.(*errors.ExtErr).Range(func(err error) (stop bool) {
+		return true
+	})
+}
+
 func TestAll(t *testing.T) {
 	t.Log(BUG1001.String())
 	t.Log(errBug1001)
@@ -102,6 +121,8 @@ func TestAll(t *testing.T) {
 
 	errors.Attach(e2, e3)
 	errors.Nest(e2, e1)
+
+	//
 
 	var err error
 	err = errors.New("something").Attach(errBug1, errBug2).Nest(errBug1, errBug2).Msg("anything")
