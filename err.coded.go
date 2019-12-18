@@ -5,6 +5,8 @@ package errors
 import (
 	"bytes"
 	"fmt"
+	"log"
+	"strconv"
 )
 
 // CodedErr adds a error code
@@ -19,9 +21,29 @@ func (e *CodedErr) Code(code Code) *CodedErr {
 	return e
 }
 
-// Equal compares code
+// Equal compares with code
 func (e *CodedErr) Equal(code Code) bool {
-	return e.code == code
+	return e.code == Code(code)
+}
+
+// EqualRecursive compares with code
+func (e *CodedErr) EqualRecursive(code Code) bool {
+	if e.Equal(code) {
+		return true
+	}
+
+	b := false
+	Walk(e, func(err error) (stop bool) {
+		log.Printf("  ___E : %+v", err)
+		if c, ok := err.(interface{ Equal(code Code) bool }); ok {
+			if c.Equal(Code(code)) {
+				b = true
+				return true
+			}
+		}
+		return false
+	})
+	return b
 }
 
 // Number returns the code number
@@ -31,7 +53,17 @@ func (e *CodedErr) Number() Code {
 
 func (e *CodedErr) Error() string {
 	var buf bytes.Buffer
-	buf.WriteString(fmt.Sprintf("%06d|%s|", e.code, e.code.String()))
+	var s = strconv.Itoa(int(e.code))
+	buf.WriteString(LeftPad(s, '0', 6))
+	buf.WriteRune('|')
+	// buf.WriteString(strconv.Itoa(int(e.code)))
+	// buf.WriteRune('|')
+	// buf.WriteString(fmt.Sprintf("%06d|", e.code))
+	s = e.code.String()
+	if len(s) > 0 {
+		buf.WriteString(s)
+		buf.WriteString("|")
+	}
 	buf.WriteString(e.ExtErr.Error())
 	return buf.String()
 }

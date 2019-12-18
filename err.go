@@ -20,13 +20,14 @@ func NewTemplate(tmpl string) *ExtErr {
 }
 
 // NewWithError ExtErr error object with nested errors
-func NewWithError(errors ...error) *ExtErr {
-	return New("unknown error").Attach(errors...)
+func NewWithError(errs ...error) *ExtErr {
+	return New("unknown error").Attach(errs...)
 }
 
 // NewCodedError error object with nested errors
-func NewCodedError(code Code) *CodedErr {
-	return &CodedErr{code: code}
+func NewCodedError(code Code, errs ...error) *CodedErr {
+	e := &CodedErr{code: code}
+	return e.Attach(errs...)
 }
 
 // // NewWithCodeMsg ExtErr error object with nested errors
@@ -56,6 +57,110 @@ type ExtErr struct {
 	tmpl  string
 }
 
+// GetTemplateString returns e.tmpl member
+func (e *ExtErr) GetTemplateString() string {
+	return e.tmpl
+}
+
+// GetMsgString returns e.msg member
+func (e *ExtErr) GetMsgString() string {
+	return e.msg
+}
+
+// GetInner returns e.inner member
+func (e *ExtErr) GetInner() *ExtErr {
+	return e.inner
+}
+
+// GetErrs returns e.errs member
+func (e *ExtErr) GetErrs() []error {
+	return e.errs
+}
+
+// Walkable interface
+type Walkable interface {
+	Walk(fn func(err error) (stop bool))
+}
+
+// Ranged interface
+type Ranged interface {
+	Range(fn func(err error) (stop bool))
+}
+
+// CanWalk tests if err is walkable
+func CanWalk(err error) (ok bool) {
+	_, ok = err.(Walkable)
+	return
+}
+
+// CanRange tests if err is range-able
+func CanRange(err error) (ok bool) {
+	_, ok = err.(Ranged)
+	return
+}
+
+// CanUnwrap tests if err is unwrap-able
+func CanUnwrap(err error) (ok bool) {
+	_, ok = err.(interface{ Unwrap() error })
+	return
+}
+
+// CanIs tests if err is is-able
+func CanIs(err error) (ok bool) {
+	_, ok = err.(interface{ Is(error) bool })
+	return
+}
+
+// CanAs tests if err is as-able
+func CanAs(err error) (ok bool) {
+	_, ok = err.(interface{ As(interface{}) bool })
+	return
+}
+
+// Walk will walk all inner/attached and nested error objects inside e
+func (e *ExtErr) Walk(fn func(err error) (stop bool)) {
+	for _, ee := range e.errs {
+		if fn(ee) {
+			return
+		}
+		if ex, ok := ee.(Walkable); ok {
+			ex.Walk(fn)
+		}
+	}
+	if e.inner != nil {
+		if !fn(e.inner) {
+			e.inner.Walk(fn)
+		}
+	}
+}
+
+// Walk will walk all inner and nested error objects inside err
+func Walk(err error, fn func(err error) (stop bool)) {
+	if !fn(err) {
+		if ee, ok := err.(Walkable); ok {
+			ee.Walk(fn)
+		}
+	}
+}
+
+// Range can walk the inner/attached errors inside err
+func Range(err error, fn func(err error) (stop bool)) {
+	if !fn(err) {
+		if ee, ok := err.(Ranged); ok {
+			ee.Range(fn)
+		}
+	}
+}
+
+// Range can walk the inner/attached errors inside e
+func (e *ExtErr) Range(fn func(err error) (stop bool)) {
+	for _, ee := range e.errs {
+		if fn(ee) {
+			return
+		}
+	}
+}
+
 // Unwrap returns the result of calling the Unwrap method on err, if err's
 // type contains an Unwrap method returning error.
 // Otherwise, Unwrap returns nil.
@@ -65,15 +170,20 @@ func (e *ExtErr) Unwrap() error {
 	}
 
 	for _, ee := range e.errs {
-		if x, ok := ee.(interface{ Unwrap() error }); ok {
-			return x.Unwrap()
-		}
+		// if x, ok := ee.(interface{ Unwrap() error }); ok {
+		// 	return x.Unwrap()
+		// }
+		return ee
 	}
 	return nil
 }
 
 // Is reports whether any error in err's chain matches target.
 func (e *ExtErr) Is(err error) bool {
+	if e == err {
+		return true
+	}
+
 	if e.inner != nil {
 		if e.inner == err {
 			return true
@@ -156,7 +266,7 @@ func (e *ExtErr) nest(errs ...error) *ExtErr {
 		} else if len(z.errs) == 0 {
 			z.errs = errs
 			return e // z
-		} else {
+		} else if errs[0] != nil {
 			z.inner = &ExtErr{errs: errs}
 			return e // z
 		}
@@ -164,7 +274,9 @@ func (e *ExtErr) nest(errs ...error) *ExtErr {
 }
 
 func (e *ExtErr) add(errs ...error) *ExtErr {
-	e.errs = append(e.errs, errs...)
+	if len(errs) > 0 && errs[0] != nil {
+		e.errs = append(e.errs, errs...)
+	}
 	return e
 }
 

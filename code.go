@@ -196,6 +196,12 @@ var codeToStr = map[Code]string{
 	RateLimited:        `RATE_LIMITED`,
 }
 
+// New create a new *CodedErr object
+func (c Code) New(msg string, args ...interface{}) *CodedErr {
+	return NewCodedError(c).Msg(msg, args...)
+}
+
+// String for stringer interface
 func (c Code) String() string {
 	if x, ok := codeToStr[c]; ok {
 		return x

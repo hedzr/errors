@@ -46,6 +46,45 @@ func TestAll(t *testing.T) {
 	t.Log(errBug1001)
 	t.Log(BUG1003)
 
+	e1 := BUG1003.New("z")
+	t.Log(e1.Number())
+	if !e1.Equal(BUG1003) {
+		t.Fatal("wrong equal")
+	}
+	if !e1.EqualRecursive(BUG1003) {
+		t.Fatal("wrong equalr 1.3")
+	}
+	e2 := BUG1001.New("z1").Nest(e1)
+	if !e2.EqualRecursive(BUG1003) {
+		t.Fatal("wrong equalr 2.3")
+	}
+	if !e2.EqualRecursive(BUG1001) {
+		t.Fatal("wrong equalr 2.1")
+	}
+	e3 := BUG1002.New("z2").Attach(e2).Nest(e1)
+	errors.Walk(e3, func(err error) (stop bool) {
+		t.Logf("  ..w.. : %+v", err)
+		return false
+	})
+	if !e3.EqualRecursive(BUG1003) {
+		t.Fatal("wrong equal 3.3")
+	}
+	if !e3.EqualRecursive(BUG1002) {
+		t.Fatal("wrong equal 3.2")
+	}
+	if !e3.EqualRecursive(BUG1001) {
+		t.Fatal("wrong equal 3.1")
+	}
+	errors.Range(e2, func(err error) (stop bool) {
+		t.Logf("  ..r.. : %+v", err)
+		return false
+	})
+
+	t.Log(e3.GetErrs(), e3.GetInner(), e3.GetMsgString(), e3.GetTemplateString())
+	t.Log(errors.CanAs(e3), errors.CanIs(e3), errors.CanUnwrap(e3), errors.CanRange(e3), errors.CanWalk(e3))
+
+	//
+
 	var err error
 	err = errors.New("something").Attach(errBug1, errBug2).Nest(errBug1, errBug2).Msg("anything")
 
