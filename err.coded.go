@@ -5,7 +5,6 @@ package errors
 import (
 	"bytes"
 	"fmt"
-	"log"
 	"strconv"
 )
 
@@ -13,6 +12,16 @@ import (
 type CodedErr struct {
 	code Code
 	ExtErr
+}
+
+// NoCannedError detects mqttError object is not an error or not an canned-error (inners is empty)
+func (e *CodedErr) NoCannedError() bool {
+	return e.Number() == OK || e.InnerEmpty()
+}
+
+// InnerEmpty tests if any errors attached (nor nested) to `e` or not
+func (e *CodedErr) InnerEmpty() bool {
+	return len(e.GetErrs()) == 0
 }
 
 // Code put another code into CodedErr
@@ -34,7 +43,7 @@ func (e *CodedErr) EqualRecursive(code Code) bool {
 
 	b := false
 	Walk(e, func(err error) (stop bool) {
-		log.Printf("  ___E : %+v", err)
+		// log.Printf("  ___E : %+v", err)
 		if c, ok := err.(interface{ Equal(code Code) bool }); ok {
 			if c.Equal(Code(code)) {
 				b = true
@@ -51,6 +60,27 @@ func (e *CodedErr) Number() Code {
 	return e.code
 }
 
+// IsBoth tests if all codes presented
+func (e *CodedErr) IsBoth(code ...Code) bool {
+	for _, c := range code {
+		if !e.EqualRecursive(c) {
+			return false
+		}
+	}
+	return true
+}
+
+// IsAny tests if any codes presented
+func (e *CodedErr) IsAny(code ...Code) bool {
+	for _, c := range code {
+		if e.EqualRecursive(c) {
+			return true
+		}
+	}
+	return false
+}
+
+// Error for stringer interface
 func (e *CodedErr) Error() string {
 	var buf bytes.Buffer
 	var s = strconv.Itoa(int(e.code))
@@ -115,4 +145,14 @@ func (e *CodedErr) Attach(errors ...error) *CodedErr {
 func (e *CodedErr) Nest(errors ...error) *CodedErr {
 	_ = e.nest(errors...)
 	return e
+}
+
+// AttachIts attaches the nested errors into CodedErr
+func (e *CodedErr) AttachIts(errors ...error) {
+	_ = e.add(errors...)
+}
+
+// NestIts attaches the nested errors into CodedErr
+func (e *CodedErr) NestIts(errors ...error) {
+	_ = e.nest(errors...)
 }

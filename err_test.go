@@ -80,13 +80,33 @@ func TestAll(t *testing.T) {
 		return false
 	})
 
+	t.Log(e2.NoCannedError())
+	t.Log(e2.IsBoth(BUG1003))
+	t.Log(e2.IsBoth(BUG1001, BUG1002))
+	t.Log(e2.IsAny(BUG1002, BUG1001))
+	t.Log(e2.IsAny(BUG1002))
 	t.Log(e3.GetErrs(), e3.GetInner(), e3.GetMsgString(), e3.GetTemplateString())
 	t.Log(errors.CanAs(e3), errors.CanIs(e3), errors.CanUnwrap(e3), errors.CanRange(e3), errors.CanWalk(e3))
 
 	//
 
+	t.Log(errors.Equal(e2, BUG1003))
+	t.Log(errors.IsBoth(e2, BUG1003))
+	t.Log(errors.IsBoth(e2, BUG1001, BUG1002))
+	t.Log(errors.IsAny(e2, BUG1002, BUG1001))
+	t.Log(errors.IsAny(e2, BUG1002))
+
+	t.Log(errors.Equal(io.EOF, BUG1003))
+	t.Log(errors.IsBoth(io.EOF, BUG1003))
+	t.Log(errors.IsAny(io.EOF, BUG1002, BUG1001))
+
+	errors.Attach(e2, e3)
+	errors.Nest(e2, e1)
+
 	var err error
 	err = errors.New("something").Attach(errBug1, errBug2).Nest(errBug1, errBug2).Msg("anything")
+	t.Log(err.(*errors.ExtErr).NoCannedError())
+	t.Log(err.(*errors.ExtErr).Is(err))
 
 	err2 := errors.NewWithError(errBug3)
 	err3 := errors.NewCodedError(BUG1002).Attach(errBug1).Code(BUG1002)
