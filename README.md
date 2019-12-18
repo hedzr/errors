@@ -9,12 +9,14 @@
 
 Nestable errors for golang dev (both go1.13+ and lower now).
 
-Take a look at: <https://play.golang.org/p/Yt-9dCSHX1Z>
+Take a look at: <https://play.golang.org/p/P0kk4NhAbd3>
+
+
 
 ## Import
 
 ```go
-import "gtihub.com/hedzr/errors"
+import "github.com/hedzr/errors"
 ```
 
 ## `ExtErr` object
