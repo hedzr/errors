@@ -18,4 +18,3 @@ func HasWrappedError(err error) (yes bool) {
 	}
 	return false
 }
-

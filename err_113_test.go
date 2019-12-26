@@ -62,6 +62,9 @@ func TestIsStd(t *testing.T) {
 	if !errors.Is(err3, os.ErrExist) {
 		t.Fatal("expect errors.Is(err3, os.ErrExist) returns true")
 	}
+
+	t.Log(errors.HasWrappedError(err2))
+	t.Log(errors.HasWrappedError(err3))
 }
 
 func TestAsStd(t *testing.T) {
@@ -77,7 +80,7 @@ func TestAsStd(t *testing.T) {
 	var perr *os.PathError
 	if errors.As(err3, &perr) {
 		fmt.Println(perr.Path)
-	}else{
+	} else {
 		t.Fatal("expect errors.As(err3, &perr) returns true")
 	}
 }

@@ -194,8 +194,15 @@ func TestNest(t *testing.T) {
 	var err error
 
 	err = errors.New("1").Nest(io.EOF).Nest(io.ErrShortWrite).Nest(io.ErrShortBuffer)
-	t.Log(err)
+	t.Log(err, errors.TextContains(err, "short buffer"), errors.DumpStacksAsString(false))
 	t.Logf("%#v\n", err)
+
+	t.Log(errors.HasInnerErrors(err))
+	t.Log(errors.HasAttachedErrors(err))
+	t.Log(errors.HasWrappedError(err))
+
+	t.Log(errors.HasAttachedErrors(io.EOF))
+	t.Log(errors.HasInnerErrors(io.EOF))
 
 	err = errors.New("1").Attach(io.EOF).Attach(io.ErrShortWrite).Attach(io.ErrShortBuffer)
 	t.Log(err)
