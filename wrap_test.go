@@ -189,49 +189,6 @@ func TestAsValidation(t *testing.T) {
 	}
 }
 
-func TestIsStd(t *testing.T) {
-	err2 := fmt.Errorf("BUG %w BUG", os.ErrExist)
-	err3 := errors.Unwrap(err2)
-
-	t.Log(err2)
-	t.Log(err3)
-	if !errors.Is(err3, os.ErrExist) {
-		t.Fatal("expect errors.Is(err3, os.ErrExist) returns true")
-	}
-}
-
-func TestAsStd(t *testing.T) {
-	err1 := &os.PathError{Err: os.ErrPermission}
-	err2 := fmt.Errorf("BUG %w BUG", err1)
-	err3 := errors.Unwrap(err2)
-
-	t.Log(err1)
-	t.Log(err2)
-	t.Log(err3)
-	t.Log(errors.Is(err3, os.ErrExist))
-
-	var perr *os.PathError
-	if errors.As(err3, &perr) {
-		fmt.Println(perr.Path)
-	}else{
-		t.Fatal("expect errors.As(err3, &perr) returns true")
-	}
-}
-
-func TestUnwrapStd(t *testing.T) {
-	err1 := errors.New("1")
-	err2 := fmt.Errorf("BUG %w BUG", err1)
-	err3 := errors.Unwrap(err2)
-
-	t.Log(err1)
-	t.Log(err2)
-	t.Log(err3)
-	
-	if err3 != err1 {
-		t.Fatal("expect errors.Unwrap(err2) returns err1")
-	}
-}
-
 func TestUnwrap(t *testing.T) {
 
 	err1 := errors.New("1")
