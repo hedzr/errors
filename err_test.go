@@ -203,6 +203,7 @@ func TestNest(t *testing.T) {
 
 	t.Log(errors.HasAttachedErrors(io.EOF))
 	t.Log(errors.HasInnerErrors(io.EOF))
+	t.Log(errors.HasWrappedError(io.EOF))
 
 	err = errors.New("1").Attach(io.EOF).Attach(io.ErrShortWrite).Attach(io.ErrShortBuffer)
 	t.Log(err)
