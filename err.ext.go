@@ -25,23 +25,23 @@ func (e *ExtErr) GetMsgString() string {
 	return e.msg
 }
 
-// GetInner returns e.inner member
-func (e *ExtErr) GetInner() *ExtErr {
+// GetNestedError returns e.inner member (nested errors)
+func (e *ExtErr) GetNestedError() *ExtErr {
 	return e.inner
 }
 
-// GetErrs returns e.errs member
-func (e *ExtErr) GetErrs() []error {
+// GetAttachedErrors returns e.errs member (attached errors)
+func (e *ExtErr) GetAttachedErrors() []error {
 	return e.errs
 }
 
 // NoCannedError detects mqttError object is not an error or not an canned-error (inners is empty)
 func (e *ExtErr) NoCannedError() bool {
-	return e.InnerEmpty()
+	return e.HasAttachedErrors()
 }
 
-// InnerEmpty tests if any errors attached (nor nested) to `e` or not
-func (e *ExtErr) InnerEmpty() bool {
+// HasAttachedErrors tests if any errors attached (nor nested) to `e` or not
+func (e *ExtErr) HasAttachedErrors() bool {
 	return len(e.errs) == 0
 }
 

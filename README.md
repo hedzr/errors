@@ -87,8 +87,11 @@ More extendings:
    1. `CanWalk(err)`, `CanRange(err)`, `CanIs(err)`, `CanAs(err)`, `CanUnwrap(err)`
    2. `Equal(err, code)`, `IsAny(err, codes...)`, `IsBoth(err, codes...)`, 
    3. `TextContains(err, text)`
+   4. `HasAttachedErrors(err)`
+   5. `HasWrappedError(err)`
+   6. `HasInnerErrors(err)`
 4. `Attach(err, errs...)`, `Nest(err, errs...)`
-
+5. `DumpStacksAsString(allRoutines bool) string`
 
 
 

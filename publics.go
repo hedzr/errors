@@ -3,6 +3,7 @@
 package errors
 
 import (
+	"errors"
 	"runtime"
 	"strings"
 )
@@ -84,4 +85,33 @@ func DumpStacksAsString(allRoutines bool) string {
 	buf = buf[:runtime.Stack(buf, allRoutines)]
 	// fmt.Printf("=== BEGIN goroutine stack dump ===\n%s\n=== END goroutine stack dump ===\n", buf)
 	return string(buf)
+}
+
+// HasInnerErrors detects if nested or attached errors present
+func HasInnerErrors(err error) (yes bool) {
+	if Unwrap(err) != nil {
+		return true
+	}
+	return false
+}
+
+// HasAttachedErrors detects if attached errors present
+func HasAttachedErrors(err error) (yes bool) {
+	if ex, ok := err.(interface{ HasAttachedErrors() bool }); ok {
+		return ex.HasAttachedErrors()
+	}
+	return false
+}
+
+// HasWrappedError detects if nested or wrapped errors present
+//
+// nested error: ExtErr.inner
+// wrapped error: fmt.Errorf("... %w ...", err)
+func HasWrappedError(err error) (yes bool) {
+	if ex, ok := err.(interface{ GetNestedError() *ExtErr }); ok {
+		return ex.GetNestedError() != nil
+	} else if errors.Unwrap(err) != nil {
+		return true
+	}
+	return false
 }

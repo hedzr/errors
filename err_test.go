@@ -104,7 +104,7 @@ func TestAll(t *testing.T) {
 	t.Log(e2.IsBoth(BUG1001, BUG1002))
 	t.Log(e2.IsAny(BUG1002, BUG1001))
 	t.Log(e2.IsAny(BUG1002))
-	t.Log(e3.GetErrs(), e3.GetInner(), e3.GetMsgString(), e3.GetTemplateString())
+	t.Log(e3.GetAttachedErrors(), e3.GetNestedError(), e3.GetMsgString(), e3.GetTemplateString())
 	t.Log(errors.CanAs(e3), errors.CanIs(e3), errors.CanUnwrap(e3), errors.CanRange(e3), errors.CanWalk(e3))
 
 	//

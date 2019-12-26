@@ -16,12 +16,12 @@ type CodedErr struct {
 
 // NoCannedError detects mqttError object is not an error or not an canned-error (inners is empty)
 func (e *CodedErr) NoCannedError() bool {
-	return e.Number() == OK || e.InnerEmpty()
+	return e.Number() == OK || e.HasAttachedErrors()
 }
 
-// InnerEmpty tests if any errors attached (nor nested) to `e` or not
-func (e *CodedErr) InnerEmpty() bool {
-	return len(e.GetErrs()) == 0
+// HasAttachedErrors tests if any errors attached (nor nested) to `e` or not
+func (e *CodedErr) HasAttachedErrors() bool {
+	return len(e.GetAttachedErrors()) == 0
 }
 
 // Code put another code into CodedErr
