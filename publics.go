@@ -2,7 +2,10 @@
 
 package errors
 
-import "strings"
+import (
+	"runtime"
+	"strings"
+)
 
 // Walkable interface
 type Walkable interface {
@@ -73,4 +76,12 @@ func Nest(err error, errs ...error) {
 	if x, ok := err.(interface{ NestIts(errors ...error) }); ok {
 		x.NestIts(errs...)
 	}
+}
+
+// DumpStacksAsString returns stack tracing information like debug.PrintStack()
+func DumpStacksAsString(allRoutines bool) string {
+	buf := make([]byte, 16384)
+	buf = buf[:runtime.Stack(buf, allRoutines)]
+	// fmt.Printf("=== BEGIN goroutine stack dump ===\n%s\n=== END goroutine stack dump ===\n", buf)
+	return string(buf)
 }
