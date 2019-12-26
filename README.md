@@ -83,9 +83,11 @@ More extendings:
 
 1. Walkable: `errors.Walk(fn)`
 2. Ranged: `errors.Range(fn)`
-3. Tests: `CanWalk(err)`, `CanRange(err)`, `CanIs(err)`, `CanAs(err)`, `CanUnwrap(target)`
-4. `Equal(err, code)`, `IsAny(errs...)`, `IsBoth(errs...)`, 
-5. `Attach(errs...)`, `Nest(errs...)`
+3. Tests:
+   1. `CanWalk(err)`, `CanRange(err)`, `CanIs(err)`, `CanAs(err)`, `CanUnwrap(target)`
+   2. `Equal(err, code)`, `IsAny(errs...)`, `IsBoth(errs...)`, 
+   3. `TextContains(err, text)`
+4. `Attach(errs...)`, `Nest(errs...)`
 
 
 
@@ -402,6 +404,20 @@ func (e *ErrorForCmdr) Nest(errors ...error) *ErrorForCmdr {
 ```
 
 </details>
+
+A sample here: https://github.com/hedzr/errors-for-mqtt
+
+
+
+## More
+
+strings helpers:
+
+- `Left(s, length)`
+- `Right(s, length)`
+- `LeftPad(s, pad, width)`
+
+
 
 
 

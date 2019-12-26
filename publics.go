@@ -2,6 +2,8 @@
 
 package errors
 
+import "strings"
+
 // Walkable interface
 type Walkable interface {
 	Walk(fn func(err error) (stop bool))
@@ -52,6 +54,11 @@ func IsBoth(err error, code ...Code) bool {
 		return x.IsBoth(code...)
 	}
 	return false
+}
+
+// TextContains test if a text fragment is included by err
+func TextContains(err error, text string) bool {
+	return strings.Index(err.Error(), text) >= 0
 }
 
 // Attach attaches the nested errors into CodedErr
