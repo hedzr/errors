@@ -5,8 +5,11 @@ package errors
 import "fmt"
 
 // New ExtErr error object with message and allows attach more nested errors
-func New(msg string, args ...interface{}) *ExtErr {
-	e := &ExtErr{msg: fmt.Sprintf(msg, args...)}
+func New(format string, args ...interface{}) *ExtErr {
+	if len(args) == 0 {
+		return &ExtErr{msg: format}
+	}
+	e := &ExtErr{msg: fmt.Sprintf(format, args...)}
 	return e
 }
 

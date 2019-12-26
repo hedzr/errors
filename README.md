@@ -84,10 +84,10 @@ More extendings:
 1. Walkable: `errors.Walk(fn)`
 2. Ranged: `errors.Range(fn)`
 3. Tests:
-   1. `CanWalk(err)`, `CanRange(err)`, `CanIs(err)`, `CanAs(err)`, `CanUnwrap(target)`
-   2. `Equal(err, code)`, `IsAny(errs...)`, `IsBoth(errs...)`, 
+   1. `CanWalk(err)`, `CanRange(err)`, `CanIs(err)`, `CanAs(err)`, `CanUnwrap(err)`
+   2. `Equal(err, code)`, `IsAny(err, codes...)`, `IsBoth(err, codes...)`, 
    3. `TextContains(err, text)`
-4. `Attach(errs...)`, `Nest(errs...)`
+4. `Attach(err, errs...)`, `Nest(err, errs...)`
 
 
 
