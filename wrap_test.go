@@ -195,7 +195,9 @@ func TestIsStd(t *testing.T) {
 
 	t.Log(err2)
 	t.Log(err3)
-	t.Log(errors.Is(err3, os.ErrExist))
+	if !errors.Is(err3, os.ErrExist) {
+		t.Fatal("expect errors.Is(err3, os.ErrExist) returns true")
+	}
 }
 
 func TestAsStd(t *testing.T) {
@@ -211,6 +213,8 @@ func TestAsStd(t *testing.T) {
 	var perr *os.PathError
 	if errors.As(err3, &perr) {
 		fmt.Println(perr.Path)
+	}else{
+		t.Fatal("expect errors.As(err3, &perr) returns true")
 	}
 }
 
@@ -222,6 +226,10 @@ func TestUnwrapStd(t *testing.T) {
 	t.Log(err1)
 	t.Log(err2)
 	t.Log(err3)
+	
+	if err3 != err1 {
+		t.Fatal("expect errors.Unwrap(err2) returns err1")
+	}
 }
 
 func TestUnwrap(t *testing.T) {
