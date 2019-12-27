@@ -21,7 +21,7 @@ func (e *CodedErr) NoCannedError() bool {
 
 // HasAttachedErrors tests if any errors attached (nor nested) to `e` or not
 func (e *CodedErr) HasAttachedErrors() bool {
-	return len(e.GetAttachedErrors()) == 0
+	return len(e.GetAttachedErrors()) != 0
 }
 
 // Code put another code into CodedErr

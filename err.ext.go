@@ -42,7 +42,7 @@ func (e *ExtErr) NoCannedError() bool {
 
 // HasAttachedErrors tests if any errors attached (nor nested) to `e` or not
 func (e *ExtErr) HasAttachedErrors() bool {
-	return len(e.errs) == 0
+	return len(e.errs) != 0
 }
 
 // Walk will walk all inner/attached and nested error objects inside e
