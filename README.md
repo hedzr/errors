@@ -19,11 +19,6 @@ Take a look at: <https://play.golang.org/p/P0kk4NhAbd3>
 import "github.com/hedzr/errors"
 ```
 
-> **Just for v1.1.8**, need nosumdb envvar: 
-> ```bash
-> export GONOSUMDB="github.com/hedzr/errors,$GONOSUMDB"
-> ```
-
 
 
 

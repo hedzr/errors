@@ -1,0 +1,17 @@
+# CHANGELOG
+
+
+
+### v1.1.13
+
+- fixed bugs
+- full support to go 1.13
+
+
+
+### v1.1.8
+
+> **Just for v1.1.8**, need nosumdb envvar: 
+> ```bash
+> export GONOSUMDB="github.com/hedzr/errors,$GONOSUMDB"
+> ```
