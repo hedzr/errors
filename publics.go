@@ -64,14 +64,14 @@ func TextContains(err error, text string) bool {
 	return strings.Index(err.Error(), text) >= 0
 }
 
-// Attach attaches the nested errors into CodedErr
+// Attach attaches the errors into `err`
 func Attach(err error, errs ...error) {
 	if x, ok := err.(interface{ AttachIts(errors ...error) }); ok {
 		x.AttachIts(errs...)
 	}
 }
 
-// Nest attaches the nested errors into CodedErr
+// Nest wraps/nests the errors into `err`
 func Nest(err error, errs ...error) {
 	if x, ok := err.(interface{ NestIts(errors ...error) }); ok {
 		x.NestIts(errs...)
