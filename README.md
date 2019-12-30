@@ -71,6 +71,7 @@ More extendings:
 - `NewTemplate(tmpl)`
 - `NewWithError(errs...)`
 - `NewCodedError(code, errs...)`
+- `Wrap(err, format, args...)`
 
 
 
