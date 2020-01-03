@@ -114,7 +114,7 @@ func (e *CodedErr) Format(args ...interface{}) *CodedErr {
 	if len(args) == 0 {
 		e.msg = e.tmpl
 	} else {
-		e.msg = fmt.Sprintf(e.tmpl, args)
+		e.msg = fmt.Sprintf(e.tmpl, args...)
 	}
 	return e
 }

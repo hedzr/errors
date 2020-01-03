@@ -143,7 +143,7 @@ func (e *ExtErr) Format(args ...interface{}) *ExtErr {
 	if len(args) == 0 {
 		e.msg = e.tmpl
 	} else {
-		e.msg = fmt.Sprintf(e.tmpl, args)
+		e.msg = fmt.Sprintf(e.tmpl, args...)
 	}
 	return e
 }
