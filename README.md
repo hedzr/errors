@@ -19,6 +19,14 @@ Take a look at: <https://play.golang.org/p/P0kk4NhAbd3>
 import "github.com/hedzr/errors"
 ```
 
+> Sometimes you need ignore gosumdb error '410 Gone'
+> ```bash
+> export GONOSUMDB="github.com/hedzr/errors,$GONOSUMDB"
+> # Or
+> export GOSUMDB=off
+> ```
+> For more information, see also:
+> https://github.com/golang/go/issues/35164
 
 
 
