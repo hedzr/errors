@@ -16,15 +16,15 @@ func DumpStacksAsString(allRoutines bool) string {
 }
 
 // CanAttach tests if err is attach-able
-func CanAttach(err interface{}) bool {
-	_, ok := err.(interface{ Attach(errs ...error) })
-	return ok
+func CanAttach(err interface{}) (ok bool) {
+	_, ok = err.(interface{ Attach(errs ...error) })
+	return
 }
 
 // CanCause tests if err is cause-able
-func CanCause(err interface{}) bool {
-	_, ok := err.(causer)
-	return ok
+func CanCause(err interface{}) (ok bool) {
+	_, ok = err.(causer)
+	return
 }
 
 // // CanWalk tests if err is walkable

@@ -3,7 +3,7 @@
 package errors_test
 
 import (
-	errorx "github.com/hedzr/errors/v2"
+	errorx "gopkg.in/hedzr/errors.v2"
 	"io"
 	"testing"
 )

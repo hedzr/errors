@@ -39,10 +39,50 @@ import "gopkg.in/hedzr/errors.v2"
   - in an error by `Wrap()`, stacktrace wrapped;
   - for your error, attached by `WithStack(cause error)`;
 
-#### error Container and sub-errors
+#### enh
+
+- `New(msg, args...)` combines New and `Newf`(if there is a name), WithMessage, WithMessagef, ...
+- `WithCause(cause error, message string, args...interface{})`
+- `Wrap(err error, message string, args ...interface{}) error`
+- `DumpStacksAsString(allRoutines bool)`: returns stack tracing information like debug.PrintStack()
+- `CanXXX`:
+   - `CanAttach(err interface{}) bool`
+   - `CanCause(err interface{}) bool`
+   - `CanUnwrap(err interface{}) bool`
+   - `CanIs(err interface{}) bool`
+   - `CanAs(err interface{}) bool`
+     
+
+
+
+#### error Container and sub-errors (wrapped, attached or nested)
+
+- `NewContainer(message string, args ...interface{}) *withCauses`
+- `ContainerIsEmpty(container error) bool`
+- `AttachTo(container *withCauses, errs ...error)`
+- `withCauses.Attach(errs ...error)`
+
+For example:
 
 ```go
+func a() (err error){
+    holder := errors.NewContainer("errors in a()")
+    // ...
+    for {
+        // ...
+        // errors.AttachTo(holder, io.EOF, io.ShortWrite)
+        holder.Attach(io.EOF, io.ShortWrite)
+    }
+    err = holder.Error()
+    return
+}
 
+func b(){
+    err := a()
+    if errors.Is(err, io.ShortWrite) {
+        panic(err)
+    }
+}
 ```
 
 
@@ -50,5 +90,13 @@ import "gopkg.in/hedzr/errors.v2"
 
 
 
+## ACK
 
+- stack.go is an copy from pkg/errors
+- withStack is an copy from pkg/errors
+- Is, As, Unwrap are inspired from go1.13 errors
+- Cause, Wrap are inspired from pkg/errors
 
+## LICENSE
+
+MIT

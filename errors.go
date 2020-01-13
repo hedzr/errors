@@ -66,8 +66,11 @@ type withCause struct {
 	msg    string
 }
 
-func WithCause(cause error, msg string) error {
-	return &withCause{cause, msg}
+func WithCause(cause error, message string, args ...interface{}) error {
+	if len(args) > 0 {
+		message = fmt.Sprintf(message, args...)
+	}
+	return &withCause{cause, message}
 }
 
 func (w *withCause) Error() string {

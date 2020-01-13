@@ -6,6 +6,7 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"reflect"
 )
 
 type causes struct {
@@ -40,5 +41,66 @@ func (w *causes) Format(s fmt.State, verb rune) {
 		io.WriteString(s, w.Error())
 	case 'q':
 		fmt.Fprintf(s, "%q", w.Error())
+	}
+}
+
+func (w *causes) Cause() error {
+	if len(w.Causers) == 0 {
+		return nil
+	}
+	return w.Causers[0]
+}
+
+func (w *causes) Causes() []error {
+	if len(w.Causers) == 0 {
+		return nil
+	}
+	return w.Causers
+}
+
+func (w *causes) Unwrap() error {
+	// return w.Cause()
+
+	for _, err := range w.Causers {
+		u, ok := err.(interface {
+			Unwrap() error
+		})
+		if ok {
+			return u.Unwrap()
+		}
+	}
+	return nil
+}
+
+func (w *causes) Is(target error) bool {
+	if target == nil {
+		for _, e := range w.Causers {
+			if e == target {
+				return true
+			}
+		}
+		return false
+	}
+
+	isComparable := reflect.TypeOf(target).Comparable()
+	for {
+		if isComparable {
+			for _, e := range w.Causers {
+				if e == target {
+					return true
+				}
+			}
+			return false
+		}
+
+		for _, e := range w.Causers {
+			if x, ok := e.(interface{ Is(error) bool }); ok && x.Is(target) {
+				return true
+			}
+			if err := Unwrap(e); err == nil {
+				return false
+			}
+		}
+		return false
 	}
 }
