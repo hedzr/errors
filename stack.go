@@ -1,4 +1,4 @@
-package errors
+package errorx
 
 import (
 	"fmt"
@@ -7,78 +7,6 @@ import (
 	"runtime"
 	"strings"
 )
-
-func callers() *Stack {
-	const depth = 32
-	var pcs [depth]uintptr
-	n := runtime.Callers(3, pcs[:])
-	var st Stack = pcs[0:n]
-	return &st
-}
-
-// funcname removes the path prefix component of a function's name reported by func.Name().
-func funcname(name string) string {
-	i := strings.LastIndex(name, "/")
-	name = name[i+1:]
-	i = strings.Index(name, ".")
-	return name[i+1:]
-}
-
-// Stack represents a stack of program counters.
-type Stack []uintptr
-
-// Format may call Sprint(f) or Fprint(f) etc.
-// to generate its output.
-func (s *Stack) Format(st fmt.State, verb rune) {
-	switch verb {
-	case 'v':
-		switch {
-		case st.Flag('+'):
-			for _, pc := range *s {
-				f := Frame(pc)
-				fmt.Fprintf(st, "\n%+v", f)
-			}
-		}
-	}
-}
-
-// StackTrace is stack of Frames from innermost (newest) to outermost (oldest).
-func (s *Stack) StackTrace() StackTrace {
-	f := make([]Frame, len(*s))
-	for i := 0; i < len(f); i++ {
-		f[i] = Frame((*s)[i])
-	}
-	return f
-}
-
-// StackTrace is stack of Frames from innermost (newest) to outermost (oldest).
-type StackTrace []Frame
-
-// Format formats the stack of Frames according to the fmt.Formatter interface.
-//
-//    %s	lists source files for each Frame in the stack
-//    %v	lists the source file and line number for each Frame in the stack
-//
-// Format accepts flags that alter the printing of some verbs, as follows:
-//
-//    %+v   Prints filename, function, and line number for each Frame in the stack.
-func (st StackTrace) Format(s fmt.State, verb rune) {
-	switch verb {
-	case 'v':
-		switch {
-		case s.Flag('+'):
-			for _, f := range st {
-				fmt.Fprintf(s, "\n%+v", f)
-			}
-		case s.Flag('#'):
-			fmt.Fprintf(s, "%#v", []Frame(st))
-		default:
-			fmt.Fprintf(s, "%v", []Frame(st))
-		}
-	case 's':
-		fmt.Fprintf(s, "%s", []Frame(st))
-	}
-}
 
 // Frame represents a program counter inside a stack frame.
 type Frame uintptr
@@ -147,4 +75,73 @@ func (f Frame) Format(s fmt.State, verb rune) {
 		io.WriteString(s, ":")
 		f.Format(s, 'd')
 	}
+}
+
+// StackTrace is stack of Frames from innermost (newest) to outermost (oldest).
+type StackTrace []Frame
+
+// Format formats the stack of Frames according to the fmt.Formatter interface.
+//
+//    %s	lists source files for each Frame in the stack
+//    %v	lists the source file and line number for each Frame in the stack
+//
+// Format accepts flags that alter the printing of some verbs, as follows:
+//
+//    %+v   Prints filename, function, and line number for each Frame in the stack.
+func (st StackTrace) Format(s fmt.State, verb rune) {
+	switch verb {
+	case 'v':
+		switch {
+		case s.Flag('+'):
+			for _, f := range st {
+				fmt.Fprintf(s, "\n%+v", f)
+			}
+		case s.Flag('#'):
+			fmt.Fprintf(s, "%#v", []Frame(st))
+		default:
+			fmt.Fprintf(s, "%v", []Frame(st))
+		}
+	case 's':
+		fmt.Fprintf(s, "%s", []Frame(st))
+	}
+}
+
+// stack represents a stack of program counters.
+type stack []uintptr
+
+func (s *stack) Format(st fmt.State, verb rune) {
+	switch verb {
+	case 'v':
+		switch {
+		case st.Flag('+'):
+			for _, pc := range *s {
+				f := Frame(pc)
+				fmt.Fprintf(st, "\n%+v", f)
+			}
+		}
+	}
+}
+
+func (s *stack) StackTrace() StackTrace {
+	f := make([]Frame, len(*s))
+	for i := 0; i < len(f); i++ {
+		f[i] = Frame((*s)[i])
+	}
+	return f
+}
+
+func callers() *stack {
+	const depth = 32
+	var pcs [depth]uintptr
+	n := runtime.Callers(3, pcs[:])
+	var st stack = pcs[0:n]
+	return &st
+}
+
+// funcname removes the path prefix component of a function's name reported by func.Name().
+func funcname(name string) string {
+	i := strings.LastIndex(name, "/")
+	name = name[i+1:]
+	i = strings.Index(name, ".")
+	return name[i+1:]
 }
