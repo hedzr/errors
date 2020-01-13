@@ -1,4 +1,4 @@
-# errors
+# errors.v2
 
 [![Build Status](https://travis-ci.org/hedzr/errors.svg?branch=master)](https://travis-ci.org/hedzr/errors)
 [![GitHub tag (latest SemVer)](https://img.shields.io/github/tag/hedzr/errors.svg?label=release)](https://github.com/hedzr/errors/releases)
@@ -14,7 +14,8 @@ Attachable errors for golang dev (for go1.13+).
 ## Import
 
 ```go
-import "github.com/hedzr/errors/v2"
+// wrong: import "github.com/hedzr/errors/v2"
+import "gopkg.in/hedzr/errors.v2"
 ```
 
 ## Features
