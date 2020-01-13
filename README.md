@@ -15,19 +15,20 @@ Take a look at: <https://play.golang.org/p/P0kk4NhAbd3>
 
 ## Import
 
+### v1 (Archived for legacy projects)
+
 ```go
 import "github.com/hedzr/errors"
 ```
 
-> Sometimes you need ignore gosumdb error '410 Gone'
-> ```bash
-> export GONOSUMDB="github.com/hedzr/errors,$GONOSUMDB"
-> # Or
-> export GOSUMDB=off
-> ```
-> For more information, see also:
-> https://github.com/golang/go/issues/35164
 
+### v2
+
+The new `v2` branch is cleaning rewroten version, preview at `v2.0.0` (*Go Modules v2*).
+
+```go
+import "github.com/hedzr/errors/v2"
+```
 
 
 

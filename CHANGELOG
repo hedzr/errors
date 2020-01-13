@@ -2,6 +2,16 @@
 
 
 
+> Sometimes you need ignore gosumdb error '410 Gone'
+> ```bash
+> export GONOSUMDB="github.com/hedzr/errors,$GONOSUMDB"
+> # Or
+> export GOSUMDB=off
+> ```
+> For more information, see also:
+> https://github.com/golang/go/issues/35164
+
+
 ### v1.1.13
 
 - fixed bugs
