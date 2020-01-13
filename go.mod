@@ -1,4 +1,4 @@
-module github.com/hedzr/errors
+module github.com/hedzr/errors/v2
 
 go 1.13
 

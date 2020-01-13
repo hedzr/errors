@@ -1,6 +1,6 @@
 // Copyright © 2020 Hedzr Yeh.
 
-package errorx
+package errors
 
 import (
 	"fmt"
@@ -32,7 +32,7 @@ func CanCause(err interface{}) bool {
 // 	_, ok = err.(Walkable)
 // 	return
 // }
-// 
+//
 // // CanRange tests if err is range-able
 // func CanRange(err error) (ok bool) {
 // 	_, ok = err.(Ranged)

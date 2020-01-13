@@ -1,9 +1,9 @@
 // Copyright © 2020 Hedzr Yeh.
 
-package errorx_test
+package errors_test
 
 import (
-	"github.com/hedzr/njuone/pkg/errorx"
+	errorx "github.com/hedzr/errors/v2"
 	"io"
 	"testing"
 )

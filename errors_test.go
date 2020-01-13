@@ -1,6 +1,6 @@
 // Copyright © 2020 Hedzr Yeh.
 
-package errorx
+package errors
 
 import (
 	errorss "errors"
