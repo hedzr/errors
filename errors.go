@@ -9,6 +9,8 @@ import (
 	"reflect"
 )
 
+// New returns an error with the supplied message.
+// New also records the stack trace at the point it was called.
 func New(message string, args ...interface{}) error {
 	if len(args) > 0 {
 		message = fmt.Sprintf(message, args...)
@@ -66,6 +68,7 @@ type withCause struct {
 	msg    string
 }
 
+// WithCause is synonym of Wrap
 func WithCause(cause error, message string, args ...interface{}) error {
 	if len(args) > 0 {
 		message = fmt.Sprintf(message, args...)
@@ -75,6 +78,12 @@ func WithCause(cause error, message string, args ...interface{}) error {
 
 func (w *withCause) Error() string {
 	return w.msg + ": " + w.causer.Error()
+}
+
+func (w *withCause) Attach(errs ...error) {
+	for _, err := range errs {
+		w.causer = err
+	}
 }
 
 func (w *withCause) Cause() error {
@@ -127,6 +136,11 @@ func (w *withCauses) wrap(errs ...error) error {
 	}
 }
 
+func (w *withCauses) Attach(errs ...error) {
+	w.causers = append(w.causers, errs...)
+	w.stack = callers()
+}
+
 func (w *withCauses) Cause() error {
 	if len(w.causers) == 0 {
 		return nil
@@ -143,11 +157,6 @@ func (w *withCauses) Causes() []error {
 
 func (w *withCauses) Unwrap() error {
 	return w.Cause()
-}
-
-func (w *withCauses) Attach(errs ...error) {
-	w.causers = append(w.causers, errs...)
-	w.stack = callers()
 }
 
 func (w *withCauses) IsEmpty() bool {
@@ -255,10 +264,11 @@ func (w *withStack) Unwrap() error {
 	return nil
 }
 
-func (w *withStack) Attach(errs ...error) {
+func (w *withStack) Attach(errs ...error) *withStack {
 	if x, ok := w.error.(interface{ Attach(errs ...error) }); ok {
 		x.Attach(errs...)
 	}
+	return w
 }
 
 func (w *withStack) IsEmpty() bool {

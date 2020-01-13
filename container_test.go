@@ -3,15 +3,15 @@
 package errors_test
 
 import (
-	errorx "gopkg.in/hedzr/errors.v2"
+	"gopkg.in/hedzr/errors.v2"
 	"io"
 	"testing"
 )
 
 func sample(simulate bool) (err error) {
-	c := errorx.NewContainer("sample error")
+	c := errors.NewContainer("sample error")
 	if simulate {
-		errorx.AttachTo(c, io.EOF, io.ErrUnexpectedEOF, io.ErrShortBuffer, io.ErrShortWrite)
+		errors.AttachTo(c, io.EOF, io.ErrUnexpectedEOF, io.ErrShortBuffer, io.ErrShortWrite)
 	}
 	err = c.Error()
 	return

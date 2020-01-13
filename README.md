@@ -49,11 +49,12 @@ go get -v gopkg.in/hedzr/errors.v2@v2.0.3
 - `func Wrap(err error, message string) error`
 - `func Cause(err error) error`
 - [x] `func Cause1(err error) error`
+- `func WithCause(cause error, message string, args ...interface{}) error`, = `Wrap`
 - supports Stacktrace
   - in an error by `Wrap()`, stacktrace wrapped;
   - for your error, attached by `WithStack(cause error)`;
 
-#### enh
+#### enhancements
 
 - `New(msg, args...)` combines New and `Newf`(if there is a name), WithMessage, WithMessagef, ...
 - `WithCause(cause error, message string, args...interface{})`
@@ -101,7 +102,21 @@ func b(){
 
 
 
+#### Coded error
 
+- `Code` is a generic type of error codes
+- `WithCode(code, err, msg, args...)` can format an error object with error code, attached inner err, msg, and stack info.
+- `Code.New(msg, args...)` is like `WithCode`.
+- `Code.Register(codeNameString)` declares the name string of an error code yourself.
+
+```go
+err := InvalidArgument.New("wrong").Attach(io.ErrShortWrite)
+
+const MyCode001 Code=1001
+
+MyCode001.Register("MyCode001")
+err := MyCode001.New("wrong 001: no config file")
+```
 
 
 ## ACK
