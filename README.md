@@ -110,13 +110,27 @@ func b(){
 - `Code.Register(codeNameString)` declares the name string of an error code yourself.
 
 ```go
+// using the pre-defined error code
 err := InvalidArgument.New("wrong").Attach(io.ErrShortWrite)
 
+// customizing the error code
 const MyCode001 Code=1001
 
+// and register its name
 MyCode001.Register("MyCode001")
+// and use the error code
 err := MyCode001.New("wrong 001: no config file")
 ```
+
+##### Error Template: formatting the coded-error late
+
+
+```go
+errTmpl := InvalidArgument.New("wrong %s")
+err := errTmpl.FormatNew("one")
+```
+
+
 
 
 ## ACK
