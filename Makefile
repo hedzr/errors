@@ -51,6 +51,21 @@ bench:
 	@echo "  >  benchmark testing ..."
 	go test -bench="." -run=^$ -benchtime=10s ./...
 
+#$(BIN)/godoc: | $(GOBASE)     # # # ❶
+#	@echo "  >  installing godoc ..."
+#	@GOPATH=$(GOPATH) GO111MODULE=$(GO111MODULE) GOPROXY=$(GOPROXY) \
+#	go install golang.org/x/tools/cmd/godoc
+
+## godoc: run godoc server at "localhost;6060"
+godoc: # | $(GOBASE) $(BIN)/godoc
+	@echo "  >  PWD = $(shell pwd)"
+	@echo "  >  started godoc server at :6060: http://localhost:6060/pkg/github.com/hedzr/$(PROJECTNAME1) ..."
+	#@echo "  $  GOPATH=$(GOPATH) godoc -http=:6060 -index -notes '(BUG|TODO|DONE|Deprecated)' -play -timestamps"
+	godoc -v -index -http=:6060 -notes '(BUG|TODO|DONE|Deprecated)' -play -timestamps -goroot $(GOPATH) 
+	# gopkg.in/hedzr/errors.v2.New
+	# -goroot $(GOPATH) -index
+	# https://medium.com/@elliotchance/godoc-tips-tricks-cda6571549b
+
 help: Makefile
 	@echo
 	@echo " Choose a command run in "$(PROJECTNAME)":"
