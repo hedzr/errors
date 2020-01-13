@@ -10,7 +10,7 @@ import (
 )
 
 // New returns an error with the supplied message.
-// New also records the stack trace at the point it was called.
+// New also records the Stack trace at the point it was called.
 func New(message string, args ...interface{}) error {
 	if len(args) > 0 {
 		message = fmt.Sprintf(message, args...)
@@ -94,6 +94,35 @@ func (w *withCause) Unwrap() error {
 	return w.causer
 }
 
+// As finds the first error in err's chain that matches target, and if so, sets
+// target to that error value and returns true.
+func (w *withCause) As(target interface{}) bool {
+	if target == nil {
+		panic("errors: target cannot be nil")
+	}
+	val := reflect.ValueOf(target)
+	typ := val.Type()
+	if typ.Kind() != reflect.Ptr || val.IsNil() {
+		panic("errors: target must be a non-nil pointer")
+	}
+	if e := typ.Elem(); e.Kind() != reflect.Interface && !e.Implements(errorType) {
+		panic("errors: *target must be interface or implement error")
+	}
+	targetType := typ.Elem()
+	err := w.causer
+	for err != nil {
+		if reflect.TypeOf(err).AssignableTo(targetType) {
+			val.Elem().Set(reflect.ValueOf(err))
+			return true
+		}
+		if x, ok := err.(interface{ As(interface{}) bool }); ok && x.As(target) {
+			return true
+		}
+		err = Unwrap(err)
+	}
+	return false
+}
+
 func (w *withCause) Is(target error) bool {
 	if target == nil {
 		return w.causer == target
@@ -116,54 +145,73 @@ func (w *withCause) Is(target error) bool {
 	}
 }
 
-type withCauses struct {
+// WithCauses holds a group of errors object.
+type WithCauses struct {
 	causers []error
 	msg     string
-	*stack
+	*Stack
 }
 
-func (w *withCauses) Error() error {
+func (w *WithCauses) Error() error {
 	if len(w.causers) == 0 {
 		return nil
 	}
 	return w.wrap(w.causers...)
 }
 
-func (w *withCauses) wrap(errs ...error) error {
+func (w *WithCauses) wrap(errs ...error) error {
 	return &causes{
 		Causers: errs,
-		stack:   w.stack,
+		Stack:   w.Stack,
 	}
 }
 
-func (w *withCauses) Attach(errs ...error) {
+// Attach appends errs
+func (w *WithCauses) Attach(errs ...error) {
 	w.causers = append(w.causers, errs...)
-	w.stack = callers()
+	w.Stack = callers()
 }
 
-func (w *withCauses) Cause() error {
+// Cause returns the underlying cause of the error, if possible.
+// An error value has a cause if it implements the following
+// interface:
+//
+//     type causer interface {
+//            Cause() error
+//     }
+//
+// If the error does not implement Cause, the original error will
+// be returned. If the error is nil, nil will be returned without further
+// investigation.
+func (w *WithCauses) Cause() error {
 	if len(w.causers) == 0 {
 		return nil
 	}
 	return w.causers[0]
 }
 
-func (w *withCauses) Causes() []error {
+// Causes returns the underlying cause of the errors.
+func (w *WithCauses) Causes() []error {
 	if len(w.causers) == 0 {
 		return nil
 	}
 	return w.causers
 }
 
-func (w *withCauses) Unwrap() error {
+// Unwrap returns the result of calling the Unwrap method on err, if err's
+// type contains an Unwrap method returning error.
+// Otherwise, Unwrap returns nil.
+func (w *WithCauses) Unwrap() error {
 	return w.Cause()
 }
 
-func (w *withCauses) IsEmpty() bool {
+// IsEmpty tests has attached errors
+func (w *WithCauses) IsEmpty() bool {
 	return len(w.causers) == 0
 }
 
-func (w *withCauses) Is(target error) bool {
+// Is reports whether any error in err's chain matches target.
+func (w *WithCauses) Is(target error) bool {
 	if target == nil {
 		for _, e := range w.causers {
 			if e == target {
@@ -196,7 +244,7 @@ func (w *withCauses) Is(target error) bool {
 	}
 }
 
-// Wrap returns an error annotating err with a stack trace
+// Wrap returns an error annotating err with a Stack trace
 // at the point Wrap is called, and the supplied message.
 // If err is nil, Wrap returns nil.
 func Wrap(err error, message string, args ...interface{}) error {
@@ -210,36 +258,62 @@ func Wrap(err error, message string, args ...interface{}) error {
 		causer: err,
 		msg:    message,
 	}
-	return &withStack{
+	return &WithStackInfo{
 		err,
 		callers(),
 	}
 }
 
-type withStack struct {
+// WithStackInfo is exported now
+type WithStackInfo struct {
 	error
-	*stack
+	*Stack
 }
 
-// WithStack annotates err with a stack trace at the point WithStack was called.
+// WithStack annotates err with a Stack trace at the point WithStack was called.
 // If err is nil, WithStack returns nil.
 func WithStack(cause error) error {
 	if cause == nil {
 		return nil
 	}
-	return &withStack{cause, callers()}
+	return &WithStackInfo{cause, callers()}
 }
 
-func (w *withStack) Cause() error {
+// Cause returns the underlying cause of the error, if possible.
+// An error value has a cause if it implements the following
+// interface:
+//
+//     type causer interface {
+//            Cause() error
+//     }
+//
+// If the error does not implement Cause, the original error will
+// be returned. If the error is nil, nil will be returned without further
+// investigation.
+func (w *WithStackInfo) Cause() error {
 	return w.error
 }
 
-func (w *withStack) Format(s fmt.State, verb rune) {
+// SetCause sets the underlying error manually if necessary.
+func (w *WithStackInfo) SetCause(cause error) error {
+	w.error = cause
+	return w
+}
+
+// Format formats the stack of Frames according to the fmt.Formatter interface.
+//
+//    %s	lists source files for each Frame in the stack
+//    %v	lists the source file and line number for each Frame in the stack
+//
+// Format accepts flags that alter the printing of some verbs, as follows:
+//
+//    %+v   Prints filename, function, and line number for each Frame in the stack.
+func (w *WithStackInfo) Format(s fmt.State, verb rune) {
 	switch verb {
 	case 'v':
 		if s.Flag('+') {
 			fmt.Fprintf(s, "%+v", w.Cause())
-			w.stack.Format(s, verb)
+			w.Stack.Format(s, verb)
 			return
 		}
 		fallthrough
@@ -250,28 +324,63 @@ func (w *withStack) Format(s fmt.State, verb rune) {
 	}
 }
 
-func (w *withStack) Is(target error) bool {
+// Is reports whether any error in err's chain matches target.
+func (w *WithStackInfo) Is(target error) bool {
 	if x, ok := w.error.(interface{ Is(error) bool }); ok && x.Is(target) {
 		return true
 	}
 	return false
 }
 
-func (w *withStack) Unwrap() error {
+// As finds the first error in err's chain that matches target, and if so, sets
+// target to that error value and returns true.
+func (w *WithStackInfo) As(target interface{}) bool {
+	if target == nil {
+		panic("errors: target cannot be nil")
+	}
+	val := reflect.ValueOf(target)
+	typ := val.Type()
+	if typ.Kind() != reflect.Ptr || val.IsNil() {
+		panic("errors: target must be a non-nil pointer")
+	}
+	if e := typ.Elem(); e.Kind() != reflect.Interface && !e.Implements(errorType) {
+		panic("errors: *target must be interface or implement error")
+	}
+	targetType := typ.Elem()
+	err := w.error
+	for err != nil {
+		if reflect.TypeOf(err).AssignableTo(targetType) {
+			val.Elem().Set(reflect.ValueOf(err))
+			return true
+		}
+		if x, ok := err.(interface{ As(interface{}) bool }); ok && x.As(target) {
+			return true
+		}
+		err = Unwrap(err)
+	}
+	return false
+}
+
+// Unwrap returns the result of calling the Unwrap method on err, if err's
+// type contains an Unwrap method returning error.
+// Otherwise, Unwrap returns nil.
+func (w *WithStackInfo) Unwrap() error {
 	if x, ok := w.error.(interface{ Unwrap() error }); ok {
 		return x.Unwrap()
 	}
 	return nil
 }
 
-func (w *withStack) Attach(errs ...error) *withStack {
+// Attach appends errs
+func (w *WithStackInfo) Attach(errs ...error) *WithStackInfo {
 	if x, ok := w.error.(interface{ Attach(errs ...error) }); ok {
 		x.Attach(errs...)
 	}
 	return w
 }
 
-func (w *withStack) IsEmpty() bool {
+// IsEmpty tests has attached errors
+func (w *WithStackInfo) IsEmpty() bool {
 	if x, ok := w.error.(interface{ IsEmpty() bool }); ok {
 		return x.IsEmpty()
 	}

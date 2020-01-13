@@ -201,9 +201,10 @@ var codeToStr = map[Code]string{
 }
 
 type withCode struct {
-	code   Code
-	causer error
-	msg    string
+	code      Code
+	causer    error
+	msg       string
+	livedArgs []interface{}
 }
 
 func (w *withCode) Error() string {
@@ -211,13 +212,23 @@ func (w *withCode) Error() string {
 	buf.WriteString(w.code.String())
 	if len(w.msg) > 0 {
 		buf.WriteRune('|')
-		buf.WriteString(w.msg)
+		if len(w.livedArgs) > 0 {
+			buf.WriteString(fmt.Sprintf(w.msg, w.livedArgs))
+		} else {
+			buf.WriteString(w.msg)
+		}
 	}
 	if w.causer != nil {
 		buf.WriteRune('|')
 		buf.WriteString(w.causer.Error())
 	}
 	return buf.String()
+}
+
+func (w *withCode) FormatNew(livedArgs ...interface{}) error {
+	x := WithCode(w.code, w.causer, w.msg)
+	x.error.(*withCode).livedArgs = livedArgs
+	return x
 }
 
 func (w *withCode) Attach(errs ...error) {
@@ -261,7 +272,7 @@ func (w *withCode) Is(target error) bool {
 //
 
 // WithCode formats a wrapped error object with error code.
-func WithCode(code Code, err error, message string, args ...interface{}) *withStack {
+func WithCode(code Code, err error, message string, args ...interface{}) *WithStackInfo {
 	if len(args) > 0 {
 		message = fmt.Sprintf(message, args...)
 	}
@@ -270,14 +281,14 @@ func WithCode(code Code, err error, message string, args ...interface{}) *withSt
 		causer: err,
 		msg:    message,
 	}
-	return &withStack{
+	return &WithStackInfo{
 		error: err,
-		stack: callers(),
+		Stack: callers(),
 	}
 }
 
 // New create a new *CodedErr object
-func (c Code) New(msg string, args ...interface{}) *withStack {
+func (c Code) New(msg string, args ...interface{}) *WithStackInfo {
 	return WithCode(c, nil, msg, args...)
 }
 
