@@ -156,18 +156,18 @@ func TestAll(t *testing.T) {
 		t.Log("Is() ok")
 	}
 
-	err = eb1.Format("resources exhausted")
-	t.Log(err)
-	err = eb11.Format()
-	t.Log(err)
-	err = eb2.Format("resources exhausted")
-	t.Log(err)
-	err = eb3.Format()
-	t.Log(err)
-	err = eb31.Format("resources exhausted")
-	t.Log(err)
-	err = eb4.Format()
-	t.Log(err)
+	tmpl := eb1.Formatf("resources exhausted")
+	t.Log(tmpl)
+	tmpl = eb11.Formatf()
+	t.Log(tmpl)
+	tmpl = eb2.Formatf("resources exhausted")
+	t.Log(tmpl)
+	tmpl = eb3.Formatf()
+	t.Log(tmpl)
+	tmpl = eb31.Formatf("resources exhausted")
+	t.Log(tmpl)
+	tmpl = eb4.Formatf()
+	t.Log(tmpl)
 }
 
 func TestIsAs(t *testing.T) {

@@ -79,7 +79,6 @@ More extendings:
 - `NewTemplate(tmpl)`
 - `NewWithError(errs...)`
 - `NewCodedError(code, errs...)`
-- `Wrap(err, format, args...)`
 
 
 
@@ -97,6 +96,13 @@ More extendings:
 4. `Attach(err, errs...)`, `Nest(err, errs...)`
 5. `DumpStacksAsString(allRoutines bool) string`
 
+
+### for `pkg/errors`
+
+- `Wrap(err, format, args...)`
+- `Wrapf(err, format, args...)`
+- `WithMessage(err, msg)`
+- `WithStack(err)`
 
 
 
@@ -226,7 +232,7 @@ func init() {
 }
 
 func TestAll(t *testing.T) {
-	err = eb1.Format("resources exhausted")
+	err = eb1.Formatf("resources exhausted")
 	t.Log(err)
 }
 ```
@@ -249,7 +255,7 @@ func init() {
 }
 
 // ...
-return ErrNoNotFound.Format(filename)
+return ErrNoNotFound.Formatf(filename)
 ```
 
 </details>

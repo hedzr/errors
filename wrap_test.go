@@ -198,14 +198,17 @@ func TestUnwrap(t *testing.T) {
 		err  error
 		want error
 	}{
+		{errors.NewCodedError(errors.Canceled).Nest(err1), err1},
+		{errors.NewCodedError(errors.Canceled).Attach(err1), err1},
 		{nil, nil},
 		{wrapped{"wrapped", nil}, nil},
 		{err1, nil},
 		{erra, err1},
 		{wrapped{"wrap 3", erra}, erra},
+		{errors.New("aa").Nest(erra), erra},
 	}
 	for _, tc := range testCases {
-		if got := errors.Unwrap(tc.err); got != tc.want {
+		if got := errors.Cause(tc.err); got != tc.want {
 			t.Errorf("Unwrap(%v) = %v, want %v", tc.err, got, tc.want)
 		}
 	}

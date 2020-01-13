@@ -5,6 +5,7 @@ package errors
 import (
 	"bytes"
 	"fmt"
+	"io"
 	"strconv"
 )
 
@@ -60,6 +61,18 @@ func (e *CodedErr) Number() Code {
 	return e.code
 }
 
+// Unwrap returns the result of calling the Unwrap method on err, if err's
+// type contains an Unwrap method returning error.
+// Otherwise, Unwrap returns nil.
+func (e *CodedErr) Unwrap() error {
+	return e.ExtErr.Unwrap()
+}
+
+// Cause = Unwrap
+func (e *CodedErr) Cause() error {
+	return e.Unwrap()
+}
+
 // IsBoth tests if all codes presented
 func (e *CodedErr) IsBoth(code ...Code) bool {
 	for _, c := range code {
@@ -102,15 +115,15 @@ func (e *CodedErr) Error() string {
 // Coder could compile the error object with formatting args later.
 //
 // Note that `ExtErr.Template()` had been overrided here
-func (e *CodedErr) Template(tmpl string) *CodedErr {
+func (e *CodedErr) Template(tmpl string) Templater {
 	e.tmpl = tmpl
 	return e
 }
 
-// Format compiles the final msg with string template and args
+// Formatf compiles the final msg with string template and args
 //
 // Note that `ExtErr.Template()` had been overridden here
-func (e *CodedErr) Format(args ...interface{}) *CodedErr {
+func (e *CodedErr) Formatf(args ...interface{}) Templater {
 	if len(args) == 0 {
 		e.msg = e.tmpl
 	} else {
@@ -155,4 +168,21 @@ func (e *CodedErr) AttachIts(errors ...error) {
 // NestIts attaches the nested errors into CodedErr
 func (e *CodedErr) NestIts(errors ...error) {
 	_ = e.nest(errors...)
+}
+
+// Format implements Formatter interface for fmt.Printf("%+v", err)
+func (e *CodedErr) Format(st fmt.State, verb rune) {
+	switch verb {
+	case 'v':
+		if st.Flag('+') {
+			io.WriteString(st, e.Error())
+			e.stack.Format(st, verb)
+			return
+		}
+		fallthrough
+	case 's':
+		io.WriteString(st, e.Error())
+	case 'q':
+		fmt.Fprintf(st, "%q", e.Error())
+	}
 }

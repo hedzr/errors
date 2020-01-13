@@ -5,6 +5,7 @@ package errors
 import (
 	"bytes"
 	"fmt"
+	"io"
 )
 
 // ExtErr is a nestable error object
@@ -13,6 +14,7 @@ type ExtErr struct {
 	errs  []error
 	msg   string
 	tmpl  string
+	stack *Stack
 }
 
 // GetTemplateString returns e.tmpl member
@@ -76,9 +78,13 @@ func (e *ExtErr) Range(fn func(err error) (stop bool)) {
 // Otherwise, Unwrap returns nil.
 func (e *ExtErr) Unwrap() error {
 	if e.inner != nil {
+		// return e.inner
+		for _, ee := range e.inner.errs {
+			return ee
+		}
 		return e.inner
 	}
-
+	
 	for _, ee := range e.errs {
 		// if x, ok := ee.(interface{ Unwrap() error }); ok {
 		// 	return x.Unwrap()
@@ -86,6 +92,11 @@ func (e *ExtErr) Unwrap() error {
 		return ee
 	}
 	return nil
+}
+
+// Cause = Unwrap
+func (e *ExtErr) Cause() error {
+	return e.Unwrap()
 }
 
 // Is reports whether any error in err's chain matches target.
@@ -131,15 +142,21 @@ func (e *ExtErr) As(target interface{}) bool {
 	return false
 }
 
+// Templater is the interface implemented by template error object.
+type Templater interface {
+	Template(tmpl string) Templater
+	Formatf(args ...interface{}) Templater
+}
+
 // Template setup a string format template.
 // Coder could compile the error object with formatting args later.
-func (e *ExtErr) Template(tmpl string) *ExtErr {
+func (e *ExtErr) Template(tmpl string) Templater {
 	e.tmpl = tmpl
 	return e
 }
 
-// Format compiles the final msg with string template and args
-func (e *ExtErr) Format(args ...interface{}) *ExtErr {
+// Formatf compiles the final msg with string template and args
+func (e *ExtErr) Formatf(args ...interface{}) Templater {
 	if len(args) == 0 {
 		e.msg = e.tmpl
 	} else {
@@ -181,7 +198,10 @@ func (e *ExtErr) NestIts(errors ...error) {
 func (e *ExtErr) nest(errs ...error) *ExtErr {
 	z := e
 	for {
-		if z.inner != nil {
+		if z.inner == nil {
+			z.inner = &ExtErr{errs: errs}
+			return e
+		} else if z.inner != nil {
 			z = z.inner
 		} else if len(z.errs) == 0 {
 			z.errs = errs
@@ -200,6 +220,24 @@ func (e *ExtErr) add(errs ...error) *ExtErr {
 	return e
 }
 
+// Format implements Formatter interface for fmt.Printf("%+v", err)
+func (e *ExtErr) Format(st fmt.State, verb rune) {
+	switch verb {
+	case 'v':
+		if st.Flag('+') {
+			io.WriteString(st, e.Error())
+			e.stack.Format(st, verb)
+			return
+		}
+		fallthrough
+	case 's':
+		io.WriteString(st, e.Error())
+	case 'q':
+		fmt.Fprintf(st, "%q", e.Error())
+	}
+}
+
+// Error returns error message string presentation
 func (e *ExtErr) Error() string {
 	var buf bytes.Buffer
 	if len(e.msg) == 0 {
@@ -220,4 +258,9 @@ func (e *ExtErr) Error() string {
 		buf.WriteString("]")
 	}
 	return buf.String()
+}
+
+// Stack returns the caller stack object
+func (e *ExtErr) Stack() *Stack {
+	return e.stack
 }
