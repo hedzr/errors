@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-// Frame represents a program counter inside a stack frame.
+// Frame represents a program counter inside a Stack frame.
 type Frame uintptr
 
 // pc returns the program counter for this frame;
@@ -77,17 +77,17 @@ func (f Frame) Format(s fmt.State, verb rune) {
 	}
 }
 
-// StackTrace is stack of Frames from innermost (newest) to outermost (oldest).
+// StackTrace is Stack of Frames from innermost (newest) to outermost (oldest).
 type StackTrace []Frame
 
-// Format formats the stack of Frames according to the fmt.Formatter interface.
+// Format formats the Stack of Frames according to the fmt.Formatter interface.
 //
-//    %s	lists source files for each Frame in the stack
-//    %v	lists the source file and line number for each Frame in the stack
+//    %s	lists source files for each Frame in the Stack
+//    %v	lists the source file and line number for each Frame in the Stack
 //
 // Format accepts flags that alter the printing of some verbs, as follows:
 //
-//    %+v   Prints filename, function, and line number for each Frame in the stack.
+//    %+v   Prints filename, function, and line number for each Frame in the Stack.
 func (st StackTrace) Format(s fmt.State, verb rune) {
 	switch verb {
 	case 'v':
@@ -106,10 +106,18 @@ func (st StackTrace) Format(s fmt.State, verb rune) {
 	}
 }
 
-// stack represents a stack of program counters.
-type stack []uintptr
+// Stack represents a Stack of program counters.
+type Stack []uintptr
 
-func (s *stack) Format(st fmt.State, verb rune) {
+// Format formats the stack of Frames according to the fmt.Formatter interface.
+//
+//    %s	lists source files for each Frame in the stack
+//    %v	lists the source file and line number for each Frame in the stack
+//
+// Format accepts flags that alter the printing of some verbs, as follows:
+//
+//    %+v   Prints filename, function, and line number for each Frame in the stack.
+func (s *Stack) Format(st fmt.State, verb rune) {
 	switch verb {
 	case 'v':
 		switch {
@@ -122,7 +130,8 @@ func (s *stack) Format(st fmt.State, verb rune) {
 	}
 }
 
-func (s *stack) StackTrace() StackTrace {
+// StackTrace returns the stacktrace frames
+func (s *Stack) StackTrace() StackTrace {
 	f := make([]Frame, len(*s))
 	for i := 0; i < len(f); i++ {
 		f[i] = Frame((*s)[i])
@@ -130,11 +139,11 @@ func (s *stack) StackTrace() StackTrace {
 	return f
 }
 
-func callers() *stack {
+func callers() *Stack {
 	const depth = 32
 	var pcs [depth]uintptr
 	n := runtime.Callers(3, pcs[:])
-	var st stack = pcs[0:n]
+	var st Stack = pcs[0:n]
 	return &st
 }
 

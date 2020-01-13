@@ -9,13 +9,13 @@ import "fmt"
 //
 //
 //
-func NewContainer(message string, args ...interface{}) *withCauses {
+func NewContainer(message string, args ...interface{}) *WithCauses {
 	if len(args) > 0 {
 		message = fmt.Sprintf(message, args...)
 	}
-	err := &withCauses{
+	err := &WithCauses{
 		msg:   message,
-		stack: callers(),
+		Stack: callers(),
 	}
 	return err
 }
@@ -29,7 +29,7 @@ func ContainerIsEmpty(container error) bool {
 }
 
 // AttachTo appends more errors into 'container' error container.
-func AttachTo(container *withCauses, errs ...error) {
+func AttachTo(container *WithCauses, errs ...error) {
 	if container == nil {
 		panic("nil error container not allowed")
 	}

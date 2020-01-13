@@ -11,7 +11,7 @@ import (
 
 type causes struct {
 	Causers []error
-	*stack
+	*Stack
 }
 
 func (w *causes) Error() string {
@@ -24,16 +24,24 @@ func (w *causes) Error() string {
 		buf.WriteString(c.Error())
 	}
 	buf.WriteString("]")
-	// buf.WriteString(w.stack)
+	// buf.WriteString(w.Stack)
 	return buf.String()
 }
 
+// Format formats the stack of Frames according to the fmt.Formatter interface.
+//
+//    %s	lists source files for each Frame in the stack
+//    %v	lists the source file and line number for each Frame in the stack
+//
+// Format accepts flags that alter the printing of some verbs, as follows:
+//
+//    %+v   Prints filename, function, and line number for each Frame in the stack.
 func (w *causes) Format(s fmt.State, verb rune) {
 	switch verb {
 	case 'v':
 		if s.Flag('+') {
 			fmt.Fprintf(s, "%+v", w.Error())
-			w.stack.Format(s, verb)
+			w.Stack.Format(s, verb)
 			return
 		}
 		fallthrough
