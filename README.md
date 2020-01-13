@@ -17,6 +17,20 @@ Attachable errors for golang dev (for go1.13+).
 // wrong: import "github.com/hedzr/errors/v2"
 import "gopkg.in/hedzr/errors.v2"
 ```
+To take affect after new version released right away, delete the Go Modules local cache:
+
+```bash
+rm -rf $GOPATH/pkg/mod/*
+```
+
+Or, try go get the exact version just like:
+
+```bash
+go get -v gopkg.in/hedzr/errors.v2@v2.0.3
+```
+
+
+
 
 ## Features
 
