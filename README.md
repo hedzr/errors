@@ -7,7 +7,7 @@
 [![codecov](https://codecov.io/gh/hedzr/errors/branch/master/graph/badge.svg)](https://codecov.io/gh/hedzr/errors)
 
 
-Attachable errors for golang dev (for go1.13+).
+Attachable errors and more for golang dev (for go1.13+).
 
 
 
@@ -54,11 +54,11 @@ go get -v gopkg.in/hedzr/errors.v2@v2.0.3
   - in an error by `Wrap()`, stacktrace wrapped;
   - for your error, attached by `WithStack(cause error)`;
 
-#### enhancements
+#### Enhancements
 
 - `New(msg, args...)` combines New and `Newf`(if there is a name), WithMessage, WithMessagef, ...
 - `WithCause(cause error, message string, args...interface{})`
-- `Wrap(err error, message string, args ...interface{}) error`
+- `Wrap(err error, message string, args ...interface{}) error`, no Wrapf
 - `DumpStacksAsString(allRoutines bool)`: returns stack tracing information like debug.PrintStack()
 - `CanXXX`:
    - `CanAttach(err interface{}) bool`
@@ -105,9 +105,13 @@ func b(){
 #### Coded error
 
 - `Code` is a generic type of error codes
-- `WithCode(code, err, msg, args...)` can format an error object with error code, attached inner err, msg, and stack info.
+- `WithCode(code, err, msg, args...)` can format an error object with error code, attached inner err, message or msg template, and stack info.
 - `Code.New(msg, args...)` is like `WithCode`.
 - `Code.Register(codeNameString)` declares the name string of an error code yourself.
+- `Code.NewTemplate(tmpl)` create an coded error template object `*WithCodeInfo`.
+- `WithCodeInfo.FormateNew(livedArgs...)` formats the err msg till used.
+
+Try it at: <https://play.golang.org/p/Y2uThZHAvK1>
 
 ```go
 // using the pre-defined error code
