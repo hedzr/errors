@@ -208,8 +208,33 @@ func TestUnwrap(t *testing.T) {
 		{errors.New("aa").Nest(erra), erra},
 	}
 	for _, tc := range testCases {
+		if got := errors.Unwrap(tc.err); got != tc.want {
+			t.Errorf("Unwrap(%v) = '%v', want '%v'", tc.err, got, tc.want)
+		}
+	}
+}
+
+func TestCause(t *testing.T) {
+
+	err1 := errors.New("1")
+	erra := wrapped{"wrap 2", err1}
+
+	testCases := []struct {
+		err  error
+		want error
+	}{
+		{errors.NewCodedError(errors.Canceled).Nest(err1), err1},
+		{errors.NewCodedError(errors.Canceled).Attach(err1), err1},
+		{nil, nil},
+		// {wrapped{"wrapped", nil}, nil},
+		// {err1, nil},
+		{erra, erra},
+		// {wrapped{"wrap 3", erra}, erra},
+		// {errors.New("aa").Nest(erra), erra},
+	}
+	for _, tc := range testCases {
 		if got := errors.Cause(tc.err); got != tc.want {
-			t.Errorf("Unwrap(%v) = %v, want %v", tc.err, got, tc.want)
+			t.Errorf("Cause(%v) = '%v', want '%v'", tc.err, got, tc.want)
 		}
 	}
 }

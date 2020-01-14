@@ -84,7 +84,7 @@ func (e *ExtErr) Unwrap() error {
 		}
 		return e.inner
 	}
-	
+
 	for _, ee := range e.errs {
 		// if x, ok := ee.(interface{ Unwrap() error }); ok {
 		// 	return x.Unwrap()

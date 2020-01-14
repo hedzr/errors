@@ -74,7 +74,11 @@ func Cause(err error) error {
 		if !ok {
 			break
 		}
-		err = cause.Cause()
+		e := cause.Cause()
+		if e == nil {
+			break
+		}
+		err = e
 	}
 	return err
 }
