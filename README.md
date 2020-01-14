@@ -126,8 +126,10 @@ err := MyCode001.New("wrong 001: no config file")
 
 
 ```go
-errTmpl := InvalidArgument.New("wrong %s")
-err := errTmpl.FormatNew("one")
+	errTmpl1001 := BUG1001.NewTemplate("something is wrong, %v")
+	err4 := errTmpl1001.FormatNew("unsatisfied conditions").Attach(io.ShortBuffer)
+	fmt.Println(err4)
+	fmt.Printf("%+v\n", err4)
 ```
 
 
