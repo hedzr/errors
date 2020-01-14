@@ -29,6 +29,8 @@ type causer interface {
 }
 
 // Cause1 returns the underlying cause of the error, if possible.
+// Cause1 unwraps just one level of the inner wrapped error.
+//
 // An error value has a cause if it implements the following
 // interface:
 //

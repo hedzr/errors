@@ -374,7 +374,30 @@ func WithCode(code Code, err error, message string, args ...interface{}) *WithSt
 	}
 }
 
-// New create a new *CodedErr object
+// Equal compares error object and error Code
+func Equal(err error, code Code) bool {
+	x, ok := err.(interface{ Equal(Code) bool })
+	if !ok {
+		return false
+	}
+	return x.Equal(code)
+}
+
+// EqualR compares error object and error Code recursively
+func EqualR(err error, code Code) bool {
+retryEqual:
+	x, ok := err.(interface{ Equal(Code) bool })
+	if !ok {
+		err = Cause1(err) // unwrap one level of inner wrapped error
+		if err != nil {
+			goto retryEqual
+		}
+		return false
+	}
+	return x.Equal(code)
+}
+
+// New create a new *CodedErr object based an error code
 func (c Code) New(msg string, args ...interface{}) *WithStackInfo {
 	return WithCode(c, nil, msg, args...)
 }
