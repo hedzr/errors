@@ -27,7 +27,9 @@ func Example_container() {
 
 	// err = sample(true)
 	c = errors.NewContainer("sample error")
+	// in a long loop, we can add many sub-errors into container 'c'...
 	errors.AttachTo(c, io.EOF, io.ErrUnexpectedEOF, io.ErrShortBuffer, io.ErrShortWrite)
+	// and we extract all of them as a single parent error object now.
 	err = c.Error()
 	if err == nil {
 		panic("want error")
