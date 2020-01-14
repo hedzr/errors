@@ -209,6 +209,16 @@ type WithCodeInfo struct {
 	livedArgs []interface{}
 }
 
+// Code returns the error code value
+func (w *WithCodeInfo) Code() Code {
+	return w.code
+}
+
+// Equal tests if equals with code 'c'
+func (w *WithCodeInfo) Equal(c Code) bool {
+	return w.code == c
+}
+
 func (w *WithCodeInfo) Error() string {
 	var buf bytes.Buffer
 	buf.WriteString(w.code.String())
