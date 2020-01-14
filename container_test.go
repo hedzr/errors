@@ -8,7 +8,7 @@ import (
 	"testing"
 )
 
-func sample(simulate bool) (err error) {
+func samplec(simulate bool) (err error) {
 	c := errors.NewContainer("sample error")
 	if simulate {
 		errors.AttachTo(c, io.EOF, io.ErrUnexpectedEOF, io.ErrShortBuffer, io.ErrShortWrite)
@@ -18,14 +18,14 @@ func sample(simulate bool) (err error) {
 }
 
 func TestContainer(t *testing.T) {
-	err := sample(false)
+	err := samplec(false)
 	if err != nil {
 		t.Fatal(err)
 	} else {
 		t.Logf("%+v", err)
 	}
 
-	err = sample(true)
+	err = samplec(true)
 	if err == nil {
 		t.Fatal("want error")
 	} else {

@@ -5,8 +5,13 @@ import "fmt"
 // NewContainer wraps a group of errors and msg as one and return it.
 // The returned error object is a container to hold many sub-errors.
 //
-// Examples:
+// For Example:
 //
+// 		c := errors.NewContainer("sample error")
+// 		... for a long loop
+// 		errors.AttachTo(c, io.EOF, io.ErrUnexpectedEOF, io.ErrShortBuffer, io.ErrShortWrite)
+// 		...
+// 		err = c.Error()
 //
 //
 func NewContainer(message string, args ...interface{}) *WithCauses {
