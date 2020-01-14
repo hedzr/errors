@@ -47,8 +47,8 @@ go get -v gopkg.in/hedzr/errors.v2@v2.0.3
 #### `pkg/errors` compatibilities
 
 - `func Wrap(err error, message string) error`
-- `func Cause(err error) error`
-- [x] `func Cause1(err error) error`
+- `func Cause(err error) error`: unwraps recursively, just like Unwrap()
+- [x] `func Cause1(err error) error`: unwraps just one level
 - `func WithCause(cause error, message string, args ...interface{}) error`, = `Wrap`
 - supports Stacktrace
   - in an error by `Wrap()`, stacktrace wrapped;
@@ -81,20 +81,22 @@ For example:
 
 ```go
 func a() (err error){
-    holder := errors.NewContainer("errors in a()")
+	container = errors.NewContainer("sample error")
     // ...
     for {
         // ...
-        // errors.AttachTo(holder, io.EOF, io.ShortWrite)
-        holder.Attach(io.EOF, io.ShortWrite)
+        // in a long loop, we can add many sub-errors into container 'c'...
+        errors.AttachTo(container, io.EOF, io.ErrUnexpectedEOF, io.ErrShortBuffer, io.ErrShortWrite)
     }
-    err = holder.Error()
-    return
+	// and we extract all of them as a single parent error object now.
+	err = container.Error()
+	return
 }
 
 func b(){
     err := a()
-    if errors.Is(err, io.ShortWrite) {
+    // test the containered error 'err' if it hosted a sub-error `io.ErrShortWrite` or not.
+    if errors.Is(err, io.ErrShortWrite) {
         panic(err)
     }
 }
@@ -110,6 +112,7 @@ func b(){
 - `Code.Register(codeNameString)` declares the name string of an error code yourself.
 - `Code.NewTemplate(tmpl)` create an coded error template object `*WithCodeInfo`.
 - `WithCodeInfo.FormateNew(livedArgs...)` formats the err msg till used.
+- `Equal(err, code)`: compares `err` with `code`
 
 Try it at: <https://play.golang.org/p/Y2uThZHAvK1>
 
