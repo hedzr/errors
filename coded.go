@@ -3,6 +3,7 @@ package errors
 import (
 	"bytes"
 	"fmt"
+	"io"
 	"reflect"
 )
 
@@ -224,6 +225,36 @@ func (w *WithCodeInfo) Error() string {
 		buf.WriteString(w.causer.Error())
 	}
 	return buf.String()
+}
+
+// Format formats the stack of Frames according to the fmt.Formatter interface.
+//
+//    %s	lists source files for each Frame in the stack
+//    %v	lists the source file and line number for each Frame in the stack
+//
+// Format accepts flags that alter the printing of some verbs, as follows:
+//
+//    %+v   Prints filename, function, and line number for each Frame in the stack.
+func (w *WithCodeInfo) Format(s fmt.State, verb rune) {
+	switch verb {
+	case 'v':
+		if s.Flag('+') {
+			msg := w.msg
+			if len(w.livedArgs) > 0 {
+				msg = fmt.Sprintf(w.msg, w.livedArgs...)
+			}
+			fmt.Fprintf(s, "%d|%+v|%s", int(w.code), w.code.String(), msg)
+			if w.causer != nil {
+				fmt.Fprintf(s, "|%+v", w.causer)
+			}
+			return
+		}
+		fallthrough
+	case 's':
+		io.WriteString(s, w.Error())
+	case 'q':
+		fmt.Fprintf(s, "%q", w.Error())
+	}
 }
 
 // FormatNew creates a new error object based on this error template 'w'.
