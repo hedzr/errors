@@ -261,6 +261,35 @@ func (w *WithCodeInfo) Unwrap() error {
 	return w.causer
 }
 
+// As finds the first error in err's chain that matches target, and if so, sets
+// target to that error value and returns true.
+func (w *WithCodeInfo) As(target interface{}) bool {
+	if target == nil {
+		panic("errors: target cannot be nil")
+	}
+	val := reflect.ValueOf(target)
+	typ := val.Type()
+	if typ.Kind() != reflect.Ptr || val.IsNil() {
+		panic("errors: target must be a non-nil pointer")
+	}
+	if e := typ.Elem(); e.Kind() != reflect.Interface && !e.Implements(errorType) {
+		panic("errors: *target must be interface or implement error")
+	}
+	targetType := typ.Elem()
+	err := w.causer
+	for err != nil {
+		if reflect.TypeOf(err).AssignableTo(targetType) {
+			val.Elem().Set(reflect.ValueOf(err))
+			return true
+		}
+		if x, ok := err.(interface{ As(interface{}) bool }); ok && x.As(target) {
+			return true
+		}
+		err = Unwrap(err)
+	}
+	return false
+}
+
 // Is reports whether any error in err's chain matches target.
 func (w *WithCodeInfo) Is(target error) bool {
 	if target == nil {
