@@ -200,14 +200,15 @@ var codeToStr = map[Code]string{
 	RateLimited:        `RATE_LIMITED`,
 }
 
-type withCode struct {
+// WithCodeInfo is a type integrating both error code, cause, message, and template
+type WithCodeInfo struct {
 	code      Code
 	causer    error
 	msg       string
 	livedArgs []interface{}
 }
 
-func (w *withCode) Error() string {
+func (w *WithCodeInfo) Error() string {
 	var buf bytes.Buffer
 	buf.WriteString(w.code.String())
 	if len(w.msg) > 0 {
@@ -225,27 +226,43 @@ func (w *withCode) Error() string {
 	return buf.String()
 }
 
-func (w *withCode) FormatNew(livedArgs ...interface{}) error {
+// FormatNew creates a new error object based on this error template 'w'.
+//
+// Example:
+//
+// 	   errTmpl1001 := BUG1001.NewTemplate("something is wrong %v")
+// 	   err4 := errTmpl1001.FormatNew("ok").Attach(errBug1)
+// 	   fmt.Println(err4)
+// 	   fmt.Printf("%+v\n", err4)
+//
+func (w *WithCodeInfo) FormatNew(livedArgs ...interface{}) *WithStackInfo {
 	x := WithCode(w.code, w.causer, w.msg)
-	x.error.(*withCode).livedArgs = livedArgs
+	x.error.(*WithCodeInfo).livedArgs = livedArgs
 	return x
 }
 
-func (w *withCode) Attach(errs ...error) {
+// Attach appends errs
+func (w *WithCodeInfo) Attach(errs ...error) {
 	for _, err := range errs {
 		w.causer = err
 	}
 }
 
-func (w *withCode) Cause() error {
+// Cause returns the underlying cause of the error recursively,
+// if possible.
+func (w *WithCodeInfo) Cause() error {
 	return w.causer
 }
 
-func (w *withCode) Unwrap() error {
+// Unwrap returns the result of calling the Unwrap method on err, if err's
+// type contains an Unwrap method returning error.
+// Otherwise, Unwrap returns nil.
+func (w *WithCodeInfo) Unwrap() error {
 	return w.causer
 }
 
-func (w *withCode) Is(target error) bool {
+// Is reports whether any error in err's chain matches target.
+func (w *WithCodeInfo) Is(target error) bool {
 	if target == nil {
 		return w.causer == target
 	}
@@ -276,7 +293,7 @@ func WithCode(code Code, err error, message string, args ...interface{}) *WithSt
 	if len(args) > 0 {
 		message = fmt.Sprintf(message, args...)
 	}
-	err = &withCode{
+	err = &WithCodeInfo{
 		code:   code,
 		causer: err,
 		msg:    message,
@@ -290,6 +307,16 @@ func WithCode(code Code, err error, message string, args ...interface{}) *WithSt
 // New create a new *CodedErr object
 func (c Code) New(msg string, args ...interface{}) *WithStackInfo {
 	return WithCode(c, nil, msg, args...)
+}
+
+// NewTemplate create an error template so that you may `FormatNew(liveArgs...)` late.
+func (c Code) NewTemplate(tmpl string) *WithCodeInfo {
+	err := &WithCodeInfo{
+		code:   c,
+		causer: nil,
+		msg:    tmpl,
+	}
+	return err
 }
 
 // String for stringer interface
