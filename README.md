@@ -24,10 +24,10 @@ import "github.com/hedzr/errors"
 
 ### v2
 
-The new `v2` branch is cleaning rewroten version, preview at `v2.0.0` (*Go Modules v2*).
+The new [`v2` branch](https://github.com/hedzr/errors/tree/v2) is cleaning rewroten version, preview at `v2.0.x` (*gopkg v2*).
 
 ```go
-import "github.com/hedzr/errors/v2"
+import "gopkg.in/hedzr/errors.v2"
 ```
 
 
