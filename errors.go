@@ -4,18 +4,24 @@ package errors
 
 import (
 	"fmt"
-	"github.com/pkg/errors"
 	"io"
 	"reflect"
 )
 
 // New returns an error with the supplied message.
 // New also records the Stack trace at the point it was called.
-func New(message string, args ...interface{}) error {
+func New(message string, args ...interface{}) *WithStackInfo {
 	if len(args) > 0 {
 		message = fmt.Sprintf(message, args...)
 	}
-	return errors.New(message)
+	err := &withCause{
+		causer: nil,
+		msg:    message,
+	}
+	return &WithStackInfo{
+		err,
+		callers(),
+	}
 }
 
 type causer interface {
@@ -77,19 +83,28 @@ func WithCause(cause error, message string, args ...interface{}) error {
 }
 
 func (w *withCause) Error() string {
-	return w.msg + ": " + w.causer.Error()
+	if w.causer != nil {
+		return w.msg + ": " + w.causer.Error()
+	}
+	return w.msg
 }
 
+// Attach appends errs
 func (w *withCause) Attach(errs ...error) {
 	for _, err := range errs {
 		w.causer = err
 	}
 }
 
+// Cause returns the underlying cause of the error recursively,
+// if possible.
 func (w *withCause) Cause() error {
 	return w.causer
 }
 
+// Unwrap returns the result of calling the Unwrap method on err, if err's
+// type contains an Unwrap method returning error.
+// Otherwise, Unwrap returns nil.
 func (w *withCause) Unwrap() error {
 	return w.causer
 }
@@ -123,6 +138,7 @@ func (w *withCause) As(target interface{}) bool {
 	return false
 }
 
+// Is reports whether any error in err's chain matches target.
 func (w *withCause) Is(target error) bool {
 	if target == nil {
 		return w.causer == target
@@ -247,7 +263,7 @@ func (w *WithCauses) Is(target error) bool {
 // Wrap returns an error annotating err with a Stack trace
 // at the point Wrap is called, and the supplied message.
 // If err is nil, Wrap returns nil.
-func Wrap(err error, message string, args ...interface{}) error {
+func Wrap(err error, message string, args ...interface{}) *WithStackInfo {
 	if err == nil {
 		return nil
 	}
