@@ -25,7 +25,7 @@ func NewContainer(message string, args ...interface{}) *WithCauses {
 	return err
 }
 
-// ContainerIsEmpty appends more errors into 'container' error container.
+// ContainerIsEmpty tests if 'container' is empty (no more wrapped/attached sub-errors)
 func ContainerIsEmpty(container error) bool {
 	if x, ok := container.(interface{ IsEmpty() bool }); ok {
 		return x.IsEmpty()
