@@ -26,7 +26,7 @@ rm -rf $GOPATH/pkg/mod/*
 Or, try go get the exact version just like:
 
 ```bash
-go get -v gopkg.in/hedzr/errors.v2@v2.0.3
+go get -v gopkg.in/hedzr/errors.v2@v2.0.12
 ```
 
 
@@ -87,6 +87,9 @@ func a() (err error){
         // ...
         // in a long loop, we can add many sub-errors into container 'c'...
         errors.AttachTo(container, io.EOF, io.ErrUnexpectedEOF, io.ErrShortBuffer, io.ErrShortWrite)
+        // Or:
+        // container.Attach(someFuncReturnsErr(xxx))
+        // ... break
     }
 	// and we extract all of them as a single parent error object now.
 	err = container.Error()

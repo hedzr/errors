@@ -285,7 +285,9 @@ func (w *WithCodeInfo) FormatNew(livedArgs ...interface{}) *WithStackInfo {
 // Attach appends errs
 func (w *WithCodeInfo) Attach(errs ...error) {
 	for _, err := range errs {
-		w.causer = err
+		if err != nil {
+			w.causer = err
+		}
 	}
 }
 

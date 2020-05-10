@@ -94,7 +94,9 @@ func (w *withCause) Error() string {
 // Attach appends errs
 func (w *withCause) Attach(errs ...error) {
 	for _, err := range errs {
-		w.causer = err
+		if err != nil {
+			w.causer = err
+		}
 	}
 }
 
@@ -186,7 +188,11 @@ func (w *WithCauses) wrap(errs ...error) error {
 
 // Attach appends errs
 func (w *WithCauses) Attach(errs ...error) {
-	w.causers = append(w.causers, errs...)
+	for _, ex := range errs {
+		if ex != nil {
+			w.causers = append(w.causers, ex)
+		}
+	}
 	w.Stack = callers()
 }
 
