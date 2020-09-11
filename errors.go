@@ -106,14 +106,14 @@ func (w *withCause) Cause() error {
 	return w.causer
 }
 
-// Unwrap returns the result of calling the Unwrap method on err, if err's
-// type contains an Unwrap method returning error.
+// Unwrap returns the result of calling the Unwrap method on err, if
+// `err`'s type contains an Unwrap method returning error.
 // Otherwise, Unwrap returns nil.
 func (w *withCause) Unwrap() error {
 	return w.causer
 }
 
-// As finds the first error in err's chain that matches target, and if so, sets
+// As finds the first error in `err`'s chain that matches target, and if so, sets
 // target to that error value and returns true.
 func (w *withCause) As(target interface{}) bool {
 	if target == nil {
@@ -142,7 +142,7 @@ func (w *withCause) As(target interface{}) bool {
 	return false
 }
 
-// Is reports whether any error in err's chain matches target.
+// Is reports whether any error in `err`'s chain matches target.
 func (w *withCause) Is(target error) bool {
 	if target == nil {
 		return w.causer == target
@@ -156,7 +156,7 @@ func (w *withCause) Is(target error) bool {
 		if x, ok := w.causer.(interface{ Is(error) bool }); ok && x.Is(target) {
 			return true
 		}
-		// TODO: consider supporing target.Is(err). This would allow
+		// TODO: consider supporting target.Is(err). This would allow
 		// user-definable predicates, but also may allow for coping with sloppy
 		// APIs, thereby making it easier to get away with them.
 		if err := Unwrap(w.causer); err == nil {
@@ -164,6 +164,10 @@ func (w *withCause) Is(target error) bool {
 		}
 	}
 }
+
+//
+// ----------
+//
 
 // WithCauses holds a group of errors object.
 type WithCauses struct {
@@ -214,6 +218,16 @@ func (w *WithCauses) Cause() error {
 	return w.causers[0]
 }
 
+// SetCause sets the underlying error manually if necessary.
+func (w *WithCauses) SetCause(cause error) error {
+	if len(w.causers) == 0 {
+		w.causers = append(w.causers, cause)
+	} else {
+		w.causers[0] = cause
+	}
+	return w.Cause()
+}
+
 // Causes returns the underlying cause of the errors.
 func (w *WithCauses) Causes() []error {
 	if len(w.causers) == 0 {
@@ -222,8 +236,8 @@ func (w *WithCauses) Causes() []error {
 	return w.causers
 }
 
-// Unwrap returns the result of calling the Unwrap method on err, if err's
-// type contains an Unwrap method returning error.
+// Unwrap returns the result of calling the Unwrap method on err, if
+// `err`'s type contains an Unwrap method returning error.
 // Otherwise, Unwrap returns nil.
 func (w *WithCauses) Unwrap() error {
 	return w.Cause()
@@ -234,7 +248,11 @@ func (w *WithCauses) IsEmpty() bool {
 	return len(w.causers) == 0
 }
 
-// Is reports whether any error in err's chain matches target.
+//
+// ----------
+//
+
+// Is reports whether any error in `err`'s chain matches target.
 func (w *WithCauses) Is(target error) bool {
 	if target == nil {
 		for _, e := range w.causers {
@@ -266,6 +284,36 @@ func (w *WithCauses) Is(target error) bool {
 		}
 		return false
 	}
+}
+
+// As finds the first error in `err`'s chain that matches target, and if so, sets
+// target to that error value and returns true.
+func (w *WithCauses) As(target interface{}) bool {
+	if target == nil {
+		panic("errors: target cannot be nil")
+	}
+	val := reflect.ValueOf(target)
+	typ := val.Type()
+	if typ.Kind() != reflect.Ptr || val.IsNil() {
+		panic("errors: target must be a non-nil pointer")
+	}
+	if e := typ.Elem(); e.Kind() != reflect.Interface && !e.Implements(errorType) {
+		panic("errors: *target must be interface or implement error")
+	}
+	targetType := typ.Elem()
+	for _, err := range w.causers {
+		for err != nil {
+			if reflect.TypeOf(err).AssignableTo(targetType) {
+				val.Elem().Set(reflect.ValueOf(err))
+				return true
+			}
+			if x, ok := err.(interface{ As(interface{}) bool }); ok && x.As(target) {
+				return true
+			}
+			err = Unwrap(err)
+		}
+	}
+	return false
 }
 
 // Wrap returns an error annotating err with a Stack trace
@@ -336,19 +384,19 @@ func (w *WithStackInfo) Format(s fmt.State, verb rune) {
 	switch verb {
 	case 'v':
 		if s.Flag('+') {
-			fmt.Fprintf(s, "%+v", w.Cause())
+			_, _ = fmt.Fprintf(s, "%+v", w.Cause())
 			w.Stack.Format(s, verb)
 			return
 		}
 		fallthrough
 	case 's':
-		io.WriteString(s, w.Error())
+		_, _ = io.WriteString(s, w.Error())
 	case 'q':
-		fmt.Fprintf(s, "%q", w.Error())
+		_, _ = fmt.Fprintf(s, "%q", w.Error())
 	}
 }
 
-// Is reports whether any error in err's chain matches target.
+// Is reports whether any error in `err`'s chain matches target.
 func (w *WithStackInfo) Is(target error) bool {
 	if x, ok := w.error.(interface{ Is(error) bool }); ok && x.Is(target) {
 		return true
@@ -356,7 +404,7 @@ func (w *WithStackInfo) Is(target error) bool {
 	return false
 }
 
-// As finds the first error in err's chain that matches target, and if so, sets
+// As finds the first error in `err`'s chain that matches target, and if so, sets
 // target to that error value and returns true.
 func (w *WithStackInfo) As(target interface{}) bool {
 	if target == nil {
@@ -385,8 +433,8 @@ func (w *WithStackInfo) As(target interface{}) bool {
 	return false
 }
 
-// Unwrap returns the result of calling the Unwrap method on err, if err's
-// type contains an Unwrap method returning error.
+// Unwrap returns the result of calling the Unwrap method on err, if
+// `err`'s type contains an Unwrap method returning error.
 // Otherwise, Unwrap returns nil.
 func (w *WithStackInfo) Unwrap() error {
 	if x, ok := w.error.(interface{ Unwrap() error }); ok {
@@ -416,8 +464,8 @@ func (w *WithStackInfo) IsEmpty() bool {
 // func New(text string) error
 // func Unwrap(err error) error
 
-// Unwrap returns the result of calling the Unwrap method on err, if err's
-// type contains an Unwrap method returning error.
+// Unwrap returns the result of calling the Unwrap method on err, if
+// `err`'s type contains an Unwrap method returning error.
 // Otherwise, Unwrap returns nil.
 func Unwrap(err error) error {
 	u, ok := err.(interface {
@@ -429,7 +477,7 @@ func Unwrap(err error) error {
 	return u.Unwrap()
 }
 
-// Is reports whether any error in err's chain matches target.
+// Is reports whether any error in `err`'s chain matches target.
 //
 // The chain consists of err itself followed by the sequence of errors obtained by
 // repeatedly calling Unwrap.
@@ -449,7 +497,7 @@ func Is(err, target error) bool {
 		if x, ok := err.(interface{ Is(error) bool }); ok && x.Is(target) {
 			return true
 		}
-		// TODO: consider supporing target.Is(err). This would allow
+		// TODO: consider supporting target.Is(err). This would allow
 		// user-definable predicates, but also may allow for coping with sloppy
 		// APIs, thereby making it easier to get away with them.
 		if err = Unwrap(err); err == nil {
@@ -458,7 +506,7 @@ func Is(err, target error) bool {
 	}
 }
 
-// As finds the first error in err's chain that matches target, and if so, sets
+// As finds the first error in `err`'s chain that matches target, and if so, sets
 // target to that error value and returns true.
 //
 // The chain consists of err itself followed by the sequence of errors obtained by
