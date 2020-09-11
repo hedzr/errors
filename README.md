@@ -6,8 +6,11 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/hedzr/errors)](https://goreportcard.com/report/github.com/hedzr/errors)
 [![codecov](https://codecov.io/gh/hedzr/errors/branch/master/graph/badge.svg)](https://codecov.io/gh/hedzr/errors)
 
+Wrapped errors and more for golang developing (not just for go1.13+).
 
-Attachable errors and more for golang dev (for go1.13+).
+`hedzr/errors` provides the compatbilities to your old project up to go 1.13.
+
+`hedzr/errors` provides some extra enhancements for better context environment saving on error occurred.
 
 
 
@@ -66,11 +69,15 @@ go get -v gopkg.in/hedzr/errors.v2@v2.0.12
    - `CanUnwrap(err interface{}) bool`
    - `CanIs(err interface{}) bool`
    - `CanAs(err interface{}) bool`
-     
+
+#### Extras
+
+- Container/Holder for a group of sub-errors
+- Coded error: the predefined errno
 
 
 
-#### error Container and sub-errors (wrapped, attached or nested)
+## error Container and sub-errors (wrapped, attached or nested)
 
 - `NewContainer(message string, args ...interface{}) *withCauses`
 - `ContainerIsEmpty(container error) bool`
@@ -107,7 +114,7 @@ func b(){
 
 
 
-#### Coded error
+## Coded error
 
 - `Code` is a generic type of error codes
 - `WithCode(code, err, msg, args...)` can format an error object with error code, attached inner err, message or msg template, and stack info.
@@ -132,7 +139,7 @@ MyCode001.Register("MyCode001")
 err := MyCode001.New("wrong 001: no config file")
 ```
 
-##### Error Template: formatting the coded-error late
+### Error Template: formatting the coded-error late
 
 
 ```go
