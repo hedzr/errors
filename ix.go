@@ -79,10 +79,10 @@ type InterfaceWithStackInfo interface {
 	InterfaceAttachSpecial
 }
 
-// IWithCauses is an interface for WithCauses
-type IWithCauses interface {
-	//error
-	InterfaceCause
+// Holder is an interface for WithCauses and InterfaceContainer
+type Holder interface {
+	Error() error
+	//InterfaceCause
 	InterfaceCauses
 	InterfaceContainer
 	InterfaceFormat

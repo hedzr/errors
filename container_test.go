@@ -3,6 +3,8 @@
 package errors_test
 
 import (
+	"bufio"
+	"bytes"
 	"gopkg.in/hedzr/errors.v2"
 	"io"
 	"testing"
@@ -30,5 +32,34 @@ func TestContainer(t *testing.T) {
 		t.Fatal("want error")
 	} else {
 		t.Logf("%+v", err)
+	}
+}
+
+type bizStrut struct {
+	err errors.Holder
+	w   *bufio.Writer
+}
+
+func (bw *bizStrut) Write(b []byte) {
+	_, err := bw.w.Write(b)
+	bw.err.Attach(err)
+}
+
+func (bw *bizStrut) Flush() error {
+	err := bw.w.Flush()
+	bw.err.Attach(err)
+	return bw.err.Error()
+}
+
+func TestContainer2(t *testing.T) {
+	var bb bytes.Buffer
+	var bw = &bizStrut{
+		err: errors.NewContainer("bizStruct have errors"),
+		w:   bufio.NewWriter(&bb),
+	}
+	bw.Write([]byte("hello "))
+	bw.Write([]byte("world "))
+	if err := bw.Flush(); err != nil {
+		t.Fatal(err)
 	}
 }
