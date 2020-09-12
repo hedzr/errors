@@ -6,7 +6,6 @@ import (
 	"bytes"
 	"fmt"
 	"io"
-	"reflect"
 )
 
 type causes struct {
@@ -82,34 +81,41 @@ func (w *causes) Unwrap() error {
 }
 
 func (w *causes) Is(target error) bool {
-	if target == nil {
-		for _, e := range w.Causers {
-			if e == target {
-				return true
-			}
-		}
-		return false
-	}
+	return IsSlice(w.Causers, target)
+	//if target == nil {
+	//	//for _, e := range w.Causers {
+	//	//	if e == target {
+	//	//		return true
+	//	//	}
+	//	//}
+	//	return false
+	//}
+	//
+	//isComparable := reflect.TypeOf(target).Comparable()
+	//for {
+	//	if isComparable {
+	//		for _, e := range w.Causers {
+	//			if e == target {
+	//				return true
+	//			}
+	//		}
+	//		// return false
+	//	}
+	//
+	//	for _, e := range w.Causers {
+	//		if x, ok := e.(interface{ Is(error) bool }); ok && x.Is(target) {
+	//			return true
+	//		}
+	//		//if err := Unwrap(e); err == nil {
+	//		//	return false
+	//		//}
+	//	}
+	//	return false
+	//}
+}
 
-	isComparable := reflect.TypeOf(target).Comparable()
-	for {
-		if isComparable {
-			for _, e := range w.Causers {
-				if e == target {
-					return true
-				}
-			}
-			// return false
-		}
-
-		for _, e := range w.Causers {
-			if x, ok := e.(interface{ Is(error) bool }); ok && x.Is(target) {
-				return true
-			}
-			//if err := Unwrap(e); err == nil {
-			//	return false
-			//}
-		}
-		return false
-	}
+// As finds the first error in `err`'s chain that matches target, and if so, sets
+// target to that error value and returns true.
+func (w *causes) As(target interface{}) bool {
+	return AsSlice(w.Causers, target)
 }

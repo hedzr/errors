@@ -116,53 +116,56 @@ func (w *withCause) Unwrap() error {
 // As finds the first error in `err`'s chain that matches target, and if so, sets
 // target to that error value and returns true.
 func (w *withCause) As(target interface{}) bool {
-	if target == nil {
-		panic("errors: target cannot be nil")
-	}
-	val := reflect.ValueOf(target)
-	typ := val.Type()
-	if typ.Kind() != reflect.Ptr || val.IsNil() {
-		panic("errors: target must be a non-nil pointer")
-	}
-	if e := typ.Elem(); e.Kind() != reflect.Interface && !e.Implements(errorType) {
-		panic("errors: *target must be interface or implement error")
-	}
-	targetType := typ.Elem()
-	err := w.causer
-	for err != nil {
-		if reflect.TypeOf(err).AssignableTo(targetType) {
-			val.Elem().Set(reflect.ValueOf(err))
-			return true
-		}
-		if x, ok := err.(interface{ As(interface{}) bool }); ok && x.As(target) {
-			return true
-		}
-		err = Unwrap(err)
-	}
-	return false
+	return As(w.causer, target)
+	//if target == nil {
+	//	panic("errors: target cannot be nil")
+	//}
+	//val := reflect.ValueOf(target)
+	//typ := val.Type()
+	//if typ.Kind() != reflect.Ptr || val.IsNil() {
+	//	panic("errors: target must be a non-nil pointer")
+	//}
+	//if e := typ.Elem(); e.Kind() != reflect.Interface && !e.Implements(errorType) {
+	//	panic("errors: *target must be interface or implement error")
+	//}
+	//targetType := typ.Elem()
+	//err := w.causer
+	//for err != nil {
+	//	if reflect.TypeOf(err).AssignableTo(targetType) {
+	//		val.Elem().Set(reflect.ValueOf(err))
+	//		return true
+	//	}
+	//	if x, ok := err.(interface{ As(interface{}) bool }); ok && x.As(target) {
+	//		return true
+	//	}
+	//	err = Unwrap(err)
+	//}
+	//return false
 }
 
 // Is reports whether any error in `err`'s chain matches target.
 func (w *withCause) Is(target error) bool {
-	if target == nil {
-		return w.causer == target
-	}
-
-	isComparable := reflect.TypeOf(target).Comparable()
-	for {
-		if isComparable && w.causer == target {
-			return true
-		}
-		if x, ok := w.causer.(interface{ Is(error) bool }); ok && x.Is(target) {
-			return true
-		}
-		// TODO: consider supporting target.Is(err). This would allow
-		// user-definable predicates, but also may allow for coping with sloppy
-		// APIs, thereby making it easier to get away with them.
-		if err := Unwrap(w.causer); err == nil {
-			return false
-		}
-	}
+	return w.causer == target || Is(w.causer, target)
+	//if target == nil {
+	//	return w.causer == target
+	//}
+	//
+	//isComparable := reflect.TypeOf(target).Comparable()
+	//for {
+	//	if isComparable && w.causer == target {
+	//		return true
+	//	}
+	//	if x, ok := w.causer.(interface{ Is(error) bool }); ok && x.Is(target) {
+	//		return true
+	//	}
+	//	// TO/DO: consider supporting target.Is(err). This would allow
+	//	// user-definable predicates, but also may allow for coping with sloppy
+	//	// APIs, thereby making it easier to get away with them.
+	//	//if err := Unwrap(w.causer); err == nil {
+	//	//	return false
+	//	//}
+	//	return w.causer == target
+	//}
 }
 
 //
@@ -257,66 +260,68 @@ func (w *WithCauses) IsEmpty() bool {
 
 // Is reports whether any error in `err`'s chain matches target.
 func (w *WithCauses) Is(target error) bool {
-	if target == nil {
-		for _, e := range w.causers {
-			if e == target {
-				return true
-			}
-		}
-		return false
-	}
-
-	isComparable := reflect.TypeOf(target).Comparable()
-	for {
-		if isComparable {
-			for _, e := range w.causers {
-				if e == target {
-					return true
-				}
-			}
-			return false
-		}
-
-		for _, e := range w.causers {
-			if x, ok := e.(interface{ Is(error) bool }); ok && x.Is(target) {
-				return true
-			}
-			if err := Unwrap(e); err == nil {
-				return false
-			}
-		}
-		return false
-	}
+	return IsSlice(w.causers, target)
+	//if target == nil {
+	//	//for _, e := range w.causers {
+	//	//	if e == target {
+	//	//		return true
+	//	//	}
+	//	//}
+	//	return false
+	//}
+	//
+	//isComparable := reflect.TypeOf(target).Comparable()
+	//for {
+	//	if isComparable {
+	//		for _, e := range w.causers {
+	//			if e == target {
+	//				return true
+	//			}
+	//		}
+	//		// return false
+	//	}
+	//
+	//	for _, e := range w.causers {
+	//		if x, ok := e.(interface{ Is(error) bool }); ok && x.Is(target) {
+	//			return true
+	//		}
+	//		//if err := Unwrap(e); err == nil {
+	//		//	return false
+	//		//}
+	//	}
+	//	return false
+	//}
 }
 
 // As finds the first error in `err`'s chain that matches target, and if so, sets
 // target to that error value and returns true.
 func (w *WithCauses) As(target interface{}) bool {
-	if target == nil {
-		panic("errors: target cannot be nil")
-	}
-	val := reflect.ValueOf(target)
-	typ := val.Type()
-	if typ.Kind() != reflect.Ptr || val.IsNil() {
-		panic("errors: target must be a non-nil pointer")
-	}
-	if e := typ.Elem(); e.Kind() != reflect.Interface && !e.Implements(errorType) {
-		panic("errors: *target must be interface or implement error")
-	}
-	targetType := typ.Elem()
-	for _, err := range w.causers {
-		for err != nil {
-			if reflect.TypeOf(err).AssignableTo(targetType) {
-				val.Elem().Set(reflect.ValueOf(err))
-				return true
-			}
-			if x, ok := err.(interface{ As(interface{}) bool }); ok && x.As(target) {
-				return true
-			}
-			err = Unwrap(err)
-		}
-	}
-	return false
+	return AsSlice(w.causers, target)
+	//if target == nil {
+	//	panic("errors: target cannot be nil")
+	//}
+	//val := reflect.ValueOf(target)
+	//typ := val.Type()
+	//if typ.Kind() != reflect.Ptr || val.IsNil() {
+	//	panic("errors: target must be a non-nil pointer")
+	//}
+	//if e := typ.Elem(); e.Kind() != reflect.Interface && !e.Implements(errorType) {
+	//	panic("errors: *target must be interface or implement error")
+	//}
+	//targetType := typ.Elem()
+	//for _, err := range w.causers {
+	//	for err != nil {
+	//		if reflect.TypeOf(err).AssignableTo(targetType) {
+	//			val.Elem().Set(reflect.ValueOf(err))
+	//			return true
+	//		}
+	//		if x, ok := err.(interface{ As(interface{}) bool }); ok && x.As(target) {
+	//			return true
+	//		}
+	//		err = Unwrap(err)
+	//	}
+	//}
+	//return false
 }
 
 // Wrap returns an error annotating err with a Stack trace
@@ -404,36 +409,37 @@ func (w *WithStackInfo) Is(target error) bool {
 	if x, ok := w.error.(interface{ Is(error) bool }); ok && x.Is(target) {
 		return true
 	}
-	return false
+	return w.error == target
 }
 
 // As finds the first error in `err`'s chain that matches target, and if so, sets
 // target to that error value and returns true.
 func (w *WithStackInfo) As(target interface{}) bool {
-	if target == nil {
-		panic("errors: target cannot be nil")
-	}
-	val := reflect.ValueOf(target)
-	typ := val.Type()
-	if typ.Kind() != reflect.Ptr || val.IsNil() {
-		panic("errors: target must be a non-nil pointer")
-	}
-	if e := typ.Elem(); e.Kind() != reflect.Interface && !e.Implements(errorType) {
-		panic("errors: *target must be interface or implement error")
-	}
-	targetType := typ.Elem()
-	err := w.error
-	for err != nil {
-		if reflect.TypeOf(err).AssignableTo(targetType) {
-			val.Elem().Set(reflect.ValueOf(err))
-			return true
-		}
-		if x, ok := err.(interface{ As(interface{}) bool }); ok && x.As(target) {
-			return true
-		}
-		err = Unwrap(err)
-	}
-	return false
+	return As(w.error, target)
+	//if target == nil {
+	//	panic("errors: target cannot be nil")
+	//}
+	//val := reflect.ValueOf(target)
+	//typ := val.Type()
+	//if typ.Kind() != reflect.Ptr || val.IsNil() {
+	//	panic("errors: target must be a non-nil pointer")
+	//}
+	//if e := typ.Elem(); e.Kind() != reflect.Interface && !e.Implements(errorType) {
+	//	panic("errors: *target must be interface or implement error")
+	//}
+	//targetType := typ.Elem()
+	//err := w.error
+	//for err != nil {
+	//	if reflect.TypeOf(err).AssignableTo(targetType) {
+	//		val.Elem().Set(reflect.ValueOf(err))
+	//		return true
+	//	}
+	//	if x, ok := err.(interface{ As(interface{}) bool }); ok && x.As(target) {
+	//		return true
+	//	}
+	//	err = Unwrap(err)
+	//}
+	//return false
 }
 
 // Unwrap returns the result of calling the Unwrap method on err, if
@@ -525,6 +531,40 @@ func Is(err, target error) bool {
 	}
 }
 
+// IsSlice tests err.Is for errs slice
+func IsSlice(errs []error, target error) bool {
+	if target == nil {
+		//for _, e := range errs {
+		//	if e == target {
+		//		return true
+		//	}
+		//}
+		return false
+	}
+
+	isComparable := reflect.TypeOf(target).Comparable()
+	for {
+		if isComparable {
+			for _, e := range errs {
+				if e == target {
+					return true
+				}
+			}
+			// return false
+		}
+
+		for _, e := range errs {
+			if x, ok := e.(interface{ Is(error) bool }); ok && x.Is(target) {
+				return true
+			}
+			//if err := Unwrap(e); err == nil {
+			//	return false
+			//}
+		}
+		return false
+	}
+}
+
 // As finds the first error in `err`'s chain that matches target, and if so, sets
 // target to that error value and returns true.
 //
@@ -552,6 +592,33 @@ func As(err error, target interface{}) bool {
 	}
 	targetType := typ.Elem()
 	for err != nil {
+		if reflect.TypeOf(err).AssignableTo(targetType) {
+			val.Elem().Set(reflect.ValueOf(err))
+			return true
+		}
+		if x, ok := err.(interface{ As(interface{}) bool }); ok && x.As(target) {
+			return true
+		}
+		err = Unwrap(err)
+	}
+	return false
+}
+
+// AsSlice tests err.As for errs slice
+func AsSlice(errs []error, target interface{}) bool {
+	if target == nil {
+		panic("errors: target cannot be nil")
+	}
+	val := reflect.ValueOf(target)
+	typ := val.Type()
+	if typ.Kind() != reflect.Ptr || val.IsNil() {
+		panic("errors: target must be a non-nil pointer")
+	}
+	if e := typ.Elem(); e.Kind() != reflect.Interface && !e.Implements(errorType) {
+		panic("errors: *target must be interface or implement error")
+	}
+	targetType := typ.Elem()
+	for _, err := range errs {
 		if reflect.TypeOf(err).AssignableTo(targetType) {
 			val.Elem().Set(reflect.ValueOf(err))
 			return true

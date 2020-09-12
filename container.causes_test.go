@@ -47,4 +47,27 @@ func TestCausesUnwrap(t *testing.T) {
 		t.Fatal("expecting d.Is() io.ErrClosedPipe")
 	}
 
+	var e2 *causes
+	if !d.As(&e2) || e2 != c {
+		t.Fatal("As() failed")
+	}
+}
+
+func TestCausesEmptyCausers(t *testing.T) {
+	c := &causes{Causers: nil}
+
+	t.Logf("1. %%v : %v", c)
+	t.Logf("2. %%+v : %+v", c)
+	t.Logf("3. %%s : %s", c)
+	t.Logf("4. %%q : %q", c)
+
+	c1 := c.Cause()
+	t.Logf("Cause(): %v", c1)
+
+	c2 := c.Causes()
+	t.Logf("Causes(): %v", c2)
+
+	if nil != c.Unwrap() {
+		t.Fatal("expecting the return result is nil")
+	}
 }

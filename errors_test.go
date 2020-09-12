@@ -54,6 +54,23 @@ func Test02(t *testing.T) {
 	if !Is(err, io.EOF) {
 		t.Fatal("is failed")
 	}
+
+	err = &withCause{
+		causer: nil,
+		msg:    "dskjdl",
+	}
+	if Is(err, io.EOF) {
+		t.Fatal("is failed")
+	}
+	if Is(err, nil) {
+		t.Fatal("is failed")
+	}
+	if err.Is(io.EOF) {
+		t.Fatal("is failed")
+	}
+	if !err.Is(nil) {
+		t.Fatal("is failed")
+	}
 }
 
 func Test03(t *testing.T) {
@@ -79,6 +96,12 @@ func Test03(t *testing.T) {
 	t.Log(err.Causes())
 
 	_ = err.SetCause(nil)
+	if err.Is(nil) {
+		t.Fatal("is failed")
+	}
+	if err.Is(io.ErrClosedPipe) {
+		t.Fatal("is failed")
+	}
 	_ = err.SetCause(io.EOF)
 
 	err = &WithCauses{
@@ -90,8 +113,94 @@ func Test03(t *testing.T) {
 	t.Log(err.Causes())
 
 	_ = err.SetCause(nil)
+	if !CanCause(err) {
+		t.Fatal("expecting CanCause() return true")
+	}
+	if !CanAttach(err) {
+		t.Fatal("expecting CanAttach() return true")
+	}
+	if !CanUnwrap(err) {
+		t.Fatal("expecting CanUnwrap() return true")
+	}
+	if !CanIs(err) {
+		t.Fatal("expecting CanIs() return true")
+	}
+	if !CanAs(err) {
+		t.Fatal("expecting CanAs() return true")
+	}
+	t.Logf("dump: %v", DumpStacksAsString(true))
+
 	_ = err.SetCause(io.EOF)
 	_ = err.Unwrap()
+}
+
+func TestWrap(t *testing.T) {
+	err := Wrap(io.EOF, "1")
+	err = Wrap(io.EOF, "hello %v", "world")
+	t.Logf("err is: %v", err)
+
+	err = Wrap(nil, "hello %v", "world")
+	if err != nil {
+		t.Fatal("the return should be nil")
+	}
+}
+
+func TestWithStack(t *testing.T) {
+	err := WithStack(io.EOF)
+	t.Logf("err is: %v", err)
+
+	se := err.(*WithStackInfo)
+	_ = se.SetCause(io.ErrShortWrite)
+	if !se.Is(io.ErrShortWrite) {
+		t.Fatal("expecting ErrShortWrite")
+	}
+	t.Logf("e: %q", se)
+
+	err = WithStack(nil)
+	if err != nil {
+		t.Fatal("the return should be nil")
+	}
+
+	//
+
+	se = &WithStackInfo{
+		error: nil,
+		Stack: nil,
+	}
+	if nil != se.Unwrap() {
+		t.Fatal("expecting return result is nil")
+	}
+	_ = se.Attach(nil)
+	se.IsEmpty()
+	_ = se.Attach(io.ErrShortWrite)
+	if nil == se.Unwrap() {
+		t.Fatal("expecting return result is NOT nil")
+	}
+
+	se2 := &WithStackInfo{
+		error: se,
+		Stack: nil,
+	}
+	se2.IsEmpty()
+}
+
+func TestStack(t *testing.T) {
+	s := callers()
+	t.Logf("1. %%v: %v", s)
+	t.Logf("2. %%+v: %+v", s)
+	t.Logf("3. %%#v: %#v", s)
+	t.Logf("4. %%s: %s", s)
+	t.Logf("5. %%q: %q", s)
+
+	st := s.StackTrace()
+	t.Logf("1. %%v: %v", st)
+	t.Logf("2. %%+v: %+v", st)
+	t.Logf("3. %%#v: %#v", st)
+	t.Logf("4. %%s: %s", st)
+	t.Logf("5. %%q: %q", st)
+
+	fn := funcname("dsjk.go/dskl.ds.d")
+	t.Logf("fn: %v", fn)
 }
 
 func Test1(t *testing.T) {

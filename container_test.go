@@ -72,4 +72,9 @@ func TestContainer3(t *testing.T) {
 	if errors.ContainerIsEmpty(err) {
 		t.Fatal("non-empty container here")
 	}
+
+	c := errors.New("sample error")
+	if errors.ContainerIsEmpty(c) {
+		t.Fatal("non-empty container here")
+	}
 }
