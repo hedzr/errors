@@ -70,12 +70,13 @@ func (w *causes) Unwrap() error {
 	// return w.Cause()
 
 	for _, err := range w.Causers {
-		u, ok := err.(interface {
-			Unwrap() error
-		})
-		if ok {
-			return u.Unwrap()
-		}
+		//u, ok := err.(interface {
+		//	Unwrap() error
+		//})
+		//if ok {
+		//	return u.Unwrap()
+		//}
+		return err // just return the first cause
 	}
 	return nil
 }
@@ -98,16 +99,16 @@ func (w *causes) Is(target error) bool {
 					return true
 				}
 			}
-			return false
+			// return false
 		}
 
 		for _, e := range w.Causers {
 			if x, ok := e.(interface{ Is(error) bool }); ok && x.Is(target) {
 				return true
 			}
-			if err := Unwrap(e); err == nil {
-				return false
-			}
+			//if err := Unwrap(e); err == nil {
+			//	return false
+			//}
 		}
 		return false
 	}

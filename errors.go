@@ -220,6 +220,9 @@ func (w *WithCauses) Cause() error {
 
 // SetCause sets the underlying error manually if necessary.
 func (w *WithCauses) SetCause(cause error) error {
+	if cause == nil {
+		return nil
+	}
 	if len(w.causers) == 0 {
 		w.causers = append(w.causers, cause)
 	} else {
@@ -437,17 +440,33 @@ func (w *WithStackInfo) As(target interface{}) bool {
 // `err`'s type contains an Unwrap method returning error.
 // Otherwise, Unwrap returns nil.
 func (w *WithStackInfo) Unwrap() error {
-	if x, ok := w.error.(interface{ Unwrap() error }); ok {
-		return x.Unwrap()
+	if w.error != nil {
+		return w.error
 	}
+	//if x, ok := w.error.(interface{ Unwrap() error }); ok {
+	//	return x.Unwrap()
+	//}
 	return nil
 }
 
 // Attach appends errs
 func (w *WithStackInfo) Attach(errs ...error) *WithStackInfo {
+	if w.error == nil {
+		if len(errs) > 1 {
+			panic("*WithStackInfo.Attach() can only wrap one child error object.")
+		}
+		for _, e := range errs {
+			if e != nil {
+				w.error = e
+			}
+		}
+		return w
+	}
+
 	if x, ok := w.error.(interface{ Attach(errs ...error) }); ok {
 		x.Attach(errs...)
 	}
+
 	return w
 }
 

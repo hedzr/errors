@@ -10,7 +10,7 @@ import (
 	"testing"
 )
 
-func samplec(simulate bool) (err error) {
+func sampleC(simulate bool) (err error) {
 	c := errors.NewContainer("sample error")
 	if simulate {
 		errors.AttachTo(c, io.EOF, io.ErrUnexpectedEOF, io.ErrShortBuffer, io.ErrShortWrite)
@@ -20,14 +20,14 @@ func samplec(simulate bool) (err error) {
 }
 
 func TestContainer(t *testing.T) {
-	err := samplec(false)
+	err := sampleC(false)
 	if err != nil {
 		t.Fatal(err)
 	} else {
 		t.Logf("%+v", err)
 	}
 
-	err = samplec(true)
+	err = sampleC(true)
 	if err == nil {
 		t.Fatal("want error")
 	} else {
@@ -54,12 +54,22 @@ func (bw *bizStrut) Flush() error {
 func TestContainer2(t *testing.T) {
 	var bb bytes.Buffer
 	var bw = &bizStrut{
-		err: errors.NewContainer("bizStruct have errors"),
+		err: errors.NewContainer("bizStruct have errors %v", "ext"),
 		w:   bufio.NewWriter(&bb),
 	}
 	bw.Write([]byte("hello "))
 	bw.Write([]byte("world "))
 	if err := bw.Flush(); err != nil {
 		t.Fatal(err)
+	}
+	if !bw.err.IsEmpty() {
+		t.Fatal("non-empty container here")
+	}
+}
+
+func TestContainer3(t *testing.T) {
+	err := sampleC(true)
+	if errors.ContainerIsEmpty(err) {
+		t.Fatal("non-empty container here")
 	}
 }

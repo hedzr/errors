@@ -31,6 +31,69 @@ func geneofxs() error {
 	return Wrap(io.EOF, "text")
 }
 
+func Test00(t *testing.T) {
+	err := New("1")
+	err = New("hello %v", "world")
+	t.Log(err)
+}
+
+func Test01(t *testing.T) {
+	err := WithCause(io.EOF, "1")
+	err = WithCause(io.EOF, "hello %v", "world")
+	t.Log(err)
+	if !Is(err, io.EOF) {
+		t.Fatal("is failed")
+	}
+}
+
+func Test02(t *testing.T) {
+	err := &withCause{
+		causer: io.EOF,
+		msg:    "dskjdl",
+	}
+	if !Is(err, io.EOF) {
+		t.Fatal("is failed")
+	}
+}
+
+func Test03(t *testing.T) {
+	be := &bizErr{num: 2}
+	err := &WithCauses{
+		causers: []error{io.EOF, be},
+		msg:     "dsda",
+		Stack:   nil,
+	}
+	if !err.Is(io.EOF) {
+		t.Fatal("is failed")
+	}
+	if !err.Is(be) {
+		t.Fatal("is failed")
+	}
+
+	var e2 *bizErr
+	if !err.As(&e2) {
+		t.Fatal("as failed")
+	}
+
+	t.Log(err.Cause())
+	t.Log(err.Causes())
+
+	_ = err.SetCause(nil)
+	_ = err.SetCause(io.EOF)
+
+	err = &WithCauses{
+		causers: nil,
+		msg:     "dsda",
+		Stack:   nil,
+	}
+	t.Log(err.Cause())
+	t.Log(err.Causes())
+
+	_ = err.SetCause(nil)
+	_ = err.SetCause(io.EOF)
+	_ = err.Unwrap()
+}
+
 func Test1(t *testing.T) {
 	var err error
 
@@ -93,7 +156,7 @@ func Test2(t *testing.T) {
 	} else {
 		t.Fatal("Is() failed: expect it is a EOF")
 	}
-	if Unwrap(err) == io.EOF {
+	if Unwrap(Unwrap(err)) == io.EOF {
 		// Wrap(err, msg): the error object has stacktrace info
 		t.Logf("ok: %+v", err)
 	} else {

@@ -253,17 +253,17 @@ func (w *WithCodeInfo) Format(s fmt.State, verb rune) {
 			if len(w.livedArgs) > 0 {
 				msg = fmt.Sprintf(w.msg, w.livedArgs...)
 			}
-			fmt.Fprintf(s, "%d|%+v|%s", int(w.code), w.code.String(), msg)
+			_, _ = fmt.Fprintf(s, "%d|%+v|%s", int(w.code), w.code.String(), msg)
 			if w.causer != nil {
-				fmt.Fprintf(s, "|%+v", w.causer)
+				_, _ = fmt.Fprintf(s, "|%+v", w.causer)
 			}
 			return
 		}
 		fallthrough
 	case 's':
-		io.WriteString(s, w.Error())
+		_, _ = io.WriteString(s, w.Error())
 	case 'q':
-		fmt.Fprintf(s, "%q", w.Error())
+		_, _ = fmt.Fprintf(s, "%q", w.Error())
 	}
 }
 
@@ -288,6 +288,9 @@ func (w *WithCodeInfo) Attach(errs ...error) {
 		if err != nil {
 			w.causer = err
 		}
+	}
+	if len(errs) > 1 {
+		panic("*WithCodeInfo.Attach() can only wrap one child error object.")
 	}
 }
 
@@ -347,7 +350,7 @@ func (w *WithCodeInfo) Is(target error) bool {
 		if x, ok := w.causer.(interface{ Is(error) bool }); ok && x.Is(target) {
 			return true
 		}
-		// TODO: consider supporing target.Is(err). This would allow
+		// TODO: consider supporting target.Is(err). This would allow
 		// user-definable predicates, but also may allow for coping with sloppy
 		// APIs, thereby making it easier to get away with them.
 		if err := Unwrap(w.causer); err == nil {
