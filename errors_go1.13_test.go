@@ -6,11 +6,17 @@ package errors
 
 import (
 	errorsstd "errors"
+	"fmt"
+
 	// pkgerrors "github.com/pkg/errors"
 	"io"
 	"os"
 	"testing"
 )
+
+func geneof13() error {
+	return fmt.Errorf("xxx %w wrapped at go1.%v+", io.EOF, 13)
+}
 
 func Test1go113(t *testing.T) {
 	var err error

@@ -3,8 +3,6 @@
 package errors
 
 import (
-	"fmt"
-	"github.com/pkg/errors"
 	"io"
 	"os"
 	"testing"
@@ -14,13 +12,9 @@ func geneof() error {
 	return io.EOF
 }
 
-func geneof2() error {
-	return errors.Wrap(io.EOF, "xx")
-}
-
-func geneof13() error {
-	return fmt.Errorf("xxx %w wrapped at go1.%v+", io.EOF, 13)
-}
+//func geneof2() error {
+//	return pkgerrors.Wrap(io.EOF, "xx")
+//}
 
 func geneofx() error {
 	return WithCause(io.EOF, "text")
@@ -206,14 +200,7 @@ func Test1(t *testing.T) {
 	var err error
 
 	err = geneof()
-	if errors.Cause(err) == io.EOF {
-		t.Logf("ok: %v", err)
-	} else {
-		t.Fatal("expect it is a EOF")
-	}
-
-	err = geneof2()
-	if errors.Cause(err) == io.EOF {
+	if Cause(err) == io.EOF {
 		t.Logf("ok: %v", err)
 	} else {
 		t.Fatal("expect it is a EOF")
@@ -238,7 +225,7 @@ func Test2(t *testing.T) {
 	var err error
 
 	err = geneofx()
-	if errors.Cause(err) == io.EOF {
+	if Cause(err) == io.EOF {
 		t.Logf("ok: %v", err)
 	} else {
 		t.Fatal("expect it is a EOF")
@@ -250,7 +237,7 @@ func Test2(t *testing.T) {
 	}
 
 	err = geneofxs()
-	if errors.Cause(err) == io.EOF {
+	if Cause(err) == io.EOF {
 		t.Logf("ok: %v", err)
 	} else {
 		t.Fatal("expect it is a EOF")
