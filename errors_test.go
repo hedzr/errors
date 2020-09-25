@@ -3,7 +3,6 @@
 package errors
 
 import (
-	errorss "errors"
 	"fmt"
 	"github.com/pkg/errors"
 	"io"
@@ -220,12 +219,19 @@ func Test1(t *testing.T) {
 		t.Fatal("expect it is a EOF")
 	}
 
-	err = geneof13()
-	if errorss.Is(err, io.EOF) {
-		t.Logf("ok: %v", err)
-	} else {
-		t.Fatal("expect it is a EOF")
-	}
+	//err = geneof2()
+	//if pkgerrors.Cause(err) == io.EOF {
+	//	t.Logf("ok: %v", err)
+	//} else {
+	//	t.Fatal("expect it is a EOF")
+	//}
+
+	//err = geneof13()
+	//if errorsstd.Is(err, io.EOF) {
+	//	t.Logf("ok: %v", err)
+	//} else {
+	//	t.Fatal("expect it is a EOF")
+	//}
 }
 
 func Test2(t *testing.T) {
