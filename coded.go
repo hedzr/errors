@@ -420,6 +420,9 @@ func (c Code) NewTemplate(tmpl string) *WithCodeInfo {
 	return err
 }
 
+// Error for error interface
+func (c Code) Error() string { return c.String() }
+
 // String for stringer interface
 func (c Code) String() string {
 	if x, ok := codeToStr[c]; ok {
