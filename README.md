@@ -114,16 +114,31 @@ func b(){
 
 Try it at: <https://play.golang.org/p/Y2uThZHAvK1>
 
+### Builtin Codes
+
+The builtin Codes are errors, such as `OK`, `Canceled`, `Unknown`, `InvalidArgument`, `DeadlineExceeded`, `NotFound`, `AlreadyExists`,  etc..
+
 ```go
-// using the pre-defined error code
+// Uses a Code as an error
+var err error = errors.OK
+var err2 error = errors.InvalidArgument
+fmt.Println("error is: %v", err2)
+
+// Uses a Code as enh-error (hedzr/errors)
 err := InvalidArgument.New("wrong").Attach(io.ErrShortWrite)
+```
 
+### Customized Codes
+
+```go
 // customizing the error code
-const MyCode001 Code=1001
+const MyCode001 errors.Code=1001
 
-// and register its name
+// and register the name of MyCode001
 MyCode001.Register("MyCode001")
-// and use the error code
+
+// and use it as a builtin Code
+fmt.Println("error is: %v", MyCode001)
 err := MyCode001.New("wrong 001: no config file")
 ```
 
@@ -131,10 +146,11 @@ err := MyCode001.New("wrong 001: no config file")
 
 
 ```go
-	errTmpl1001 := BUG1001.NewTemplate("something is wrong, %v")
-	err4 := errTmpl1001.FormatNew("unsatisfied conditions").Attach(io.ShortBuffer)
-	fmt.Println(err4)
-	fmt.Printf("%+v\n", err4)
+const BUG1001 errors.Code=1001
+errTmpl1001 := BUG1001.NewTemplate("something is wrong, %v")
+err4 := errTmpl1001.FormatNew("unsatisfied conditions").Attach(io.ShortBuffer)
+fmt.Println(err4)
+fmt.Printf("%+v\n", err4)
 ```
 
 
