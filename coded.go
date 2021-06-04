@@ -135,69 +135,84 @@ const (
 
 	// RateLimited indicates some flow control algorithm is running and applied.
 	// = HTTP Code 429
-	RateLimited = -17
+	RateLimited Code = -17
 
 	// BadRequest generates a 400 error.
 	// = HTTP 400
-	BadRequest = -18
+	BadRequest Code = -18
 
 	// Conflict generates a 409 error.
 	// = hTTP 409
-	Conflict = -19
+	Conflict Code = -19
 
 	// Forbidden generates a 403 error.
-	Forbidden = -20
+	Forbidden Code = -20
 
 	// InternalServerError generates a 500 error.
-	InternalServerError = -21
+	InternalServerError Code = -21
 
 	// MethodNotAllowed generates a 405 error.
-	MethodNotAllowed = -22
+	MethodNotAllowed Code = -22
+
+	// Timeout generates a Timeout error.
+	Timeout Code = -23
 
 	// MinErrorCode is the lower bound
-	MinErrorCode = -1000
+	MinErrorCode Code = -1000
 )
 
 var strToCode = map[string]Code{
-	`OK`:                  OK,
-	`CANCELLED`:           Canceled,
-	`UNKNOWN`:             Unknown,
-	`INVALID_ARGUMENT`:    InvalidArgument,
-	`DEADLINE_EXCEEDED`:   DeadlineExceeded,
-	`NOT_FOUND`:           NotFound,
-	`ALREADY_EXISTS`:      AlreadyExists,
-	`PERMISSION_DENIED`:   PermissionDenied,
-	`RESOURCE_EXHAUSTED`:  ResourceExhausted,
-	`FAILED_PRECONDITION`: FailedPrecondition,
-	`ABORTED`:             Aborted,
-	`OUT_OF_RANGE`:        OutOfRange,
-	`UNIMPLEMENTED`:       Unimplemented,
-	`INTERNAL`:            Internal,
-	`UNAVAILABLE`:         Unavailable,
-	`DATA_LOSS`:           DataLoss,
-	`UNAUTHENTICATED`:     Unauthenticated,
-	`RATE_LIMITED`:        RateLimited,
+	`OK`:                    OK,
+	`CANCELLED`:             Canceled,
+	`UNKNOWN`:               Unknown,
+	`INVALID_ARGUMENT`:      InvalidArgument,
+	`DEADLINE_EXCEEDED`:     DeadlineExceeded,
+	`NOT_FOUND`:             NotFound,
+	`ALREADY_EXISTS`:        AlreadyExists,
+	`PERMISSION_DENIED`:     PermissionDenied,
+	`RESOURCE_EXHAUSTED`:    ResourceExhausted,
+	`FAILED_PRECONDITION`:   FailedPrecondition,
+	`ABORTED`:               Aborted,
+	`OUT_OF_RANGE`:          OutOfRange,
+	`UNIMPLEMENTED`:         Unimplemented,
+	`INTERNAL`:              Internal,
+	`UNAVAILABLE`:           Unavailable,
+	`DATA_LOSS`:             DataLoss,
+	`UNAUTHENTICATED`:       Unauthenticated,
+	`RATE_LIMITED`:          RateLimited,
+	`BAD_REQUEST`:           BadRequest,
+	`CONFLICT`:              Conflict,
+	`FORBIDDEN`:             Forbidden,
+	`INTERNAL_SERVER_ERROR`: InternalServerError,
+	`METHOD_NOT_ALLOWED`:    MethodNotAllowed,
+	`TIMEOUT`:               Timeout,
 }
 
 var codeToStr = map[Code]string{
-	OK:                 `OK`,
-	Canceled:           `CANCELLED`,
-	Unknown:            `UNKNOWN`,
-	InvalidArgument:    `INVALID_ARGUMENT`,
-	DeadlineExceeded:   `DEADLINE_EXCEEDED`,
-	NotFound:           `NOT_FOUND`,
-	AlreadyExists:      `ALREADY_EXISTS`,
-	PermissionDenied:   `PERMISSION_DENIED`,
-	ResourceExhausted:  `RESOURCE_EXHAUSTED`,
-	FailedPrecondition: `FAILED_PRECONDITION`,
-	Aborted:            `ABORTED`,
-	OutOfRange:         `OUT_OF_RANGE`,
-	Unimplemented:      `UNIMPLEMENTED`,
-	Internal:           `INTERNAL`,
-	Unavailable:        `UNAVAILABLE`,
-	DataLoss:           `DATA_LOSS`,
-	Unauthenticated:    `UNAUTHENTICATED`,
-	RateLimited:        `RATE_LIMITED`,
+	OK:                  `OK`,
+	Canceled:            `CANCELLED`,
+	Unknown:             `UNKNOWN`,
+	InvalidArgument:     `INVALID_ARGUMENT`,
+	DeadlineExceeded:    `DEADLINE_EXCEEDED`,
+	NotFound:            `NOT_FOUND`,
+	AlreadyExists:       `ALREADY_EXISTS`,
+	PermissionDenied:    `PERMISSION_DENIED`,
+	ResourceExhausted:   `RESOURCE_EXHAUSTED`,
+	FailedPrecondition:  `FAILED_PRECONDITION`,
+	Aborted:             `ABORTED`,
+	OutOfRange:          `OUT_OF_RANGE`,
+	Unimplemented:       `UNIMPLEMENTED`,
+	Internal:            `INTERNAL`,
+	Unavailable:         `UNAVAILABLE`,
+	DataLoss:            `DATA_LOSS`,
+	Unauthenticated:     `UNAUTHENTICATED`,
+	RateLimited:         `RATE_LIMITED`,
+	BadRequest:          `BAD_REQUEST`,
+	Conflict:            `CONFLICT`,
+	Forbidden:           `FORBIDDEN`,
+	InternalServerError: `INTERNAL_SERVER_ERROR`,
+	MethodNotAllowed:    `METHOD_NOT_ALLOWED`,
+	Timeout:             `TIMEOUT`,
 }
 
 // WithCodeInfo is a type integrating both error code, cause, message, and template
