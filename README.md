@@ -5,6 +5,7 @@
 [![GoDoc](https://img.shields.io/badge/godoc-reference-blue.svg?style=flat)](https://godoc.org/github.com/hedzr/errors) 
 [![Go Report Card](https://goreportcard.com/badge/github.com/hedzr/errors)](https://goreportcard.com/report/github.com/hedzr/errors)
 [![codecov](https://codecov.io/gh/hedzr/errors/branch/v2/graph/badge.svg)](https://codecov.io/gh/hedzr/errors)
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fhedzr%2Ferrors.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fhedzr%2Ferrors?ref=badge_shield)
 
 Wrapped errors and more for golang developing (not just for go1.13+).
 
