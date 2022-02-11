@@ -73,16 +73,21 @@ func Test03(t *testing.T) {
 		msg:     "dsda",
 		Stack:   nil,
 	}
+
 	if !err.Is(io.EOF) {
-		t.Fatal("is failed")
+		t.Fatal("is failed (eof)")
 	}
 	if !err.Is(be) {
-		t.Fatal("is failed")
+		t.Fatal("is failed (be)")
+	}
+
+	if err.Is(io.ErrNoProgress) {
+		t.Fatal("is failed (not ErrNoProgress)")
 	}
 
 	var e2 *bizErr
 	if !err.As(&e2) {
-		t.Fatal("as failed")
+		t.Fatal("as failed (bizErr)")
 	}
 
 	t.Log(err.Cause())

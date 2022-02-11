@@ -325,56 +325,16 @@ func (w *WithCodeInfo) Unwrap() error {
 // target to that error value and returns true.
 func (w *WithCodeInfo) As(target interface{}) bool {
 	return As(w.causer, target)
-	//if target == nil {
-	//	panic("errors: target cannot be nil")
-	//}
-	//val := reflect.ValueOf(target)
-	//typ := val.Type()
-	//if typ.Kind() != reflect.Ptr || val.IsNil() {
-	//	panic("errors: target must be a non-nil pointer")
-	//}
-	//if e := typ.Elem(); e.Kind() != reflect.Interface && !e.Implements(errorType) {
-	//	panic("errors: *target must be interface or implement error")
-	//}
-	//targetType := typ.Elem()
-	//err := w.causer
-	//for err != nil {
-	//	if reflect.TypeOf(err).AssignableTo(targetType) {
-	//		val.Elem().Set(reflect.ValueOf(err))
-	//		return true
-	//	}
-	//	if x, ok := err.(interface{ As(interface{}) bool }); ok && x.As(target) {
-	//		return true
-	//	}
-	//	err = Unwrap(err)
-	//}
-	//return false
 }
 
 // Is reports whether any error in err's chain matches target.
 func (w *WithCodeInfo) Is(target error) bool {
 	return w.causer == target || Is(w.causer, target)
-	//if target == nil {
-	//	return w.causer == target
-	//}
-	//
-	//isComparable := reflect.TypeOf(target).Comparable()
-	//for {
-	//	if isComparable && w.causer == target {
-	//		return true
-	//	}
-	//	if x, ok := w.causer.(interface{ Is(error) bool }); ok && x.Is(target) {
-	//		return true
-	//	}
-	//	// TO/DO: consider supporting target.Is(err). This would allow
-	//	// user-definable predicates, but also may allow for coping with sloppy
-	//	// APIs, thereby making it easier to get away with them.
-	//	//if err := Unwrap(w.causer); err == nil {
-	//	//	return false
-	//	//}
-	//
-	//	return w.causer == target
-	//}
+}
+
+// TypeIs reports whether any error in err's chain matches target.
+func (w *WithCodeInfo) TypeIs(target error) bool {
+	return w.causer == target || TypeIs(w.causer, target)
 }
 
 //
@@ -446,7 +406,7 @@ func (c Code) String() string {
 	return codeToStr[Unknown]
 }
 
-// Register register a code and its token string for using later
+// Register registers a code and its token string for using later
 func (c Code) Register(codeName string) (errno Code) {
 	errno = AlreadyExists
 	if c <= MinErrorCode || c > 0 {
