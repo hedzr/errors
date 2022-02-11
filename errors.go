@@ -516,8 +516,13 @@ func Is(err, target error) bool {
 
 	isComparable := reflect.TypeOf(target).Comparable()
 	for {
-		if isComparable && err == target {
-			return true
+		if isComparable {
+			if err == target {
+				return true
+			}
+			if reflect.TypeOf(target) == reflect.TypeOf(err) {
+				return true
+			}
 		}
 		if x, ok := err.(interface{ Is(error) bool }); ok && x.Is(target) {
 			return true
@@ -545,8 +550,12 @@ func IsSlice(errs []error, target error) bool {
 	isComparable := reflect.TypeOf(target).Comparable()
 	for {
 		if isComparable {
+			tt := reflect.TypeOf(target)
 			for _, e := range errs {
 				if e == target {
+					return true
+				}
+				if reflect.TypeOf(e) == tt {
 					return true
 				}
 			}
