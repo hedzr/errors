@@ -77,7 +77,9 @@ For example:
 
 ```go
 func a() (err error){
-	container = errors.NewContainer("sample error")
+    container = errors.NewContainer("sample error")
+    defer container.Defer(&err) // wraps the errors in container to err and return it
+
     // ...
     for {
         // ...
@@ -87,9 +89,9 @@ func a() (err error){
         // container.Attach(someFuncReturnsErr(xxx))
         // ... break
     }
-	// and we extract all of them as a single parent error object now.
-	err = container.Error()
-	return
+    // // and we extract all of them as a single parent error object now.
+    // err = container.Error()
+    return
 }
 
 func b(){
