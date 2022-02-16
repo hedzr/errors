@@ -408,6 +408,7 @@ func (w *WithStackInfo) Unwrap() error {
 }
 
 // Attach appends errs
+// WithStackInfo.Attach() can only wrap and hold one child error object.
 func (w *WithStackInfo) Attach(errs ...error) *WithStackInfo {
 	if w.error == nil {
 		if len(errs) > 1 {
@@ -423,6 +424,28 @@ func (w *WithStackInfo) Attach(errs ...error) *WithStackInfo {
 
 	if x, ok := w.error.(interface{ Attach(errs ...error) }); ok {
 		x.Attach(errs...)
+	}
+
+	return w
+}
+
+// AttachGenerals appends errs if the general object is a error object
+// WithStackInfo.AttachGenerals() can only wrap and hold one child error object.
+func (w *WithStackInfo) AttachGenerals(errs ...interface{}) *WithStackInfo {
+	if w.error == nil {
+		if len(errs) > 1 {
+			panic("*WithStackInfo.AttachGenerals() can only wrap one child error object.")
+		}
+		for _, e := range errs {
+			if e1, ok := e.(error); ok {
+				w.error = e1
+			}
+		}
+		return w
+	}
+
+	if x, ok := w.error.(interface{ AttachGenerals(errs ...interface{}) }); ok {
+		x.AttachGenerals(errs...)
 	}
 
 	return w
