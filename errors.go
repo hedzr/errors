@@ -139,6 +139,10 @@ type WithCauses struct {
 	*Stack
 }
 
+func (w *WithCauses) Defer(err *error) {
+	*err = w.Error()
+}
+
 func (w *WithCauses) Error() error {
 	if len(w.causers) == 0 {
 		return nil

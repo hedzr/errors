@@ -12,6 +12,7 @@ import (
 
 func sampleC(simulate bool) (err error) {
 	c := errors.NewContainer("sample error")
+	defer c.Defer(&err)
 	if simulate {
 		errors.AttachTo(c, io.EOF, io.ErrUnexpectedEOF, io.ErrShortBuffer, io.ErrShortWrite)
 	}
