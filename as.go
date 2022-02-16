@@ -25,7 +25,8 @@ func As(err error, target interface{}) bool {
 		panic("errors: target must be a non-nil pointer")
 	}
 	if e := typ.Elem(); e.Kind() != reflect.Interface && !e.Implements(errorType) {
-		panic("errors: *target must be interface or implement error")
+		// panic("errors: *target must be interface or implement error")
+		return false
 	}
 	targetType := typ.Elem()
 	for err != nil {
@@ -52,7 +53,8 @@ func AsSlice(errs []error, target interface{}) bool {
 		panic("errors: target must be a non-nil pointer")
 	}
 	if e := typ.Elem(); e.Kind() != reflect.Interface && !e.Implements(errorType) {
-		panic("errors: *target must be interface or implement error")
+		// panic("errors: *target must be interface or implement error")
+		return false
 	}
 	targetType := typ.Elem()
 	for _, err := range errs {
