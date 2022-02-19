@@ -36,6 +36,9 @@ func TestNew(t *testing.T) {
 	err = New()
 	t.Logf("failed: %+v", err)
 
+	err = New("hello").Attach(io.EOF)
+	t.Logf("failed: %+v", err)
+
 }
 
 func TestWithStackInfo_New(t *testing.T) {
