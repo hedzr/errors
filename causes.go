@@ -14,9 +14,9 @@ type causes2 struct {
 }
 
 // WithCode for error interface
-func (c *causes2) WithCode(code Code) *causes2 {
-	c.Code = code
-	return c
+func (w *causes2) WithCode(code Code) *causes2 {
+	w.Code = code
+	return w
 }
 
 func (w *causes2) WithMessage(message string, args ...interface{}) *causes2 {
@@ -29,6 +29,31 @@ func (w *causes2) WithMessage(message string, args ...interface{}) *causes2 {
 
 // End ends the WithXXX stream calls while you dislike unwanted `err =`.
 func (w *causes2) End() {}
+
+// Defer can be used as a defer function to simplify your codes.
+//
+// The codes:
+//
+//     func some(){
+//       // as a inner errors container
+//       child := func() (err error) {
+//      	errContainer := errors.New("")
+//      	defer errContainer.Defer(&err)
+//
+//      	for _, r := range []error{io.EOF, io.ErrClosedPipe, errors.Internal} {
+//      		errContainer.Attach(r)
+//      	}
+//
+//      	return
+//       }
+//
+//       err := child()
+//       t.Logf("failed: %+v", err)
+//    }
+//
+func (w *causes2) Defer(err *error) {
+	*err = w
+}
 
 // WithErrors appends errs
 // WithStackInfo.Attach() can only wrap and hold one child error object.

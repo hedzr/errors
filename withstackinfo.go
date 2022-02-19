@@ -48,16 +48,18 @@ func (w *WithStackInfo) rebuild() *WithStackInfo {
 }
 
 // WithCode for error interface
-func (c *WithStackInfo) WithCode(code Code) *WithStackInfo {
-	c.Code = code
-	return c
+func (w *WithStackInfo) WithCode(code Code) *WithStackInfo {
+	w.Code = code
+	return w
 }
 
+// WithSkip _
 func (w *WithStackInfo) WithSkip(skip int) *WithStackInfo {
 	w.Stack = callers(skip)
 	return w
 }
 
+// WithMessage _
 func (w *WithStackInfo) WithMessage(message string, args ...interface{}) *WithStackInfo {
 	_ = w.causes2.WithMessage(message, args...)
 	return w
@@ -116,6 +118,27 @@ func (w *WithStackInfo) Cause() error {
 	return w.causes2.Cause()
 }
 
+// Defer can be used as a defer function to simplify your codes.
+//
+// The codes:
+//
+//     func some(){
+//       // as a inner errors container
+//       child := func() (err error) {
+//      	errContainer := errors.New("")
+//      	defer errContainer.Defer(&err)
+//
+//      	for _, r := range []error{io.EOF, io.ErrClosedPipe, errors.Internal} {
+//      		errContainer.Attach(r)
+//      	}
+//
+//      	return
+//       }
+//
+//       err := child()
+//       t.Logf("failed: %+v", err)
+//    }
+//
 func (w *WithStackInfo) Defer(err *error) {
 	*err = w
 }

@@ -70,7 +70,7 @@ func (e *bizErr) Error() string {
 func TestCodesEqual(t *testing.T) {
 	err := InvalidArgument.New("wrong").WithErrors(io.ErrShortWrite)
 
-	ok := EqualR(err, InvalidArgument)
+	ok := Is(err, InvalidArgument)
 	if !ok {
 		t.Fatal("want Equal() return true but got false")
 	}

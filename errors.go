@@ -31,19 +31,44 @@ type Opt func(s *builder)
 //
 //     err := errors.Skip(1).Message("hello %v", "you").Build()
 //
-func Skip(skip int) *builder {
+func Skip(skip int) Builder {
 	return &builder{skip: skip}
 }
 
 // Message formats a message and starts a builder to create the final error object.
 //
 //     err := errors.Message("hello %v", "you").Attach(causer).Build()
-func Message(message string, args ...interface{}) *builder {
+func Message(message string, args ...interface{}) Builder {
 	return NewBuilder().WithMessage(message, args...)
 }
 
-func NewBuilder() *builder {
+// NewBuilder starts a new error builder.
+//
+// Typically, you could make an error with fluent calls:
+//
+//    err = errors.NewBuilder().
+//    	WithCode(Internal).
+//    	WithErrors(io.EOF).
+//    	WithErrors(io.ErrShortWrite).
+//    	Build()
+//    t.Logf("failed: %+v", err)
+//
+func NewBuilder() Builder {
 	return &builder{skip: 1}
+}
+
+// Builder provides a fluent calling interface to make error building easy.
+type Builder interface {
+	// WithSkip specifies a special number of stack frames that will be ignored.
+	WithSkip(skip int) Builder
+	// WithErrors attaches the given errs as inner errors.
+	WithErrors(errs ...error) Builder
+	// WithMessage formats the error message
+	WithMessage(message string, args ...interface{}) Builder
+	// WithCode specifies an error code.
+	WithCode(code Code) Builder
+	// Build builds the final error object (with *WithStackInfo type wrapped)
+	Build() *WithStackInfo
 }
 
 type builder struct {
@@ -51,17 +76,20 @@ type builder struct {
 	causes2 causes2
 }
 
-func (s *builder) WithSkip(skip int) *builder {
+// WithSkip specifies a special number of stack frames that will be ignored.
+func (s *builder) WithSkip(skip int) Builder {
 	s.skip = skip
 	return s
 }
 
-func (s *builder) WithErrors(errs ...error) *builder {
+// WithErrors attaches the given errs as inner errors.
+func (s *builder) WithErrors(errs ...error) Builder {
 	_ = s.causes2.WithErrors(errs...)
 	return s
 }
 
-func (s *builder) WithMessage(message string, args ...interface{}) *builder {
+// WithMessage formats the error message
+func (s *builder) WithMessage(message string, args ...interface{}) Builder {
 	if len(args) > 0 {
 		message = fmt.Sprintf(message, args...)
 	}
@@ -69,11 +97,13 @@ func (s *builder) WithMessage(message string, args ...interface{}) *builder {
 	return s
 }
 
-func (s *builder) WithCode(code Code) *builder {
+// WithCode specifies an error code.
+func (s *builder) WithCode(code Code) Builder {
 	s.causes2.Code = code
 	return s
 }
 
+// Build builds the final error object (with *WithStackInfo type wrapped)
 func (s *builder) Build() *WithStackInfo {
 	w := &WithStackInfo{
 		causes2: s.causes2,
