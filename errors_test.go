@@ -183,7 +183,7 @@ func TestWithStack(t *testing.T) {
 }
 
 func TestStack(t *testing.T) {
-	s := callers()
+	s := callers(0)
 	t.Logf("1. %%v: %v", s)
 	t.Logf("2. %%+v: %+v", s)
 	t.Logf("3. %%#v: %#v", s)
@@ -284,4 +284,19 @@ func Test2(t *testing.T) {
 	// if ContainerIsEmpty(c) != false {
 	// 	t.Fatal("ContainerIsEmpty(c) failed: expect it is false.")
 	// }
+}
+
+func TestSkip(t *testing.T) {
+
+}
+
+func TestStackDepth(t *testing.T) {
+	e := New("hello")
+	t.Logf("failed: %+v", e)
+
+	e = Skip(1).Message("general error").Build()
+	t.Logf("failed: %+v", e)
+
+	err := Message("hello %v", "you").Attach(e).Build()
+	t.Logf("failed: %+v", err)
 }

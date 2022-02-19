@@ -10,16 +10,75 @@ import (
 // New returns an error with the supplied message.
 // New also records the Stack trace at the point it was called.
 func New(message string, args ...interface{}) *WithStackInfo {
+	s := &builder{skip: 1}
+	return s.Message(message, args...).Build()
+}
+
+// Skip sets how many frames will be ignored while we are extracting the stacktrace info.
+// Skip starts a builder with fluent API style, so you could continue
+// build the error what you want:
+//
+//     err := errors.Skip(1).Message("hello %v", "you").Build()
+//
+func Skip(skip int) *builder {
+	return &builder{skip: skip}
+}
+
+// Message formats a message and starts a builder to create the final error object.
+//
+//     err := errors.Message("hello %v", "you").Attach(causer).Build()
+func Message(message string, args ...interface{}) *builder {
 	if len(args) > 0 {
 		message = fmt.Sprintf(message, args...)
 	}
-	err := &withCause{
-		causer: nil,
-		msg:    message,
+	return &builder{message: message, skip: 1}
+}
+
+type builder struct {
+	skip    int
+	causer  error
+	message string
+	err     *withCause
+}
+
+func (s *builder) Skip(skip int) *builder {
+	s.skip = skip
+	return s
+}
+
+func (s *builder) Attach(causer error) *builder {
+	s.causer = causer
+	if s.err != nil {
+		s.err.causer = causer
+	}
+	return s
+}
+
+func (s *builder) Message(message string, args ...interface{}) *builder {
+	if len(args) > 0 {
+		message = fmt.Sprintf(message, args...)
+	}
+	if s.err == nil {
+		s.err = &withCause{
+			causer: s.causer,
+			msg:    message,
+		}
+	} else {
+		s.err.msg = message
+	}
+	return s
+}
+
+func (s *builder) Build() *WithStackInfo {
+	if s.err == nil {
+		s.err = &withCause{
+			causer: s.causer,
+			msg:    s.message,
+		}
 	}
 	return &WithStackInfo{
-		err,
-		callers(),
+		s.err,
+		callers(s.skip),
 	}
 }
 
@@ -164,7 +223,7 @@ func (w *WithCauses) Attach(errs ...error) {
 			w.causers = append(w.causers, ex)
 		}
 	}
-	w.Stack = callers()
+	w.Stack = callers(1)
 }
 
 // Cause returns the underlying cause of the error, if possible.
@@ -304,7 +363,7 @@ func WithStack(cause error) error {
 	if cause == nil {
 		return nil
 	}
-	return &WithStackInfo{cause, callers()}
+	return &WithStackInfo{cause, callers(1)}
 }
 
 // Cause returns the underlying cause of the error, if possible.

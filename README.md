@@ -64,6 +64,33 @@ import "gopkg.in/hedzr/errors.v2"
 - Container/Holder for a group of sub-errors
 - Coded error: the predefined errno
 
+## Best Practices
+
+```go
+package test
+
+import (
+	"gopkg.in/hedzr/errors.v2"
+	"io"
+	"testing"
+)
+
+func TestForExample(t *testing.T) {
+
+	err := errors.New("some tips %v", "here")
+	
+	// attaches much more errors
+	for _, e := range []error{io.EOF, io.ErrClosedPipe} {
+		_ = err.Attach(e)
+	}
+
+	t.Logf("failed: %+v", err)
+
+	// use another number different to default to skip the error frames
+	err = errors.Skip(3).Message("some tips %v", "here").Build()
+	t.Logf("failed: %+v", err)
+}
+```
 
 
 ## error Container and sub-errors (wrapped, attached or nested)
