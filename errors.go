@@ -76,6 +76,9 @@ type Builder interface {
 	WithCode(code Code) Builder
 	// Build builds the final error object (with *WithStackInfo type wrapped)
 	Build() *WithStackInfo
+
+	// Attach inner errors for backward compatibility to v2
+	Attach(errs ...error)
 }
 
 type builder struct {
@@ -93,6 +96,12 @@ func (s *builder) WithSkip(skip int) Builder {
 func (s *builder) WithErrors(errs ...error) Builder {
 	_ = s.causes2.WithErrors(errs...)
 	return s
+}
+
+// Attach attaches the given errs as inner errors.
+// For backward compatibility to v2
+func (s *builder) Attach(errs ...error) {
+	_ = s.WithErrors(errs...).Build()
 }
 
 // WithMessage formats the error message
