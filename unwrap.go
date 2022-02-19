@@ -36,6 +36,6 @@ func Wrap(err error, message string, args ...interface{}) *WithStackInfo {
 	}
 	return &WithStackInfo{
 		err,
-		callers(),
+		callers(1),
 	}
 }

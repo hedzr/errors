@@ -353,7 +353,7 @@ func WithCode(code Code, err error, message string, args ...interface{}) *WithSt
 	}
 	return &WithStackInfo{
 		error: err,
-		Stack: callers(),
+		Stack: callers(1),
 	}
 }
 

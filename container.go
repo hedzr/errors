@@ -20,7 +20,7 @@ func NewContainer(message string, args ...interface{}) *WithCauses {
 	}
 	err := &WithCauses{
 		msg:   message,
-		Stack: callers(),
+		Stack: callers(1),
 	}
 	return err
 }
