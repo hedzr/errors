@@ -2,12 +2,12 @@ name: Go
 
 on:
   push:
-    branches: [ v2 ]
+    branches: [ v3 ]
     # Sequence of patterns matched against refs/tags
     tags:
       - 'v*' # Push events to matching v*, i.e. v1.0, v20.15.10
   pull_request:
-    branches: [ v2 ]
+    branches: [ v3 ]
     # types: [assigned, opened, synchronize, reopened]
 
 #on: [push, pull_request]
