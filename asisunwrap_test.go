@@ -65,3 +65,124 @@ func TestIs(t *testing.T) {
 		}
 	}
 }
+
+func TestWrap(t *testing.T) {
+	err := Wrap(nil, "hello, %v", "world")
+	t.Logf("failed: %+v", err)
+
+	err = Wrap(Internal, "hello, %v", "world")
+	t.Logf("failed: %+v", err)
+
+	err = Wrap(Internal, "hello, %v", "world")
+	t.Logf("failed: %+v", err)
+
+	Unwrap(io.EOF)
+}
+
+func TestTypeIsSlice(t *testing.T) {
+	TypeIsSlice(nil, nil)
+	TypeIsSlice(nil, io.EOF)
+
+	TypeIsSlice([]error{io.EOF}, io.EOF)
+
+	err := Wrap(Internal, "hello, %v", "world")
+	err.WithErrors(NotFound).End()
+
+	if TypeIsSlice(err.Causes(), NotFound) == false {
+		t.Fatalf("not ok")
+	}
+
+	if TypeIs(err, NotFound) == false {
+		t.Fatalf("not ok")
+	}
+
+	err2 := New().WithErrors(NotFound, err)
+	err3 := New().WithErrors(NotFound, err2)
+	if TypeIsSlice(err3.Causes(), err) == false {
+		t.Fatalf("not ok")
+	}
+
+	if TypeIs(err2, NotFound) == false {
+		t.Fatalf("not ok")
+	}
+	if TypeIs(err3, NotFound) == false {
+		t.Fatalf("not ok")
+	}
+	if TypeIs(err3, err2) == false {
+		t.Fatalf("not ok")
+	}
+	if TypeIs(err3, err) == false {
+		t.Fatalf("not ok")
+	}
+	TypeIs(err3, nil)
+
+	IsSlice(err3.Causes(), nil)
+	IsSlice(err3.Causes(), io.ErrShortBuffer)
+	IsSlice(err3.Causes(), io.EOF)
+	IsSlice(err3.Causes(), NotFound)
+	IsSlice(err3.Causes(), Internal)
+	IsSlice(err3.Causes(), err2)
+	IsSlice(err3.Causes(), err)
+
+	Is(err3, nil)
+	Is(err3, io.ErrShortBuffer)
+	Is(err3, io.EOF)
+	Is(err3, NotFound)
+	Is(err3, Internal)
+	Is(err3, err2)
+	Is(err3, err)
+}
+
+func TestAsRaisePanic(t *testing.T) {
+
+	t.Run("1", func(t *testing.T) {
+		defer func() { recover() }()
+		As(nil, nil)
+	})
+
+	t.Run("2", func(t *testing.T) {
+		defer func() { recover() }()
+		var v int
+		As(nil, &v)
+	})
+
+	t.Run("3", func(t *testing.T) {
+		defer func() { recover() }()
+		var err error
+		As(nil, &err)
+	})
+
+	t.Run("4", func(t *testing.T) {
+		defer func() { recover() }()
+		var err int
+		As(nil, err)
+	})
+
+}
+
+func TestAsSliceRaisePanic(t *testing.T) {
+
+	t.Run("1", func(t *testing.T) {
+		defer func() { recover() }()
+		AsSlice(nil, nil)
+	})
+
+	t.Run("2", func(t *testing.T) {
+		defer func() { recover() }()
+		var v int
+		AsSlice(nil, &v)
+	})
+
+	t.Run("3", func(t *testing.T) {
+		defer func() { recover() }()
+		var err error
+		AsSlice(nil, &err)
+	})
+
+	t.Run("4", func(t *testing.T) {
+		defer func() { recover() }()
+		var err int
+		AsSlice(nil, err)
+	})
+
+}

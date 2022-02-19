@@ -30,6 +30,12 @@ func TestNew(t *testing.T) {
 		Build()
 	t.Logf("failed: %+v", err)
 
+	err = New(WithErrors(io.EOF, io.ErrShortWrite))
+	t.Logf("failed: %+v", err)
+
+	err = New()
+	t.Logf("failed: %+v", err)
+
 }
 
 func TestWithStackInfo_New(t *testing.T) {

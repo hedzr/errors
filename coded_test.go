@@ -14,6 +14,25 @@ func (e *bizErr) Error() string {
 	return fmt.Sprintf("%v", e.num)
 }
 
+func TestCode_WithCode(t *testing.T) {
+	var c = Internal
+	c1 := (&c).WithCode(NotFound)
+
+	t.Logf("failed: %+v", c1)
+
+	c = Code(111)
+	t.Logf("failed: %+v", c)
+
+}
+
+func TestCode_Register(t *testing.T) {
+	c := Code(111)
+	t.Logf("failed: %+v", c)
+
+	c.Register("Code111")
+	t.Logf("failed: %+v", c)
+}
+
 //func TestCodeEqual(t *testing.T) {
 //	be := &bizErr{1}
 //	err := InvalidArgument.New("wrong").Attach(be)

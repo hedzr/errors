@@ -25,6 +25,13 @@ func New(args ...interface{}) *WithStackInfo {
 // Opt _
 type Opt func(s *builder)
 
+// WithErrors _
+func WithErrors(errs ...error) Opt {
+	return func(s *builder) {
+		s.WithErrors(errs...)
+	}
+}
+
 // Skip sets how many frames will be ignored while we are extracting the stacktrace info.
 // Skip starts a builder with fluent API style, so you could continue
 // build the error what you want:

@@ -50,7 +50,7 @@ func (w *WithStackInfo) rebuild() *WithStackInfo {
 // WithCode for error interface
 func (w *WithStackInfo) WithCode(code Code) *WithStackInfo {
 	w.Code = code
-	return w
+	return w.rebuild()
 }
 
 // WithSkip _
@@ -86,10 +86,13 @@ func (w *WithStackInfo) WithData(errs ...interface{}) *WithStackInfo {
 	return w
 }
 
+// TaggedData _
+type TaggedData map[string]interface{}
+
 // WithTaggedData appends errs if the general object is a error object
-func (w *WithStackInfo) WithTaggedData(siteScenes map[string]interface{}) *WithStackInfo {
+func (w *WithStackInfo) WithTaggedData(siteScenes TaggedData) *WithStackInfo {
 	if w.taggedSites == nil {
-		w.taggedSites = make(map[string]interface{})
+		w.taggedSites = make(TaggedData)
 	}
 	for k, v := range siteScenes {
 		w.taggedSites[k] = v
@@ -98,7 +101,7 @@ func (w *WithStackInfo) WithTaggedData(siteScenes map[string]interface{}) *WithS
 }
 
 // WithCause sets the underlying error manually if necessary.
-func (w *WithStackInfo) WithCause(cause error) error {
+func (w *WithStackInfo) WithCause(cause error) *WithStackInfo {
 	w.causes2.Causers = append(w.causes2.Causers, cause)
 	return w
 }
