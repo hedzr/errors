@@ -16,8 +16,23 @@ type InterfaceCause interface {
 	// be returned. If the error is nil, nil will be returned without further
 	// investigation.
 	Cause() error
+}
+
+// InterfaceSetCause _
+type InterfaceSetCause interface {
 	// SetCause sets the underlying error manually if necessary.
 	SetCause(cause error) error
+}
+
+// InterfaceAttachCause _
+type InterfaceAttachCause interface {
+	// Attach sets the underlying error manually if necessary.
+	Attach(cause error) error
+}
+
+// InterfaceAttachCauses _
+type InterfaceAttachCauses interface {
+	Attach(causes ...error) error
 }
 
 // InterfaceCauses is an interface with Causes
@@ -71,7 +86,6 @@ type InterfaceContainer interface {
 
 // InterfaceWithStackInfo is an interface for WithStackInfo
 type InterfaceWithStackInfo interface {
-	//error
 	InterfaceCause
 	InterfaceContainer
 	InterfaceFormat
@@ -82,7 +96,9 @@ type InterfaceWithStackInfo interface {
 // Holder is an interface for WithCauses and InterfaceContainer
 type Holder interface {
 	Error() error
+
 	//InterfaceCause
+
 	InterfaceCauses
 	InterfaceContainer
 	InterfaceFormat
