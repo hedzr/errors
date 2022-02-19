@@ -1,8 +1,9 @@
-package errors_test
+package old_test
 
 import (
 	"fmt"
 	"gopkg.in/hedzr/errors.v2"
+	"gopkg.in/hedzr/errors.v2/old"
 	"io"
 	"testing"
 )
@@ -17,7 +18,7 @@ func TestForExamples(t *testing.T) {
 
 func Example_container() {
 	// err := sample(false)
-	c := errors.NewContainer("sample error")
+	c := old.NewContainer("sample error")
 	err := c.Error()
 	if err != nil {
 		panic(err)
@@ -26,9 +27,9 @@ func Example_container() {
 	}
 
 	// err = sample(true)
-	c = errors.NewContainer("sample error")
+	c = old.NewContainer("sample error")
 	// in a long loop, we can add many sub-errors into container 'c'...
-	errors.AttachTo(c, io.EOF, io.ErrUnexpectedEOF, io.ErrShortBuffer, io.ErrShortWrite)
+	old.AttachTo(c, io.EOF, io.ErrUnexpectedEOF, io.ErrShortBuffer, io.ErrShortWrite)
 	// and we extract all of them as a single parent error object now.
 	err = c.Error()
 	if err == nil {
@@ -43,9 +44,9 @@ func Example_container() {
 }
 
 func sample(simulate bool) (err error) {
-	c := errors.NewContainer("sample error")
+	c := old.NewContainer("sample error")
 	if simulate {
-		errors.AttachTo(c, io.EOF, io.ErrUnexpectedEOF, io.ErrShortBuffer, io.ErrShortWrite)
+		old.AttachTo(c, io.EOF, io.ErrUnexpectedEOF, io.ErrShortBuffer, io.ErrShortWrite)
 	}
 	err = c.Error()
 	return
@@ -56,10 +57,10 @@ func Example_errorCode() {
 	fmt.Println(err)
 	fmt.Printf("%+v\n", err)
 
-	if !errors.Is(err, io.ErrShortWrite) {
+	if !old.Is(err, io.ErrShortWrite) {
 		panic("wrong Is()")
 	}
-	if errors.Is(err, io.EOF) {
+	if old.Is(err, io.EOF) {
 		panic("wrong Is()")
 	}
 
@@ -125,22 +126,22 @@ func Example_errorTemplate() {
 }
 
 func ExampleNew() {
-	err := errors.New("whoops")
+	err := old.New("whoops")
 	fmt.Println(err)
 
 	// Output: whoops
 }
 
 func fn() error {
-	e1 := errors.New("error")
-	e2 := errors.Wrap(e1, "inner")
-	e3 := errors.Wrap(e2, "middle")
-	return errors.Wrap(e3, "outer")
+	e1 := old.New("error")
+	e2 := old.Wrap(e1, "inner")
+	e3 := old.Wrap(e2, "middle")
+	return old.Wrap(e3, "outer")
 }
 
 func ExampleWrap() {
-	cause := errors.New("whoops")
-	err := errors.Wrap(cause, "oh noes")
+	cause := old.New("whoops")
+	err := old.Wrap(cause, "oh noes")
 	fmt.Println(err)
 
 	// Output: oh noes: whoops
@@ -148,10 +149,10 @@ func ExampleWrap() {
 
 func ExampleWrap_extended() {
 	// err := fn()
-	e1 := errors.New("error")
-	e2 := errors.Wrap(e1, "inner")
-	e3 := errors.Wrap(e2, "middle")
-	err := errors.Wrap(e3, "outer")
+	e1 := old.New("error")
+	e2 := old.Wrap(e1, "inner")
+	e3 := old.Wrap(e2, "middle")
+	err := old.Wrap(e3, "outer")
 	fmt.Printf("%v\n", err)
 	fmt.Printf("%+v\n", err)
 

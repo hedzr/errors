@@ -1,20 +1,20 @@
 // Copyright © 2020 Hedzr Yeh.
 
-package errors_test
+package old_test
 
 import (
 	"bufio"
 	"bytes"
-	"gopkg.in/hedzr/errors.v2"
+	"gopkg.in/hedzr/errors.v2/old"
 	"io"
 	"testing"
 )
 
 func sampleC(simulate bool) (err error) {
-	c := errors.NewContainer("sample error")
+	c := old.NewContainer("sample error")
 	defer c.Defer(&err)
 	if simulate {
-		errors.AttachTo(c, io.EOF, io.ErrUnexpectedEOF, io.ErrShortBuffer, io.ErrShortWrite)
+		old.AttachTo(c, io.EOF, io.ErrUnexpectedEOF, io.ErrShortBuffer, io.ErrShortWrite)
 	}
 	err = c.Error()
 	return
@@ -37,7 +37,7 @@ func TestContainer(t *testing.T) {
 }
 
 type bizStrut struct {
-	err errors.Holder
+	err old.Holder
 	w   *bufio.Writer
 }
 
@@ -55,7 +55,7 @@ func (bw *bizStrut) Flush() error {
 func TestContainer2(t *testing.T) {
 	var bb bytes.Buffer
 	var bw = &bizStrut{
-		err: errors.NewContainer("bizStruct have errors %v", "ext"),
+		err: old.NewContainer("bizStruct have errors %v", "ext"),
 		w:   bufio.NewWriter(&bb),
 	}
 	bw.Write([]byte("hello "))
@@ -70,12 +70,12 @@ func TestContainer2(t *testing.T) {
 
 func TestContainer3(t *testing.T) {
 	err := sampleC(true)
-	if errors.ContainerIsEmpty(err) {
+	if old.ContainerIsEmpty(err) {
 		t.Fatal("non-empty container here")
 	}
 
-	c := errors.New("sample error")
-	if errors.ContainerIsEmpty(c) {
+	c := old.New("sample error")
+	if old.ContainerIsEmpty(c) {
 		t.Fatal("non-empty container here")
 	}
 }
