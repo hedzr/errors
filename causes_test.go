@@ -68,7 +68,8 @@ func TestContainer(t *testing.T) {
 	fmt.Printf("%v", err)
 	fmt.Printf("%s", err)
 	fmt.Printf("%q", err)
-	fmt.Printf("%n", err)
+
+	//fmt.Printf("%n", err) // need go1.13+
 }
 
 func TestAsAContainer(t *testing.T) {
