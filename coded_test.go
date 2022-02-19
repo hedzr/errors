@@ -68,7 +68,7 @@ func (e *bizErr) Error() string {
 //}
 
 func TestCodesEqual(t *testing.T) {
-	err := InvalidArgument.New("wrong").WithAttach(io.ErrShortWrite)
+	err := InvalidArgument.New("wrong").WithErrors(io.ErrShortWrite)
 
 	ok := EqualR(err, InvalidArgument)
 	if !ok {

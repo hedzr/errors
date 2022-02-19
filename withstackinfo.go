@@ -29,15 +29,15 @@ func WithStack(cause error) error {
 // For instance, the construction of an error without warnings looks like:
 //
 //      err := New("hello %v", "world")
-//      _ = err.WithAttach(io.EOF, io.ErrShortWrite).
-//          WithAttach(io.ErrClosedPipe).
+//      _ = err.WithErrors(io.EOF, io.ErrShortWrite).
+//          WithErrors(io.ErrClosedPipe).
 //          WithCode(Internal)
 //
 // To avoid the `_ =`, you might belove with a End() call:
 //
 //      err := New("hello %v", "world")
-//      err.WithAttach(io.EOF, io.ErrShortWrite).
-//          WithAttach(io.ErrClosedPipe).
+//      err.WithErrors(io.EOF, io.ErrShortWrite).
+//          WithErrors(io.ErrClosedPipe).
 //          WithCode(Internal).
 //          End()
 //
@@ -63,19 +63,19 @@ func (w *WithStackInfo) WithMessage(message string, args ...interface{}) *WithSt
 	return w
 }
 
-// WithAttach appends errs
+// WithErrors appends errs
 // WithStackInfo.Attach() can only wrap and hold one child error object.
-func (w *WithStackInfo) WithAttach(errs ...error) *WithStackInfo {
-	_ = w.causes2.WithAttach(errs...)
+func (w *WithStackInfo) WithErrors(errs ...error) *WithStackInfo {
+	_ = w.causes2.WithErrors(errs...)
 	return w
 }
 
-// WithAttachGenerals appends errs if the general object is a error object
-func (w *WithStackInfo) WithAttachGenerals(errs ...interface{}) *WithStackInfo {
+// WithData appends errs if the general object is a error object
+func (w *WithStackInfo) WithData(errs ...interface{}) *WithStackInfo {
 	if len(errs) > 0 {
 		for _, e := range errs {
 			if e1, ok := e.(error); ok {
-				_ = w.WithAttach(e1)
+				_ = w.WithErrors(e1)
 			} else if e != nil {
 				w.sites = append(w.sites, e)
 			}
@@ -84,8 +84,8 @@ func (w *WithStackInfo) WithAttachGenerals(errs ...interface{}) *WithStackInfo {
 	return w
 }
 
-// WithAttachTaggedGenerals appends errs if the general object is a error object
-func (w *WithStackInfo) WithAttachTaggedGenerals(siteScenes map[string]interface{}) *WithStackInfo {
+// WithTaggedData appends errs if the general object is a error object
+func (w *WithStackInfo) WithTaggedData(siteScenes map[string]interface{}) *WithStackInfo {
 	if w.taggedSites == nil {
 		w.taggedSites = make(map[string]interface{})
 	}

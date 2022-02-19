@@ -19,7 +19,7 @@ func TestCauses2_New(t *testing.T) {
 		Causers: nil,
 		msg:     "ui err",
 	}
-	_ = err.WithAttach(io.EOF, io.ErrClosedPipe)
+	_ = err.WithErrors(io.EOF, io.ErrClosedPipe)
 	t.Logf("failed: %+v", err)
 
 	err = &causes2{
@@ -27,7 +27,24 @@ func TestCauses2_New(t *testing.T) {
 		Causers: nil,
 		msg:     "ui err",
 	}
-	err.WithAttach(io.EOF, io.ErrClosedPipe).End()
+	err.WithErrors(io.EOF, io.ErrClosedPipe).End()
 	t.Logf("failed: %+v", err)
 
+}
+
+func TestAsAContainer(t *testing.T) {
+	// as a inner errors container
+	child := func() (err error) {
+		errContainer := New("")
+
+		defer errContainer.Defer(&err)
+		for _, r := range []error{io.EOF, io.ErrShortWrite, io.ErrClosedPipe, Internal} {
+			errContainer.Attach(r)
+		}
+
+		return
+	}
+
+	err := child()
+	t.Logf("failed: %+v", err)
 }

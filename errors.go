@@ -56,8 +56,8 @@ func (s *builder) WithSkip(skip int) *builder {
 	return s
 }
 
-func (s *builder) WithAttach(errs ...error) *builder {
-	_ = s.causes2.WithAttach(errs...)
+func (s *builder) WithErrors(errs ...error) *builder {
+	_ = s.causes2.WithErrors(errs...)
 	return s
 }
 
