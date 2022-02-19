@@ -30,6 +30,13 @@ func TestNew(t *testing.T) {
 		Build()
 	t.Logf("failed: %+v", err)
 
+	err = NewBuilder().
+		WithCode(Internal).
+		WithErrors(io.EOF).
+		WithErrors(io.ErrShortWrite).
+		Attach(io.ErrClosedPipe)
+	t.Logf("failed: %+v", err)
+
 	err = New(WithErrors(io.EOF, io.ErrShortWrite))
 	t.Logf("failed: %+v", err)
 

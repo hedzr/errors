@@ -78,7 +78,7 @@ type Builder interface {
 	Build() *WithStackInfo
 
 	// Attach inner errors for backward compatibility to v2
-	Attach(errs ...error)
+	Attach(errs ...error) *WithStackInfo
 }
 
 type builder struct {
@@ -100,8 +100,8 @@ func (s *builder) WithErrors(errs ...error) Builder {
 
 // Attach attaches the given errs as inner errors.
 // For backward compatibility to v2
-func (s *builder) Attach(errs ...error) {
-	_ = s.WithErrors(errs...).Build()
+func (s *builder) Attach(errs ...error) *WithStackInfo {
+	return s.WithErrors(errs...).Build()
 }
 
 // WithMessage formats the error message

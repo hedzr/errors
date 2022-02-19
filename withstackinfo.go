@@ -146,6 +146,12 @@ func (w *WithStackInfo) Defer(err *error) {
 	*err = w
 }
 
+// Attach _
+func (w *WithStackInfo) Attach(errs ...error) *WithStackInfo {
+	_ = w.WithErrors(errs...)
+	return w
+}
+
 // Format formats the stack of Frames according to the fmt.Formatter interface.
 //
 //    %s	lists source files for each Frame in the stack
