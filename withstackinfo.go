@@ -143,7 +143,9 @@ func (w *WithStackInfo) Cause() error {
 //    }
 //
 func (w *WithStackInfo) Defer(err *error) {
-	*err = w
+	if !w.IsEmpty() || w.Code != OK {
+		*err = w
+	}
 }
 
 // Attach _
