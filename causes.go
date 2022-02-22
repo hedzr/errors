@@ -158,6 +158,10 @@ func (w *causes2) Unwrap() error {
 	return nil
 }
 
+func (w *causes2) Reset() {
+	w.unwrapIndex = 0
+}
+
 func (w *causes2) Is(target error) bool {
 	if w.Code != OK {
 		if c, ok := target.(Code); ok && c == w.Code {
