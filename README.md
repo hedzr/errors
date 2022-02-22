@@ -1,4 +1,4 @@
-# errors.v2
+# errors.v3
 
 [![Build Status](https://travis-ci.org/hedzr/errors.svg?branch=master)](https://travis-ci.org/hedzr/errors)
 [![GitHub tag (latest SemVer)](https://img.shields.io/github/tag/hedzr/errors.svg?label=release)](https://gopkg.in/hedzr/errors.v3)
