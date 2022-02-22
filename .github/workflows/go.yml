@@ -2,12 +2,12 @@ name: Go
 
 on:
   push:
-    branches: [ v3 ]
+    branches: [ master, v3 ]
     # Sequence of patterns matched against refs/tags
     tags:
       - 'v*' # Push events to matching v*, i.e. v1.0, v20.15.10
   pull_request:
-    branches: [ v3 ]
+    branches: [ master, v3 ]
     # types: [assigned, opened, synchronize, reopened]
 
 #on: [push, pull_request]
@@ -59,11 +59,13 @@ jobs:
             ${{ runner.os }}-go-
       - name: Test & Coverage
         run: go test -v -coverprofile=profile.cov ./...
-      - name: Send coverage
-        uses: shogo82148/actions-goveralls@v1
+      - name: Coveralls Parallel
+        uses: coverallsapp/github-action@master
         with:
-          path-to-profile: profile.cov
-          parallel: true
+          github-token: ${{ secrets.COVERALLS_REPO_TOKEN }}
+          path-to-lcov: profile.cov
+          parallel:
+            true
 
 #  build:
 #    #env:
@@ -140,8 +142,10 @@ jobs:
     needs: coverage
     runs-on: ubuntu-latest
     steps:
-      - uses: shogo82148/actions-goveralls@v1
+      - name: Coveralls Finished
+        uses: coverallsapp/github-action@master
         with:
+          github-token: ${{ secrets.COVERALLS_REPO_TOKEN }}
           parallel-finished: true
 
   do-release:
