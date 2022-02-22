@@ -150,7 +150,9 @@ func (w *causes2) Unwrap() error {
 		return w.Causers[w.unwrapIndex]
 	}
 	if w.unwrapIndex == len(w.Causers) {
-		return w.Code
+		if w.Code != OK {
+			return w.Code
+		}
 	}
 
 	// reset index
