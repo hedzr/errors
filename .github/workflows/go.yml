@@ -59,14 +59,19 @@ jobs:
             ${{ runner.os }}-go-
       - name: Test & Coverage
         run: go test -v -coverprofile=profile.cov ./...
-      - name: Coveralls Parallel
-        uses: coverallsapp/github-action@master
+      - name: Send coverage
+        uses: shogo82148/actions-goveralls@v1
         with:
-          # github-token: ${{ secrets.COVERALLS_REPO_TOKEN }}
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          path-to-lcov: profile.cov
-          parallel:
-            true
+          path-to-profile: profile.cov
+          parallel: true
+      # - name: Coveralls Parallel
+      #   uses: coverallsapp/github-action@master
+      #   with:
+      #     # github-token: ${{ secrets.COVERALLS_REPO_TOKEN }}
+      #     github-token: ${{ secrets.GITHUB_TOKEN }}
+      #     path-to-lcov: profile.cov
+      #     parallel:
+      #       true
 
 #  build:
 #    #env:
@@ -143,12 +148,15 @@ jobs:
     needs: coverage
     runs-on: ubuntu-latest
     steps:
-      - name: Coveralls Finished
-        uses: coverallsapp/github-action@master
+      - uses: shogo82148/actions-goveralls@v1
         with:
-          # github-token: ${{ secrets.COVERALLS_REPO_TOKEN }}
-          github-token: ${{ secrets.GITHUB_TOKEN }}
           parallel-finished: true
+      # - name: Coveralls Finished
+      #   uses: coverallsapp/github-action@master
+      #   with:
+      #     # github-token: ${{ secrets.COVERALLS_REPO_TOKEN }}
+      #     github-token: ${{ secrets.GITHUB_TOKEN }}
+      #     parallel-finished: true
 
   do-release:
     runs-on: ubuntu-latest
