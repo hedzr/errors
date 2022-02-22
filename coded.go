@@ -214,7 +214,7 @@ var codeToStr = map[Code]string{
 //
 
 // New create a new *CodedErr object based an error code
-func (c Code) New(msg string, args ...interface{}) *WithStackInfo {
+func (c Code) New(msg string, args ...interface{}) Buildable {
 	return Message(msg, args...).WithCode(c).Build()
 }
 
