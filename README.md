@@ -16,7 +16,6 @@ Wrapped errors and more for golang developing (not just for go1.13+).
 ## Import
 
 ```go
-// wrong: import "github.com/hedzr/errors/v2"
 import "gopkg.in/hedzr/errors.v3"
 ```
 
