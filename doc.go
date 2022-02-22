@@ -10,7 +10,7 @@ const (
 	// AppName const
 	AppName = "errors"
 	// Version const
-	Version = "3.0.3"
+	Version = "3.0.5"
 	// VersionInt const
-	VersionInt = 0x030003
+	VersionInt = 0x030005
 )
