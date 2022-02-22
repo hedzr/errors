@@ -4,7 +4,7 @@
 [![GitHub tag (latest SemVer)](https://img.shields.io/github/tag/hedzr/errors.svg?label=release)](https://gopkg.in/hedzr/errors.v3)
 [![GoDoc](https://img.shields.io/badge/godoc-reference-blue.svg?style=flat)](https://pkg.go.dev/gopkg.in/hedzr/errors.v3)
 [![Go Report Card](https://goreportcard.com/badge/github.com/hedzr/errors)](https://goreportcard.com/report/github.com/hedzr/errors)
-[![Coverage Status](https://coveralls.io/repos/github/hedzr/errors/badge.svg?branch=v3)](https://coveralls.io/github/hedzr/errors?branch=v3)
+[![Coverage Status](https://coveralls.io/repos/github/hedzr/errors/badge.svg)](https://coveralls.io/github/hedzr/errors)
 [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fhedzr%2Ferrors.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fhedzr%2Ferrors?ref=badge_shield)
 
 Wrapped errors and more for golang developing (not just for go1.13+).
