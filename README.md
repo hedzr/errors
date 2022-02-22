@@ -21,6 +21,9 @@ import "gopkg.in/hedzr/errors.v3"
 
 ## History
 
+- v3.0.6
+  - back to master branch
+
 - v3.0.5
   - break out `New(...).Attach(...)`, instead of `New(...).WithErrors(...)`, so that we can make the type architecture clearly and concisely.
   - `Builable` and `Error` interface are the abstract representations about our error objects.
