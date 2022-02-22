@@ -98,7 +98,7 @@ func TestTypeIsSlice(t *testing.T) {
 
 	err2 := New().WithErrors(NotFound, err)
 	err3 := New().WithErrors(NotFound, err2)
-	if TypeIsSlice(err3.Causes(), err) == false {
+	if TypeIsSlice(Causes(err3), err) == false {
 		t.Fatalf("not ok")
 	}
 
@@ -116,13 +116,13 @@ func TestTypeIsSlice(t *testing.T) {
 	}
 	TypeIs(err3, nil)
 
-	IsSlice(err3.Causes(), nil)
-	IsSlice(err3.Causes(), io.ErrShortBuffer)
-	IsSlice(err3.Causes(), io.EOF)
-	IsSlice(err3.Causes(), NotFound)
-	IsSlice(err3.Causes(), Internal)
-	IsSlice(err3.Causes(), err2)
-	IsSlice(err3.Causes(), err)
+	IsSlice(Causes(err3), nil)
+	IsSlice(Causes(err3), io.ErrShortBuffer)
+	IsSlice(Causes(err3), io.EOF)
+	IsSlice(Causes(err3), NotFound)
+	IsSlice(Causes(err3), Internal)
+	IsSlice(Causes(err3), err2)
+	IsSlice(Causes(err3), err)
 
 	Is(err3, nil)
 	Is(err3, io.ErrShortBuffer)
