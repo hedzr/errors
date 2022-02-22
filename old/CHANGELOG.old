@@ -1,6 +1,26 @@
 # CHANGELOG
 
+### v2.0.11
 
+- errors.Equal(err, code)
+
+
+### v2.0.10
+
+- annotating errors (wrapable/attachable)
+- coded: errno and
+  - tokenizable errno numbers (`errors.Code`)
+  - template error and format it with living args late.
+- container: sub-errors can be added into a container and bundle-extracted as a parent error object.
+- referable WithStackInfo and stack-frames utils.
+
+
+### v2.0.0
+
+- rewrote all codes
+
+
+### NOTES
 
 > Sometimes you need ignore gosumdb error '410 Gone'
 > ```bash

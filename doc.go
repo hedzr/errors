@@ -2,14 +2,15 @@
  * Copyright © 2019 Hedzr Yeh.
  */
 
-// Package errors defines the generic error codes, nestable ExtErr object.
+// Package errors provides some error handling primitives for wrapped, coded, messaged errors.
+//
 package errors
 
 const (
 	// AppName const
 	AppName = "errors"
 	// Version const
-	Version = "1.1.18"
+	Version = "2.2.0"
 	// VersionInt const
-	VersionInt = 0x010118
+	VersionInt = 0x020200
 )

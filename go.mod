@@ -1,5 +1,3 @@
-module github.com/hedzr/errors
+module gopkg.in/hedzr/errors.v2
 
 go 1.13
-
-require github.com/pkg/errors v0.8.1
