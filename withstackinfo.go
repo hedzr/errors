@@ -43,37 +43,87 @@ func WithStack(cause error) error {
 //
 func (w *WithStackInfo) End() {}
 
-func (w *WithStackInfo) rebuild() *WithStackInfo {
+// Data returns the wrapped common user data by WithData.
+// The error objects with passed WithData will be moved into inner
+// errors set, so its are excluded from Data().
+func (w *WithStackInfo) Data() []interface{} { return w.sites }
+
+// TaggedData returns the wrapped tagged user data by WithTaggedData.
+func (w *WithStackInfo) TaggedData() TaggedData { return w.taggedSites }
+
+// Cause returns the underlying cause of the error, if possible.
+// An error value has a cause if it implements the following
+// interface:
+//
+//     type causer interface {
+//            Cause() error
+//     }
+//
+// If an error object does not implement Cause interface, the
+// original error object will be returned.
+// If the error is nil, nil will be returned without further
+// investigation.
+func (w *WithStackInfo) Cause() error {
+	return w.causes2.Cause()
+}
+
+func (w *WithStackInfo) rebuild() Buildable {
 	return w
 }
 
-// WithCode for error interface
-func (w *WithStackInfo) WithCode(code Code) *WithStackInfo {
-	w.Code = code
-	return w.rebuild()
-}
-
-// WithSkip _
-func (w *WithStackInfo) WithSkip(skip int) *WithStackInfo {
+// WithSkip specifies a special number of stack frames that will be ignored.
+func (w *WithStackInfo) WithSkip(skip int) Buildable {
 	w.Stack = callers(skip)
 	return w
 }
 
-// WithMessage _
-func (w *WithStackInfo) WithMessage(message string, args ...interface{}) *WithStackInfo {
+// WithMessage formats the error message
+func (w *WithStackInfo) WithMessage(message string, args ...interface{}) Buildable {
 	_ = w.causes2.WithMessage(message, args...)
 	return w
 }
 
-// WithErrors appends errs
-// WithStackInfo.Attach() can only wrap and hold one child error object.
-func (w *WithStackInfo) WithErrors(errs ...error) *WithStackInfo {
+// WithCode specifies an error code.
+// An error code `Code` is a integer number with error interface
+// supported.
+func (w *WithStackInfo) WithCode(code Code) Buildable {
+	w.Code = code
+	return w.rebuild()
+}
+
+// WithErrors attaches the given errs as inner errors.
+// WithErrors is like our old Attach().
+// It wraps the inner errors into underlying container and
+// represents them all in a singular up-level error object.
+// The wrapped inner errors can be retrieved with errors.Causes:
+//
+//      var err = errors.New("hello").WithErrors(io.EOF, io.ShortBuffers)
+//      var errs []error = errors.Causes(err)
+//
+// Or, use As() to extract its:
+//
+//      var errs []error
+//      errors.As(err, &errs)
+//
+func (w *WithStackInfo) WithErrors(errs ...error) Buildable {
 	_ = w.causes2.WithErrors(errs...)
 	return w
 }
 
-// WithData appends errs if the general object is a error object
-func (w *WithStackInfo) WithData(errs ...interface{}) *WithStackInfo {
+// WithData appends errs if the general object is a error object.
+// It can be used in defer-recover block typically. For example:
+//
+//    defer func() {
+//      if e := recover(); e != nil {
+//        err = errors.New("[recovered] copyTo unsatisfied ([%v] %v -> [%v] %v), causes: %v",
+//          c.indirectType(from.Type()), from, c.indirectType(to.Type()), to, e).
+//          WithData(e)
+//        n := log.CalcStackFrames(1)   // skip defer-recover frame at first
+//        log.Skip(n).Errorf("%v", err) // skip go-lib frames and defer-recover frame, back to the point throwing panic
+//      }
+//    }()
+//
+func (w *WithStackInfo) WithData(errs ...interface{}) Buildable {
 	if len(errs) > 0 {
 		for _, e := range errs {
 			if e1, ok := e.(error); ok {
@@ -86,11 +136,8 @@ func (w *WithStackInfo) WithData(errs ...interface{}) *WithStackInfo {
 	return w
 }
 
-// TaggedData _
-type TaggedData map[string]interface{}
-
 // WithTaggedData appends errs if the general object is a error object
-func (w *WithStackInfo) WithTaggedData(siteScenes TaggedData) *WithStackInfo {
+func (w *WithStackInfo) WithTaggedData(siteScenes TaggedData) Buildable {
 	if w.taggedSites == nil {
 		w.taggedSites = make(TaggedData)
 	}
@@ -101,24 +148,9 @@ func (w *WithStackInfo) WithTaggedData(siteScenes TaggedData) *WithStackInfo {
 }
 
 // WithCause sets the underlying error manually if necessary.
-func (w *WithStackInfo) WithCause(cause error) *WithStackInfo {
+func (w *WithStackInfo) WithCause(cause error) Buildable {
 	w.causes2.Causers = append(w.causes2.Causers, cause)
 	return w
-}
-
-// Cause returns the underlying cause of the error, if possible.
-// An error value has a cause if it implements the following
-// interface:
-//
-//     type causer interface {
-//            Cause() error
-//     }
-//
-// If the error does not implement Cause, the original error will
-// be returned. If the error is nil, nil will be returned without further
-// investigation.
-func (w *WithStackInfo) Cause() error {
-	return w.causes2.Cause()
 }
 
 // Defer can be used as a defer function to simplify your codes.
@@ -149,9 +181,10 @@ func (w *WithStackInfo) Defer(err *error) {
 }
 
 // Attach _
-func (w *WithStackInfo) Attach(errs ...error) *WithStackInfo {
+// Since v3.0.5, we break Attach() and remove its returning value.
+// So WithStackInfo is a Container compliant type now.
+func (w *WithStackInfo) Attach(errs ...error) {
 	_ = w.WithErrors(errs...)
-	return w
 }
 
 // Format formats the stack of Frames according to the fmt.Formatter interface.

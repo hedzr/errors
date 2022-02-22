@@ -3,20 +3,20 @@ package errors
 import "fmt"
 
 // New returns an error with the supplied message.
-// New also records the Stack trace at the point it was called.
-func New(args ...interface{}) *WithStackInfo {
+// New also records the Stack trace at the point where it was called.
+func New(args ...interface{}) Error {
 	s := &builder{skip: 1}
 
 	if len(args) > 0 {
 		if message, ok := args[0].(string); ok {
-			return s.WithMessage(message, args[1:]...).Build()
+			return s.WithMessage(message, args[1:]...).Build().(Error)
 		}
 		for _, opt := range args {
 			if o, ok := opt.(Opt); ok {
 				o(s)
 			}
 		}
-		return s.Build()
+		return s.Build().(Error)
 	}
 
 	return &WithStackInfo{Stack: callers(1)}
@@ -66,6 +66,7 @@ func NewBuilder() Builder {
 
 // Builder provides a fluent calling interface to make error building easy.
 type Builder interface {
+
 	// WithSkip specifies a special number of stack frames that will be ignored.
 	WithSkip(skip int) Builder
 	// WithErrors attaches the given errs as inner errors.
@@ -74,11 +75,13 @@ type Builder interface {
 	WithMessage(message string, args ...interface{}) Builder
 	// WithCode specifies an error code.
 	WithCode(code Code) Builder
-	// Build builds the final error object (with *WithStackInfo type wrapped)
-	Build() *WithStackInfo
 
+	// Build builds the final error object (with Buildable interface bound)
+	Build() Error
+
+	// BREAK - Use WithErrors() for instead
 	// Attach inner errors for backward compatibility to v2
-	Attach(errs ...error) *WithStackInfo
+	// Attach(errs ...error)
 }
 
 type builder struct {
@@ -98,11 +101,11 @@ func (s *builder) WithErrors(errs ...error) Builder {
 	return s
 }
 
-// Attach attaches the given errs as inner errors.
-// For backward compatibility to v2
-func (s *builder) Attach(errs ...error) *WithStackInfo {
-	return s.WithErrors(errs...).Build()
-}
+//// Attach attaches the given errs as inner errors.
+//// For backward compatibility to v2
+//func (s *builder) Attach(errs ...error) Buildable {
+//	return s.WithErrors(errs...).Build()
+//}
 
 // WithMessage formats the error message
 func (s *builder) WithMessage(message string, args ...interface{}) Builder {
@@ -120,7 +123,7 @@ func (s *builder) WithCode(code Code) Builder {
 }
 
 // Build builds the final error object (with *WithStackInfo type wrapped)
-func (s *builder) Build() *WithStackInfo {
+func (s *builder) Build() Error {
 	w := &WithStackInfo{
 		causes2: s.causes2,
 		Stack:   callers(s.skip),
