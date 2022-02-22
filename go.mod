@@ -1,3 +1,3 @@
-module gopkg.in/hedzr/errors.v2
+module gopkg.in/hedzr/errors.v3
 
-go 1.13
+go 1.12

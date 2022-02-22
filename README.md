@@ -1,7 +1,7 @@
-# errors.v2
+# errors.v3
 
 [![Build Status](https://travis-ci.org/hedzr/errors.svg?branch=master)](https://travis-ci.org/hedzr/errors)
-[![GitHub tag (latest SemVer)](https://img.shields.io/github/tag/hedzr/errors.svg?label=release)](https://github.com/hedzr/errors/releases)
+[![GitHub tag (latest SemVer)](https://img.shields.io/github/tag/hedzr/errors.svg?label=release)](https://gopkg.in/hedzr/errors.v3)
 [![GoDoc](https://img.shields.io/badge/godoc-reference-blue.svg?style=flat)](https://godoc.org/github.com/hedzr/errors)
 [![Go Report Card](https://goreportcard.com/badge/github.com/hedzr/errors)](https://goreportcard.com/report/github.com/hedzr/errors)
 [![codecov](https://codecov.io/gh/hedzr/errors/branch/v2/graph/badge.svg)](https://codecov.io/gh/hedzr/errors)
@@ -13,30 +13,31 @@ Wrapped errors and more for golang developing (not just for go1.13+).
 
 `hedzr/errors` provides some extra enhancements for better context environment saving on error occurred.
 
-
-
 ## Import
-
-### v1 (Archived for legacy projects)
 
 ```go
 // wrong: import "github.com/hedzr/errors/v2"
-import "gopkg.in/hedzr/errors.v2"
+import "gopkg.in/hedzr/errors.v3"
 ```
 
+## History
 
-### v2
+- v3.0.5
+  - break out `New(...).Attach(...)`, instead of `New(...).WithErrors(...)`, so that we can make the type architecture clearly and concisely.
+  - `Builable` and `Error` interface are the abstract representations about our error objects.
+  - bugs fixed
+  - more godoc
 
-The new [`v2` branch](https://github.com/hedzr/errors/tree/v2) is cleaning rewroten version, preview at `v2.0.x` (*gopkg v2*).
+- v3.0.3
+  - review the backward compatibilities
 
-```go
-import "gopkg.in/hedzr/errors.v2"
-```
+- v3.0.0
+  - rewrite most codes and cleanup multiple small types
+  - use `New(...)` or `NewBuilder()` to make an error with code, message, inner error(s) and customizable stacktrace info.
 
 ## Features
 
-
-
+These features are supported for compatibilities.
 
 #### stdlib `errors' compatibilities
 
@@ -55,23 +56,12 @@ import "gopkg.in/hedzr/errors.v2"
   - in an error by `Wrap()`, stacktrace wrapped;
   - for your error, attached by `WithStack(cause error)`;
 
-#### Enhancements
+#### Others
 
-- `New(msg, args...)` combines New and `Newf`(if there is a name), WithMessage, WithMessagef, ...
-- `WithCause(cause error, message string, args...interface{})`
-- `Wrap(err error, message string, args ...interface{}) error`, no Wrapf
-- `DumpStacksAsString(allRoutines bool)`: returns stack tracing information like debug.PrintStack()
-- `CanXXX`:
-   - `CanAttach(err interface{}) bool`
-   - `CanCause(err interface{}) bool`
-   - `CanUnwrap(err interface{}) bool`
-   - `CanIs(err interface{}) bool`
-   - `CanAs(err interface{}) bool`
-
-#### Extras
-
-- Container/Holder for a group of sub-errors
-- Coded error: the predefined errno
+- Codes
+- Inner errors  
+  We like the flatter inner errors more than the cascade chain, so the `Format("%w)` is a so-so approach to collect the errors. We believe the error slice is a better choice.
+- Unwrap inner errors one by one
 
 ## Best Practices
 
@@ -79,128 +69,97 @@ import "gopkg.in/hedzr/errors.v2"
 package test
 
 import (
-	"gopkg.in/hedzr/errors.v2"
+	"gopkg.in/hedzr/errors.v3"
 	"io"
+	"reflect"
 	"testing"
 )
 
 func TestForExample(t *testing.T) {
 
-	err := errors.New("some tips %v", "here")
-	
-	// attaches much more errors
-	for _, e := range []error{io.EOF, io.ErrClosedPipe} {
-		_ = err.Attach(e)
+	fn := func() (err error) {
+		ec := errors.New("some tips %v", "here")
+		defer ec.Defer(&err)
+
+		// attaches much more errors
+		for _, e := range []error{io.EOF, io.ErrClosedPipe} {
+			ec.Attach(e)
+		}
 	}
 
+	err := fn()
 	t.Logf("failed: %+v", err)
 
 	// use another number different to default to skip the error frames
-	err = errors.Skip(3).Message("some tips %v", "here").Build()
+	err = errors.
+		Skip(3). // from on Skip()
+		WithMessage("some tips %v", "here").Build()
+	t.Logf("failed: %+v", err)
+
+	err = errors.
+		Message("1"). // from Message() on
+		WithSkip(0).
+		WithMessage("bug msg").
+		Build()
+	t.Logf("failed: %+v", err)
+
+	err = errors.
+		NewBuilder(). // from NewBuilder() on
+		WithCode(errors.Internal). // add errors.Code
+		WithErrors(io.EOF). // attach inner errors
+		WithErrors(io.ErrShortWrite, io.ErrClosedPipe).
+		Build()
+	t.Logf("failed: %+v", err)
+
+	// As code
+	var c1 errors.Code
+	if errors.As(err, &c1) {
+		println(c1) // = Internal
+	}
+
+	// As inner errors
+	var a1 []error
+	if errors.As(err, &a1) {
+		println(len(a1)) // = 3, means [io.EOF, io.ErrShortWrite, io.ErrClosedPipe]
+	}
+	// Or use Causes() to extract them:
+	if reflect.DeepEqual(a1, errors.Causes(err)) {
+		t.Fatal("unexpected problem")
+	}
+
+	// As error, the first inner error will be extracted
+	var ee1 error
+	if errors.As(err, &ee1) {
+		println(ee1) // = io.EOF
+	}
+
+	series := []error{io.EOF, io.ErrShortWrite, io.ErrClosedPipe, errors.Internal}
+	var index int
+	for ; ee1 != nil; index++ {
+		ee1 = errors.Unwrap(err) // extract the inner errors one by one
+		if ee1 != nil && ee1 != series[index] {
+			t.Fatalf("%d. cannot extract '%v' error with As(), ee1 = %v", index, series[index], ee1)
+		}
+	}
+}
+
+func TestContainer(t *testing.T) {
+	// as a inner errors container
+	child := func() (err error) {
+		errContainer := errors.New("multiple tasks have errors")
+
+		defer errContainer.Defer(&err)
+		for _, r := range []error{io.EOF, io.ErrShortWrite, io.ErrClosedPipe, errors.Internal} {
+			errContainer.Attach(r)
+		}
+
+		return
+	}
+
+	err := child()
 	t.Logf("failed: %+v", err)
 }
 ```
-
-
-## error Container and sub-errors (wrapped, attached or nested)
-
-- `NewContainer(message string, args ...interface{}) *withCauses`
-- `ContainerIsEmpty(container error) bool`
-- `AttachTo(container *withCauses, errs ...error)`
-- `withCauses.Attach(errs ...error)`
-
-For example:
-
-```go
-func a() (err error){
-    container = errors.NewContainer("sample error")
-    defer container.Defer(&err) // wraps the errors in container to err and return it
-
-    // ...
-    for {
-        // ...
-        // in a long loop, we can add many sub-errors into container 'c'...
-        errors.AttachTo(container, io.EOF, io.ErrUnexpectedEOF, io.ErrShortBuffer, io.ErrShortWrite)
-        // Or:
-        // container.Attach(someFuncReturnsErr(xxx))
-        // ... break
-    }
-    // // and we extract all of them as a single parent error object now.
-    // err = container.Error()
-    return
-}
-
-func b(){
-    err := a()
-    // test the containered error 'err' if it hosted a sub-error `io.ErrShortWrite` or not.
-    if errors.Is(err, io.ErrShortWrite) {
-        panic(err)
-    }
-}
-```
-
-
-
-## Coded error
-
-- `Code` is a generic type of error codes
-- `WithCode(code, err, msg, args...)` can format an error object with error code, attached inner err, message or msg template, and stack info.
-- `Code.New(msg, args...)` is like `WithCode`.
-- `Code.Register(codeNameString)` declares the name string of an error code yourself.
-- `Code.NewTemplate(tmpl)` create an coded error template object `*WithCodeInfo`.
-- `WithCodeInfo.FormateNew(livedArgs...)` formats the err msg till used.
-- `Equal(err, code)`: compares `err` with `code`
-
-Try it at: <https://play.golang.org/p/Y2uThZHAvK1>
-
-### Builtin Codes
-
-The builtin Codes are errors, such as `OK`, `Canceled`, `Unknown`, `InvalidArgument`, `DeadlineExceeded`, `NotFound`, `AlreadyExists`,  etc..
-
-```go
-// Uses a Code as an error
-var err error = errors.OK
-var err2 error = errors.InvalidArgument
-fmt.Println("error is: %v", err2)
-
-// Uses a Code as enh-error (hedzr/errors)
-err := InvalidArgument.New("wrong").Attach(io.ErrShortWrite)
-```
-
-### Customized Codes
-
-```go
-// customizing the error code
-const MyCode001 errors.Code=1001
-
-// and register the name of MyCode001
-MyCode001.Register("MyCode001")
-
-// and use it as a builtin Code
-fmt.Println("error is: %v", MyCode001)
-err := MyCode001.New("wrong 001: no config file")
-```
-
-### Error Template: formatting the coded-error late
-
-
-```go
-const BUG1001 errors.Code=1001
-errTmpl1001 := BUG1001.NewTemplate("something is wrong, %v")
-err4 := errTmpl1001.FormatNew("unsatisfied conditions").Attach(io.ShortBuffer)
-fmt.Println(err4)
-fmt.Printf("%+v\n", err4)
-```
-
-
-
-
-## ACK
-
-- stack.go is an copy from pkg/errors
-- withStack is an copy from pkg/errors
-- Is, As, Unwrap are inspired from go1.13 errors
-- Cause, Wrap are inspired from pkg/errors
 
 ## LICENSE
 
