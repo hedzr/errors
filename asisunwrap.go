@@ -219,6 +219,22 @@ func TypeIsSlice(errs []error, target error) bool {
 // Unwrap returns the result of calling the Unwrap method on err, if
 // `err`'s type contains an Unwrap method returning error.
 // Otherwise, Unwrap returns nil.
+//
+// An errors.Error is an unwrappable error object, all its inner errors
+// can be unwrapped in turn. Therefore it maintains an internal unwrapping
+// index and it can't be reset externally. The only approach to clear it
+// and make Unwrap work from head is, to keep Unwrap till this turn ending
+// by returning nil.
+//
+// Examples for Unwrap:
+//
+//      var err = errors.New("hello").WithErrors(io.EOF, io.ShortBuffers)
+//      var e error = err
+//      for e != nil {
+//          e = errors.Unwrap(err)
+//          // test if e is not nil and process it...
+//      }
+//
 func Unwrap(err error) error {
 	u, ok := err.(interface {
 		Unwrap() error

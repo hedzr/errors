@@ -136,6 +136,18 @@ func (w *causes2) Cause() error {
 	return w.Causers[0]
 }
 
+// Causes simply returns the wrapped inner errors.
+// It doesn't consider an wrapped Code entity is an inner error too.
+// So if you wanna to extract any inner error objects, use
+// errors.Unwrap for instead. The errors.Unwrap could extract all
+// of them one by one:
+//
+//      var err = errors.New("hello").WithErrors(io.EOF, io.ShortBuffers)
+//      var e error = err
+//      for e != nil {
+//          e = errors.Unwrap(err)
+//      }
+//
 func (w *causes2) Causes() []error {
 	if len(w.Causers) == 0 {
 		return nil

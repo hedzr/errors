@@ -29,9 +29,29 @@ func CanCause(err interface{}) (ok bool) {
 	return
 }
 
-type causer interface {
-	// Cause _
-	Cause() error
+// CanCauses tests if err is cause-able
+func CanCauses(err interface{}) (ok bool) {
+	_, ok = err.(causers)
+	return
+}
+
+// Causes simply returns the wrapped inner errors.
+// It doesn't consider an wrapped Code entity is an inner error too.
+// So if you wanna to extract any inner error objects, use
+// errors.Unwrap for instead. The errors.Unwrap could extract all
+// of them one by one:
+//
+//      var err = errors.New("hello").WithErrors(io.EOF, io.ShortBuffers)
+//      var e error = err
+//      for e != nil {
+//          e = errors.Unwrap(err)
+//      }
+//
+func Causes(err error) (errs []error) {
+	if e, ok := err.(causers); ok {
+		errs = e.Causes()
+	}
+	return
 }
 
 // // CanWalk tests if err is walkable
