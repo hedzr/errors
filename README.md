@@ -21,6 +21,11 @@ import "gopkg.in/hedzr/errors.v3"
 
 ## History
 
+- v3.0.7
+  - fix coverall upload
+  - godoc
+  - better sites/taggedsites output
+
 - v3.0.6
   - back to master branch
 
