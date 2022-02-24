@@ -21,6 +21,10 @@ import "gopkg.in/hedzr/errors.v3"
 
 ## History
 
+- v3.0.8
+  - restore error message template
+  - all features in v2 are restored with a new fluent style
+
 - v3.0.7
   - fix coverall upload
   - godoc
@@ -174,6 +178,17 @@ func TestContainer(t *testing.T) {
 
   err := child()
   t.Logf("failed: %+v", err)
+}
+
+func TestTemplateFormat(t *testing.T) {
+  err := errors.New("cannot set: %v (%v) -> %v (%v)")
+
+  err.FormatWith("a", "b", "c", "d")
+  t.Logf("Error: %v", err)
+  t.Logf("Error: %+v", err)
+
+  err.FormatWith("1", "2", "3", "4")
+  t.Logf("Error: %v", err)
 }
 ```
 
