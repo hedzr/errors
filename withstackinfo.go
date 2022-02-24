@@ -180,7 +180,8 @@ func (w *WithStackInfo) Defer(err *error) {
 	}
 }
 
-// Attach _
+// Attach collects the errors except it's nil
+//
 // Since v3.0.5, we break Attach() and remove its returning value.
 // So WithStackInfo is a Container compliant type now.
 func (w *WithStackInfo) Attach(errs ...error) {

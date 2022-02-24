@@ -68,6 +68,7 @@ func (w *causes2) WithErrors(errs ...error) *causes2 {
 	return w
 }
 
+// Attach collects the errors except it's nil
 func (w *causes2) Attach(errs ...error) {
 	_ = w.WithErrors(errs...)
 }

@@ -9,7 +9,7 @@ func New(args ...interface{}) Error {
 
 	if len(args) > 0 {
 		if message, ok := args[0].(string); ok {
-			return s.WithMessage(message, args[1:]...).Build().(Error)
+			return s.WithSkip(2).WithMessage(message, args[1:]...).Build().(Error)
 		}
 		for _, opt := range args {
 			if o, ok := opt.(Opt); ok {
@@ -85,8 +85,10 @@ type Builder interface {
 }
 
 type builder struct {
-	skip    int
-	causes2 causes2
+	skip        int
+	causes2     causes2
+	sites       []interface{}
+	taggedSites TaggedData
 }
 
 // WithSkip specifies a special number of stack frames that will be ignored.
@@ -95,9 +97,9 @@ func (s *builder) WithSkip(skip int) Builder {
 	return s
 }
 
-// WithErrors attaches the given errs as inner errors.
-func (s *builder) WithErrors(errs ...error) Builder {
-	_ = s.causes2.WithErrors(errs...)
+// WithCode specifies an error code.
+func (s *builder) WithCode(code Code) Builder {
+	s.causes2.Code = code
 	return s
 }
 
@@ -116,9 +118,45 @@ func (s *builder) WithMessage(message string, args ...interface{}) Builder {
 	return s
 }
 
-// WithCode specifies an error code.
-func (s *builder) WithCode(code Code) Builder {
-	s.causes2.Code = code
+// WithErrors attaches the given errs as inner errors.
+func (s *builder) WithErrors(errs ...error) Builder {
+	_ = s.causes2.WithErrors(errs...)
+	return s
+}
+
+// WithData appends errs if the general object is a error object.
+// It can be used in defer-recover block typically. For example:
+//
+//    defer func() {
+//      if e := recover(); e != nil {
+//        err = errors.New("[recovered] copyTo unsatisfied ([%v] %v -> [%v] %v), causes: %v",
+//          c.indirectType(from.Type()), from, c.indirectType(to.Type()), to, e).
+//          WithData(e)
+//        n := log.CalcStackFrames(1)   // skip defer-recover frame at first
+//        log.Skip(n).Errorf("%v", err) // skip go-lib frames and defer-recover frame, back to the point throwing panic
+//      }
+//    }()
+//
+func (s *builder) WithData(errs ...interface{}) Builder {
+	s.sites = append(s.sites, errs...)
+	return s
+}
+
+// WithTaggedData appends user data with tag into internal container.
+// These data can be retrieved by
+func (s *builder) WithTaggedData(siteScenes TaggedData) Builder {
+	if s.taggedSites == nil {
+		s.taggedSites = make(TaggedData)
+	}
+	for k, v := range siteScenes {
+		s.taggedSites[k] = v
+	}
+	return s
+}
+
+// WithCause sets the underlying error manually if necessary.
+func (s *builder) WithCause(cause error) Builder {
+	_ = s.causes2.WithErrors(cause)
 	return s
 }
 

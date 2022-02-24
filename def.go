@@ -172,6 +172,7 @@ type Container interface {
 
 // Attachable _
 type Attachable interface {
+	// Attach collects the errors except it's nil
 	Attach(errs ...error)
 }
 
