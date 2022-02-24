@@ -200,11 +200,19 @@ func (w *WithStackInfo) Format(s fmt.State, verb rune) {
 	switch verb {
 	case 'v':
 		if s.Flag('+') {
-			_, _ = fmt.Fprintf(s, "%+v", w.Error())
+			n, _ := fmt.Fprintf(s, "%+v", w.Error())
 			if len(w.sites) > 0 {
-				_, _ = fmt.Fprintf(s, "Sites: %+v", w.sites)
+				if n > 0 {
+					n1, _ := fmt.Fprintf(s, "\n  ")
+					n += n1
+				}
+				n1, _ := fmt.Fprintf(s, "Sites: %+v", w.sites)
+				n += n1
 			}
 			if len(w.taggedSites) > 0 {
+				if n > 0 {
+					_, _ = fmt.Fprintf(s, "\n  ")
+				}
 				_, _ = fmt.Fprintf(s, "Tagged Sites: %+v", w.taggedSites)
 			}
 			w.Stack.Format(s, verb)
