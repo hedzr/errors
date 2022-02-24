@@ -71,95 +71,104 @@ These features are supported for compatibilities.
 package test
 
 import (
-	"gopkg.in/hedzr/errors.v3"
-	"io"
-	"reflect"
-	"testing"
+    "gopkg.in/hedzr/errors.v3"
+    "io"
+    "reflect"
+    "testing"
 )
 
 func TestForExample(t *testing.T) {
 
-	fn := func() (err error) {
-		ec := errors.New("some tips %v", "here")
-		defer ec.Defer(&err)
+  fn := func() (err error) {
+    ec := errors.New("some tips %v", "here")
+    defer ec.Defer(&err)
 
-		// attaches much more errors
-		for _, e := range []error{io.EOF, io.ErrClosedPipe} {
-			ec.Attach(e)
-		}
-	}
+    // attaches much more errors
+    for _, e := range []error{io.EOF, io.ErrClosedPipe} {
+      ec.Attach(e)
+    }
+  }
 
-	err := fn()
-	t.Logf("failed: %+v", err)
+  err := fn()
+  t.Logf("failed: %+v", err)
 
-	// use another number different to default to skip the error frames
-	err = errors.
-		Skip(3). // from on Skip()
-		WithMessage("some tips %v", "here").Build()
-	t.Logf("failed: %+v", err)
+  // use another number different to default to skip the error frames
+  err = errors.
+        Skip(3). // from on Skip()
+        WithMessage("some tips %v", "here").Build()
+  t.Logf("failed: %+v", err)
 
-	err = errors.
-		Message("1"). // from Message() on
-		WithSkip(0).
-		WithMessage("bug msg").
-		Build()
-	t.Logf("failed: %+v", err)
+  err = errors.
+        Message("1"). // from Message() on
+        WithSkip(0).
+        WithMessage("bug msg").
+        Build()
+  t.Logf("failed: %+v", err)
 
-	err = errors.
-		NewBuilder(). // from NewBuilder() on
-		WithCode(errors.Internal). // add errors.Code
-		WithErrors(io.EOF). // attach inner errors
-		WithErrors(io.ErrShortWrite, io.ErrClosedPipe).
-		Build()
-	t.Logf("failed: %+v", err)
+  err = errors.
+        NewBuilder(). // from NewBuilder() on
+        WithCode(errors.Internal). // add errors.Code
+        WithErrors(io.EOF). // attach inner errors
+        WithErrors(io.ErrShortWrite, io.ErrClosedPipe).
+        Build()
+  t.Logf("failed: %+v", err)
 
-	// As code
-	var c1 errors.Code
-	if errors.As(err, &c1) {
-		println(c1) // = Internal
-	}
+  // As code
+  var c1 errors.Code
+  if errors.As(err, &c1) {
+    println(c1) // = Internal
+  }
 
-	// As inner errors
-	var a1 []error
-	if errors.As(err, &a1) {
-		println(len(a1)) // = 3, means [io.EOF, io.ErrShortWrite, io.ErrClosedPipe]
-	}
-	// Or use Causes() to extract them:
-	if reflect.DeepEqual(a1, errors.Causes(err)) {
-		t.Fatal("unexpected problem")
-	}
+  // As inner errors
+  var a1 []error
+  if errors.As(err, &a1) {
+    println(len(a1)) // = 3, means [io.EOF, io.ErrShortWrite, io.ErrClosedPipe]
+  }
+  // Or use Causes() to extract them:
+  if reflect.DeepEqual(a1, errors.Causes(err)) {
+    t.Fatal("unexpected problem")
+  }
 
-	// As error, the first inner error will be extracted
-	var ee1 error
-	if errors.As(err, &ee1) {
-		println(ee1) // = io.EOF
-	}
+  // As error, the first inner error will be extracted
+  var ee1 error
+  if errors.As(err, &ee1) {
+    println(ee1) // = io.EOF
+  }
 
-	series := []error{io.EOF, io.ErrShortWrite, io.ErrClosedPipe, errors.Internal}
-	var index int
-	for ; ee1 != nil; index++ {
-		ee1 = errors.Unwrap(err) // extract the inner errors one by one
-		if ee1 != nil && ee1 != series[index] {
-			t.Fatalf("%d. cannot extract '%v' error with As(), ee1 = %v", index, series[index], ee1)
-		}
-	}
+  series := []error{io.EOF, io.ErrShortWrite, io.ErrClosedPipe, errors.Internal}
+  var index int
+  for ; ee1 != nil; index++ {
+    ee1 = errors.Unwrap(err) // extract the inner errors one by one
+    if ee1 != nil && ee1 != series[index] {
+      t.Fatalf("%d. cannot extract '%v' error with As(), ee1 = %v", index, series[index], ee1)
+    }
+  }
 }
 
 func TestContainer(t *testing.T) {
-	// as a inner errors container
-	child := func() (err error) {
-		errContainer := errors.New("multiple tasks have errors")
+  // as a inner errors container
+  child := func() (err error) {
+    errContainer := errors.New("multiple tasks have errors")
 
-		defer errContainer.Defer(&err)
-		for _, r := range []error{io.EOF, io.ErrShortWrite, io.ErrClosedPipe, errors.Internal} {
-			errContainer.Attach(r)
-		}
+    defer errContainer.Defer(&err)
+    for _, r := range []error{io.EOF, io.ErrShortWrite, io.ErrClosedPipe, errors.Internal} {
+      errContainer.Attach(r)
+    }
+    
+    doWithItem := func(item Item) (err error) {
+      // ...
+      return
+    }
+    for _, item := range SomeItems {
+      // nil will be ignored safely, do'nt worry about invalid attaches.
+      errContainer.Attach(doWithItem(item))
+    }
 
-		return
-	}
+    return
+  }
 
-	err := child()
-	t.Logf("failed: %+v", err)
+  err := child()
+  t.Logf("failed: %+v", err)
 }
 ```
 
