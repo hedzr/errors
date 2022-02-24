@@ -77,6 +77,7 @@ func TestUnwrap(t *testing.T) {
 		t.Logf("failed: %v", e)
 	}
 }
+
 func TestWithStackInfo_New(t *testing.T) {
 
 	err := New("hello %v", "world")
@@ -102,4 +103,15 @@ func TestWithStackInfo_New(t *testing.T) {
 	t.Logf("failed: %+v", err2)
 	t.Logf("Data: %v", err2.Data())
 	t.Logf("TaggedData: %v", err2.TaggedData())
+}
+
+func TestTemplateFormat(t *testing.T) {
+	err := New("cannot set: %v (%v) -> %v (%v)")
+
+	err.FormatWith("a", "b", "c", "d")
+	t.Logf("Error: %v", err)
+	t.Logf("Error: %+v", err)
+
+	err.FormatWith("1", "2", "3", "4")
+	t.Logf("Error: %v", err)
 }

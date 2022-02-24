@@ -8,9 +8,13 @@ import (
 
 type causes2 struct {
 	Code
-	Causers     []error
-	msg         string
+
+	Causers []error
+	msg     string
+
 	unwrapIndex int
+
+	liveArgs []interface{} // error message template ?
 }
 
 // WithCode for error interface
@@ -73,11 +77,22 @@ func (w *causes2) Attach(errs ...error) {
 	_ = w.WithErrors(errs...)
 }
 
+// FormatWith _
+func (w *WithStackInfo) FormatWith(args ...interface{}) {
+	w.liveArgs = args
+}
+
 func (w *causes2) Error() string {
 	var buf bytes.Buffer
 	if w.msg != "" {
-		buf.WriteString(w.msg)
+		if len(w.liveArgs) > 0 {
+			msg := fmt.Sprintf(w.msg, w.liveArgs...)
+			buf.WriteString(msg)
+		} else {
+			buf.WriteString(w.msg)
+		}
 	}
+
 	var needclose, needsep bool
 	if w.Code != OK {
 		if buf.Len() > 0 {

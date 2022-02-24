@@ -101,6 +101,22 @@ type Buildable interface {
 
 	// Container _
 	Container
+
+	// FormatWith adds live args for formatting the message template.
+	//
+	// While you New an Error with format template without supplying
+	// the args at same time, you'll create an error message template.
+	// You could feed the live args later.
+	// A sample is:
+	//
+	//    err := errors.New("template here: %v")
+	//    // ...
+	//    err.FormatWith("good day")
+	//    println(err)   // got: template here: good day
+	//    err.FormatWith("bye")
+	//    println(err)   // got: template here: bye
+	//
+	FormatWith(args ...interface{})
 }
 
 type causer interface {
