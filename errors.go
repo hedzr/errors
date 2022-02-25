@@ -25,7 +25,9 @@ func New(args ...interface{}) Error {
 // Opt _
 type Opt func(s *builder)
 
-// WithErrors _
+// WithErrors attach child errors into an error container.
+// For a container which has IsEmpty() interface, it would not be attach if it is empty (i.e. no errors).
+// For a nil error object, it will be ignored.
 func WithErrors(errs ...error) Opt {
 	return func(s *builder) {
 		s.WithErrors(errs...)
@@ -70,6 +72,8 @@ type Builder interface {
 	// WithSkip specifies a special number of stack frames that will be ignored.
 	WithSkip(skip int) Builder
 	// WithErrors attaches the given errs as inner errors.
+	// For a container which has IsEmpty() interface, it would not be attach if it is empty (i.e. no errors).
+	// For a nil error object, it will be ignored.
 	WithErrors(errs ...error) Builder
 	// WithMessage formats the error message
 	WithMessage(message string, args ...interface{}) Builder
@@ -119,6 +123,8 @@ func (s *builder) WithMessage(message string, args ...interface{}) Builder {
 }
 
 // WithErrors attaches the given errs as inner errors.
+// For a container which has IsEmpty() interface, it would not be attach if it is empty (i.e. no errors).
+// For a nil error object, it will be ignored.
 func (s *builder) WithErrors(errs ...error) Builder {
 	_ = s.causes2.WithErrors(errs...)
 	return s

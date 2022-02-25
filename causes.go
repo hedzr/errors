@@ -60,12 +60,23 @@ func (w *causes2) Defer(err *error) {
 }
 
 // WithErrors appends errs
+//
 // WithStackInfo.Attach() can only wrap and hold one child error object.
+//
+// WithErrors attach child errors into an error container.
+// For a container which has IsEmpty() interface, it would not be attach if it is empty (i.e. no errors).
+// For a nil error object, it will be ignored.
 func (w *causes2) WithErrors(errs ...error) *causes2 {
 	if len(errs) > 0 {
 		for _, e := range errs {
 			if e != nil {
-				w.Causers = append(w.Causers, e)
+				if check, ok := e.(interface{ IsEmpty() bool }); ok {
+					if check.IsEmpty() == false {
+						w.Causers = append(w.Causers, e)
+					}
+				} else {
+					w.Causers = append(w.Causers, e)
+				}
 			}
 		}
 	}

@@ -56,6 +56,7 @@ type Buildable interface {
 	WithCode(code Code) Buildable
 	// WithErrors attaches the given errs as inner errors.
 	// WithErrors is like our old Attach().
+	//
 	// It wraps the inner errors into underlying container and
 	// represents them all in a singular up-level error object.
 	// The wrapped inner errors can be retrieved with errors.Causes:
@@ -75,6 +76,9 @@ type Buildable interface {
 	//          e = errors.Unwrap(err)
 	//      }
 	//
+	// WithErrors attach child errors into an error container.
+	// For a container which has IsEmpty() interface, it would not be attach if it is empty (i.e. no errors).
+	// For a nil error object, it will be ignored.
 	WithErrors(errs ...error) Buildable
 	// WithData appends errs if the general object is a error object.
 	// It can be used in defer-recover block typically. For example:
