@@ -21,6 +21,9 @@ import "gopkg.in/hedzr/errors.v3"
 
 ## History
 
+- v3.0.9
+  - fix: WithErrors will check IsEmpty on an error container and avoid adding it if empty.
+
 - v3.0.8
   - restore error message template
   - all features in v2 are restored with a new fluent style
