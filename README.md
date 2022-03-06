@@ -21,6 +21,9 @@ import "gopkg.in/hedzr/errors.v3"
 
 ## History
 
+- v3.0.10
+  - support go1.11-17,18+
+
 - v3.0.9
   - fix: WithErrors will check IsEmpty on an error container and avoid adding it if empty.
 
