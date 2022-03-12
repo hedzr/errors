@@ -188,6 +188,30 @@ func (w *WithStackInfo) Attach(errs ...error) {
 	_ = w.WithErrors(errs...)
 }
 
+// FormatWith _
+func (w *WithStackInfo) FormatWith(args ...interface{}) error {
+	c := w.Clone()
+	c.liveArgs = args
+	return c
+}
+
+// Clone _
+func (w *WithStackInfo) Clone() *WithStackInfo {
+	c := &WithStackInfo{
+		causes2: causes2{
+			Code:        w.causes2.Code,
+			Causers:     w.causes2.Causers,
+			msg:         w.causes2.msg,
+			unwrapIndex: w.causes2.unwrapIndex,
+			liveArgs:    w.causes2.liveArgs,
+		},
+		Stack:       w.Stack,
+		sites:       w.sites,
+		taggedSites: w.taggedSites,
+	}
+	return c
+}
+
 // Format formats the stack of Frames according to the fmt.Formatter interface.
 //
 //    %s	lists source files for each Frame in the stack

@@ -89,8 +89,22 @@ func (w *causes2) Attach(errs ...error) {
 }
 
 // FormatWith _
-func (w *WithStackInfo) FormatWith(args ...interface{}) {
-	w.liveArgs = args
+func (w *causes2) FormatWith(args ...interface{}) error {
+	c := w.Clone()
+	c.liveArgs = args
+	return c
+}
+
+// Clone _
+func (w *causes2) Clone() *causes2 {
+	c := &causes2{
+		Code:        w.Code,
+		Causers:     w.Causers,
+		msg:         w.msg,
+		unwrapIndex: w.unwrapIndex,
+		liveArgs:    w.liveArgs,
+	}
+	return c
 }
 
 func (w *causes2) Error() string {
