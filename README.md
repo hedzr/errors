@@ -21,6 +21,9 @@ import "gopkg.in/hedzr/errors.v3"
 
 ## History
 
+- v3.0.11
+  - changed the `FormatWith` interface to support error template feature.
+
 - v3.0.10
   - support go1.11-17,18+
 
