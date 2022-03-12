@@ -82,8 +82,11 @@ These features are supported for compatibilities.
 - Inner errors  
   We like the flatter inner errors more than the cascade chain, so the `Format("%w)` is a so-so approach to collect the errors. We believe the error slice is a better choice.
 - Unwrap inner errors one by one
+- Error Template
 
 ## Best Practices
+
+### Basics
 
 ```go
 package test
@@ -162,7 +165,11 @@ func TestForExample(t *testing.T) {
     }
   }
 }
+```
 
+### Error Container (Inner/Nested)
+
+```go
 func TestContainer(t *testing.T) {
   // as a inner errors container
   child := func() (err error) {
@@ -188,16 +195,19 @@ func TestContainer(t *testing.T) {
   err := child()
   t.Logf("failed: %+v", err)
 }
+```
 
-func TestTemplateFormat(t *testing.T) {
-  err := errors.New("cannot set: %v (%v) -> %v (%v)")
+### TestErrorsTmpl
 
-  err.FormatWith("a", "b", "c", "d")
-  t.Logf("Error: %v", err)
-  t.Logf("Error: %+v", err)
+```go
+func TestErrorsTmpl(t *testing.T) {
+var errTmpl = errors.New("expecting %v but got %v")
 
-  err.FormatWith("1", "2", "3", "4")
-  t.Logf("Error: %v", err)
+	var err error
+	err = errTmpl.FormatWith("789", "123")
+	t.Logf("The error is: %v", err)
+	err = errTmpl.FormatWith(true, false)
+	t.Logf("The error is: %v", err)
 }
 ```
 
