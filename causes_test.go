@@ -88,3 +88,23 @@ func TestAsAContainer(t *testing.T) {
 	err := child()
 	t.Logf("failed: %+v", err)
 }
+
+func TestIsDescended(t *testing.T) {
+	err1 := &causes2{
+		Code:    Internal,
+		Causers: nil,
+		msg:     "ui err %v",
+	}
+
+	err2 := err1.FormatWith("1st")
+	if !IsDescended(err1, err2) {
+		t.Fatalf("bad test on IsDescended(err1, err2)")
+	}
+
+	err3 := New("any error tmpl with %v")
+	err4 := err3.FormatWith("huahua")
+	if !IsDescended(err3, err4) {
+		t.Fatalf("bad test on IsDescended(err3, err4)")
+	}
+
+}
