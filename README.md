@@ -197,7 +197,10 @@ func TestContainer(t *testing.T) {
 }
 ```
 
-### TestErrorsTmpl
+### Error Template
+
+We could *declare* a message template at first and format it with live args
+to build an error instantly.
 
 ```go
 func TestErrorsTmpl(t *testing.T) {
@@ -208,6 +211,19 @@ var errTmpl = errors.New("expecting %v but got %v")
 	t.Logf("The error is: %v", err)
 	err = errTmpl.FormatWith(true, false)
 	t.Logf("The error is: %v", err)
+}
+```
+
+The derived error instance is the descendant of the error template.
+This relation can be tested by `errors.IsDescent(errTempl, err)`
+
+```go
+func TestIsDescended(t *testing.T) {
+	err3 := New("any error tmpl with %v")
+	err4 := err3.FormatWith("huahua")
+	if !IsDescended(err3, err4) {
+		t.Fatalf("bad test on IsDescended(err3, err4)")
+	}
 }
 ```
 
