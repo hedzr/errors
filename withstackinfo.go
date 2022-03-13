@@ -15,6 +15,13 @@ type WithStackInfo struct {
 	taggedSites map[string]interface{}
 }
 
+func (w *WithStackInfo) IsDescended(descendant error) bool {
+	if e, ok := descendant.(*WithStackInfo); ok {
+		return e.Code == w.Code && e.msg == w.msg
+	}
+	return false
+}
+
 // WithStack annotates err with a Stack trace at the point WithStack was called.
 // If err is nil, WithStack returns nil.
 func WithStack(cause error) error {

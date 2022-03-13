@@ -219,6 +219,22 @@ func (w *causes2) Reset() {
 	w.unwrapIndex = 0
 }
 
+// IsDescended test if ancestor is an error template and descendant
+// is derived from it by calling ancestor.FormatWith.
+func IsDescended(ancestor, descendant error) bool {
+	if a, ok := ancestor.(interface{ IsDescended(descendant error) bool }); ok {
+		return a.IsDescended(descendant)
+	}
+	return false
+}
+
+func (w *causes2) IsDescended(descendant error) bool {
+	if e, ok := descendant.(*causes2); ok {
+		return e.Code == w.Code && e.msg == w.msg
+	}
+	return false
+}
+
 func (w *causes2) Is(target error) bool {
 	if w.Code != OK {
 		if c, ok := target.(Code); ok && c == w.Code {
