@@ -127,13 +127,15 @@ func (w *causes2) Error() string {
 		buf.WriteString(w.Code.String())
 		needclose = true
 		needsep = true
-	} else if len(w.Causers) > 0 {
+	}
+	if len(w.Causers) > 0 {
 		if buf.Len() > 0 {
 			buf.WriteRune(' ')
 		}
 		buf.WriteString("[")
 		needclose = true
 	}
+
 	for i, c := range w.Causers {
 		if i > 0 || needsep {
 			buf.WriteString(" | ")
