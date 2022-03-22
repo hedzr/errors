@@ -21,6 +21,13 @@ import "gopkg.in/hedzr/errors.v3"
 
 ## History
 
+- v3.0.15
+  - fix: make Is() work for go1.12 and below
+
+- v3.0.13
+  - fea: IsDescended for error template test
+  - fix: code and causes are present at same time
+
 - v3.0.11
   - changed the `FormatWith` interface to support error template feature.
 
