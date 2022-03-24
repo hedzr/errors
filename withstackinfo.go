@@ -114,6 +114,12 @@ func (w *WithStackInfo) WithCode(code Code) Buildable {
 //
 func (w *WithStackInfo) WithErrors(errs ...error) Buildable {
 	_ = w.causes2.WithErrors(errs...)
+
+	//for _, e := range errs {
+	//	if e1, ok := e.(*WithStackInfo); ok {
+	//		w.Stack = e1.Stack
+	//	}
+	//}
 	return w
 }
 
@@ -135,6 +141,9 @@ func (w *WithStackInfo) WithData(errs ...interface{}) Buildable {
 		for _, e := range errs {
 			if e1, ok := e.(error); ok {
 				_ = w.WithErrors(e1)
+				if e1, ok := e.(*WithStackInfo); ok {
+					w.Stack = e1.Stack
+				}
 			} else if e != nil {
 				w.sites = append(w.sites, e)
 			}
