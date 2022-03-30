@@ -191,7 +191,7 @@ func (w *WithStackInfo) WithCause(cause error) Buildable {
 //    }
 //
 func (w *WithStackInfo) Defer(err *error) {
-	if !w.IsEmpty() || w.Code != OK {
+	if !w.IsEmpty() { // no inner errors attached into an error container, that assumed 'is empty'
 		*err = w
 	}
 }
