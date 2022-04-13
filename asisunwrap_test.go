@@ -7,6 +7,23 @@ import (
 	"testing"
 )
 
+func TestErrorCodeIs(t *testing.T) {
+	var err error = BadRequest
+	if !Is(err, BadRequest) {
+		t.Fatalf("want is")
+	}
+
+	err = io.ErrClosedPipe
+	if Is(err, BadRequest) {
+		t.Fatalf("want not is")
+	}
+
+	err = NotFound
+	if Is(err, BadRequest) {
+		t.Fatalf("want not is (code)")
+	}
+}
+
 // TestErrorsIs _
 func TestErrorsIs(t *testing.T) {
 	_, err := strconv.ParseFloat("hello", 64)
@@ -97,7 +114,7 @@ func TestWrap(t *testing.T) {
 	err = Wrap(Internal, "hello, %v", "world")
 	t.Logf("failed: %+v", err)
 
-	Unwrap(io.EOF)
+	_ = Unwrap(io.EOF)
 }
 
 func TestTypeIsSlice(t *testing.T) {
@@ -157,24 +174,24 @@ func TestTypeIsSlice(t *testing.T) {
 func TestAsRaisePanic(t *testing.T) {
 
 	t.Run("1", func(t *testing.T) {
-		defer func() { recover() }()
+		defer func() { recover() }() //nolint:errcheck
 		As(nil, nil)
 	})
 
 	t.Run("2", func(t *testing.T) {
-		defer func() { recover() }()
+		defer func() { recover() }() //nolint:errcheck
 		var v int
 		As(nil, &v)
 	})
 
 	t.Run("3", func(t *testing.T) {
-		defer func() { recover() }()
+		defer func() { recover() }() //nolint:errcheck
 		var err error
 		As(nil, &err)
 	})
 
 	t.Run("4", func(t *testing.T) {
-		defer func() { recover() }()
+		defer func() { recover() }() //nolint:errcheck
 		var err int
 		As(nil, err)
 	})
@@ -184,24 +201,24 @@ func TestAsRaisePanic(t *testing.T) {
 func TestAsSliceRaisePanic(t *testing.T) {
 
 	t.Run("1", func(t *testing.T) {
-		defer func() { recover() }()
+		defer func() { recover() }() //nolint:errcheck
 		AsSlice(nil, nil)
 	})
 
 	t.Run("2", func(t *testing.T) {
-		defer func() { recover() }()
+		defer func() { recover() }() //nolint:errcheck
 		var v int
 		AsSlice(nil, &v)
 	})
 
 	t.Run("3", func(t *testing.T) {
-		defer func() { recover() }()
+		defer func() { recover() }() //nolint:errcheck
 		var err error
 		AsSlice(nil, &err)
 	})
 
 	t.Run("4", func(t *testing.T) {
-		defer func() { recover() }()
+		defer func() { recover() }() //nolint:errcheck
 		var err int
 		AsSlice(nil, err)
 	})

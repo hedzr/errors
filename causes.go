@@ -71,7 +71,7 @@ func (w *causes2) WithErrors(errs ...error) *causes2 {
 		for _, e := range errs {
 			if e != nil {
 				if check, ok := e.(interface{ IsEmpty() bool }); ok {
-					if check.IsEmpty() == false {
+					if !check.IsEmpty() {
 						w.Causers = append(w.Causers, e)
 					}
 				} else {

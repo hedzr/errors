@@ -6,11 +6,11 @@ import (
 	"testing"
 )
 
-type bizErr struct {
+type bizErr struct { //nolint:unused
 	num int
 }
 
-func (e *bizErr) Error() string {
+func (e *bizErr) Error() string { //nolint:unused
 	return fmt.Sprintf("%v", e.num)
 }
 
@@ -29,11 +29,11 @@ func TestCode_Register(t *testing.T) {
 	c := Code(111)
 	t.Logf("failed: %+v", c)
 
-	c.Register("Code111")
+	_ = c.Register("Code111")
 	t.Logf("failed: %+v", c)
 }
 
-//func TestCodeEqual(t *testing.T) {
+// func TestCodeEqual(t *testing.T) {
 //	be := &bizErr{1}
 //	err := InvalidArgument.New("wrong").Attach(be)
 //
@@ -46,9 +46,9 @@ func TestCode_Register(t *testing.T) {
 //	if !Equal(e1, InvalidArgument) {
 //		t.Fatal("expecting e1 is equal to InvalidArgument")
 //	}
-//}
+// }
 //
-//func TestCodeAsIsAndSoOn(t *testing.T) {
+// func TestCodeAsIsAndSoOn(t *testing.T) {
 //	be := &bizErr{1}
 //	err := InvalidArgument.New("wrong").Attach(be)
 //
@@ -61,9 +61,9 @@ func TestCode_Register(t *testing.T) {
 //	if !err.Is(be) {
 //		t.Fatal("WithCodeInfo.Is() failed.")
 //	}
-//}
+// }
 
-//func TestCodes(t *testing.T) {
+// func TestCodes(t *testing.T) {
 //	be := &bizErr{1}
 //	err := InvalidArgument.New("wrong").Attach(be)
 //	t.Log(err)
@@ -84,7 +84,7 @@ func TestCode_Register(t *testing.T) {
 //	if old.Is(err, io.EOF) {
 //		t.Fatal("wrong Is(): shouldn't be like to io.EOF")
 //	}
-//}
+// }
 
 func TestCodesEqual(t *testing.T) {
 	err := InvalidArgument.New("wrong").WithErrors(io.ErrShortWrite)

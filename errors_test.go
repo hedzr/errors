@@ -50,8 +50,8 @@ func TestNew(t *testing.T) {
 	t.Logf("failed: %+v", err)
 
 	// since v3.0.5, Attach() has no return value
-	//err = New("hello").Attach(io.EOF)
-	//t.Logf("failed: %+v", err)
+	// err = New("hello").Attach(io.EOF)
+	// t.Logf("failed: %+v", err)
 
 }
 
@@ -108,10 +108,10 @@ func TestWithStackInfo_New(t *testing.T) {
 func TestTemplateFormat(t *testing.T) {
 	err := New("cannot set: %v (%v) -> %v (%v)")
 
-	err.FormatWith("a", "b", "c", "d")
+	_ = err.FormatWith("a", "b", "c", "d")
 	t.Logf("Error: %v", err)
 	t.Logf("Error: %+v", err)
 
-	err.FormatWith("1", "2", "3", "4")
+	_ = err.FormatWith("1", "2", "3", "4")
 	t.Logf("Error: %v", err)
 }

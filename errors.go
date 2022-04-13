@@ -9,14 +9,14 @@ func New(args ...interface{}) Error {
 
 	if len(args) > 0 {
 		if message, ok := args[0].(string); ok {
-			return s.WithSkip(2).WithMessage(message, args[1:]...).Build().(Error)
+			return s.WithSkip(2).WithMessage(message, args[1:]...).Build()
 		}
 		for _, opt := range args {
 			if o, ok := opt.(Opt); ok {
 				o(s)
 			}
 		}
-		return s.Build().(Error)
+		return s.Build()
 	}
 
 	return &WithStackInfo{Stack: callers(1)}
@@ -107,11 +107,11 @@ func (s *builder) WithCode(code Code) Builder {
 	return s
 }
 
-//// Attach attaches the given errs as inner errors.
-//// For backward compatibility to v2
-//func (s *builder) Attach(errs ...error) Buildable {
+// // Attach attaches the given errs as inner errors.
+// // For backward compatibility to v2
+// func (s *builder) Attach(errs ...error) Buildable {
 //	return s.WithErrors(errs...).Build()
-//}
+// }
 
 // WithMessage formats the error message
 func (s *builder) WithMessage(message string, args ...interface{}) Builder {

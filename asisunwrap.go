@@ -70,7 +70,7 @@ func AsSlice(errs []error, target interface{}) bool {
 		if x, ok := err.(interface{ As(interface{}) bool }); ok && x.As(target) {
 			return true
 		}
-		err = Unwrap(err)
+		err = Unwrap(err) //nolint:ineffassign,staticcheck
 	}
 	return false
 }
@@ -99,9 +99,9 @@ func Is(err, target error) bool {
 		if x, ok := err.(interface{ Is(error) bool }); ok && x.Is(target) {
 			return true
 		}
-		if ok := As(err, &target); ok {
-			return true
-		}
+		// if ok := As(err, &target); ok {
+		// 	return true
+		// }
 		// TODO: consider supporting target.Is(err). This would allow
 		// user-definable predicates, but also may allow for coping with sloppy
 		// APIs, thereby making it easier to get away with them.
@@ -114,11 +114,11 @@ func Is(err, target error) bool {
 // IsSlice tests err.Is for errs slice
 func IsSlice(errs []error, target error) bool {
 	if target == nil {
-		//for _, e := range errs {
+		// for _, e := range errs {
 		//	if e == target {
 		//		return true
 		//	}
-		//}
+		// }
 		return false
 	}
 
@@ -137,11 +137,11 @@ func IsSlice(errs []error, target error) bool {
 			if x, ok := e.(interface{ Is(error) bool }); ok && x.Is(target) {
 				return true
 			}
-			//if err := Unwrap(e); err == nil {
+			// if err := Unwrap(e); err == nil {
 			//	return false
-			//}
+			// }
 		}
-		return false
+		return false //nolint:staticcheck
 	}
 }
 
@@ -179,11 +179,11 @@ func TypeIs(err, target error) bool {
 // TypeIsSlice tests err.Is for errs slice
 func TypeIsSlice(errs []error, target error) bool {
 	if target == nil {
-		//for _, e := range errs {
+		// for _, e := range errs {
 		//	if e == target {
 		//		return true
 		//	}
-		//}
+		// }
 		return false
 	}
 
@@ -192,9 +192,9 @@ func TypeIsSlice(errs []error, target error) bool {
 		if isComparable {
 			tt := reflect.TypeOf(target)
 			for _, e := range errs {
-				//if e == target {
+				// if e == target {
 				//	return true
-				//}
+				// }
 				if reflect.TypeOf(e) == tt {
 					return true
 				}
@@ -206,11 +206,11 @@ func TypeIsSlice(errs []error, target error) bool {
 			if x, ok := e.(interface{ Is(error) bool }); ok && x.Is(target) {
 				return true
 			}
-			//if err := Unwrap(e); err == nil {
+			// if err := Unwrap(e); err == nil {
 			//	return false
-			//}
+			// }
 		}
-		return false
+		return false //nolint:staticcheck
 	}
 }
 
