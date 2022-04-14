@@ -22,6 +22,15 @@ func TestErrorCodeIs(t *testing.T) {
 	if Is(err, BadRequest) {
 		t.Fatalf("want not is (code)")
 	}
+
+	//
+
+	_, err = strconv.ParseInt("hello", 10, 64)
+	if Is(err, strconv.ErrSyntax) || Is(err, strconv.ErrRange) {
+		t.Logf("'%v' recoganized OK.", err)
+	} else {
+		t.Fatalf("'%+v' CANNOT be recoganized", err)
+	}
 }
 
 // TestErrorsIs _
