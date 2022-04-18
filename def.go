@@ -77,17 +77,22 @@ type Buildable interface {
 	//      }
 	//
 	// WithErrors attach child errors into an error container.
-	// For a container which has IsEmpty() interface, it would not be attach if it is empty (i.e. no errors).
+	// For a container which has IsEmpty() interface, it would not be
+	// attached if it is empty (i.e. no errors).
 	// For a nil error object, it will be ignored.
 	WithErrors(errs ...error) Buildable
 	// WithData appends errs if the general object is a error object.
-	// It can be used in defer-recover block typically. For example:
+	//
+	// StackTrace of errs will be copied to callee so that you can get a
+	// trace output nearer by the last error.
+	//
+	// defer-recover block typically is a better place of WithData(). For example:
 	//
 	//    defer func() {
 	//      if e := recover(); e != nil {
 	//        err = errors.New("[recovered] copyTo unsatisfied ([%v] %v -> [%v] %v), causes: %v",
 	//          c.indirectType(from.Type()), from, c.indirectType(to.Type()), to, e).
-	//          WithData(e)
+	//          WithData(e)                 // StackTrace of e -> err
 	//        n := log.CalcStackFrames(1)   // skip defer-recover frame at first
 	//        log.Skip(n).Errorf("%v", err) // skip go-lib frames and defer-recover frame, back to the point throwing panic
 	//      }
@@ -194,6 +199,10 @@ type Container interface {
 // Attachable _
 type Attachable interface {
 	// Attach collects the errors except it's nil
+	//
+	// StackTrace of errs will be copied to callee so that you can get a
+	// trace output nearer by the last error.
+	//
 	Attach(errs ...error)
 }
 

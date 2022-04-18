@@ -98,8 +98,27 @@ func (w *WithStackInfo) WithCode(code Code) Buildable {
 	return w.rebuild()
 }
 
+// Attach collects the errors except it's nil
+//
+// StackTrace of errs will be copied to callee so that you can get a
+// trace output nearer by the last error.
+//
+// Since v3.0.5, we break Attach() and remove its returning value.
+// So WithStackInfo is a Container compliant type now.
+func (w *WithStackInfo) Attach(errs ...error) {
+	_ = w.WithErrors(errs...)
+
+	for _, e := range errs {
+		if e1, ok := e.(*WithStackInfo); ok {
+			w.Stack = e1.Stack
+		}
+	}
+}
+
 // WithErrors attaches the given errs as inner errors.
-// WithErrors is like our old Attach().
+//
+// WithErrors is like our old version of Attach().
+//
 // It wraps the inner errors into underlying container and
 // represents them all in a singular up-level error object.
 // The wrapped inner errors can be retrieved with errors.Causes:
@@ -115,22 +134,26 @@ func (w *WithStackInfo) WithCode(code Code) Buildable {
 func (w *WithStackInfo) WithErrors(errs ...error) Buildable {
 	_ = w.causes2.WithErrors(errs...)
 
-	//for _, e := range errs {
+	// for _, e := range errs {
 	//	if e1, ok := e.(*WithStackInfo); ok {
 	//		w.Stack = e1.Stack
 	//	}
-	//}
+	// }
 	return w
 }
 
 // WithData appends errs if the general object is a error object.
-// It can be used in defer-recover block typically. For example:
+//
+// StackTrace of errs will be copied to callee so that you can get a
+// trace output nearer by the last error.
+//
+// defer-recover block typically is a better place of WithData(). For example:
 //
 //    defer func() {
 //      if e := recover(); e != nil {
 //        err = errors.New("[recovered] copyTo unsatisfied ([%v] %v -> [%v] %v), causes: %v",
 //          c.indirectType(from.Type()), from, c.indirectType(to.Type()), to, e).
-//          WithData(e)
+//          WithData(e)                 // StackTrace of e -> err
 //        n := log.CalcStackFrames(1)   // skip defer-recover frame at first
 //        log.Skip(n).Errorf("%v", err) // skip go-lib frames and defer-recover frame, back to the point throwing panic
 //      }
@@ -196,14 +219,6 @@ func (w *WithStackInfo) Defer(err *error) {
 	}
 }
 
-// Attach collects the errors except it's nil
-//
-// Since v3.0.5, we break Attach() and remove its returning value.
-// So WithStackInfo is a Container compliant type now.
-func (w *WithStackInfo) Attach(errs ...error) {
-	_ = w.WithErrors(errs...)
-}
-
 // FormatWith _
 func (w *WithStackInfo) FormatWith(args ...interface{}) error {
 	c := w.Clone()
@@ -266,25 +281,25 @@ func (w *WithStackInfo) Format(s fmt.State, verb rune) {
 	}
 }
 
-//// Is reports whether any error in `err`'s chain matches target.
-//func (w *WithStackInfo) Is(target error) bool {
+// // Is reports whether any error in `err`'s chain matches target.
+// func (w *WithStackInfo) Is(target error) bool {
 //	if x, ok := w.error.(interface{ Is(error) bool }); ok && x.Is(target) {
 //		return true
 //	}
 //	return w.error == target
-//}
+// }
 
-//// TypeIs reports whether any error in `err`'s chain matches target.
-//func (w *WithStackInfo) TypeIs(target error) bool {
+// // TypeIs reports whether any error in `err`'s chain matches target.
+// func (w *WithStackInfo) TypeIs(target error) bool {
 //	if x, ok := w.error.(interface{ TypeIs(error) bool }); ok && x.TypeIs(target) {
 //		return true
 //	}
 //	return w.error == target
-//}
+// }
 
-//// As finds the first error in `err`'s chain that matches target, and if so, sets
-//// target to that error value and returns true.
-//func (w *WithStackInfo) As(target interface{}) bool {
+// // As finds the first error in `err`'s chain that matches target, and if so, sets
+// // target to that error value and returns true.
+// func (w *WithStackInfo) As(target interface{}) bool {
 //	return As(w.error, target)
 //	//if target == nil {
 //	//	panic("errors: target cannot be nil")
@@ -310,12 +325,12 @@ func (w *WithStackInfo) Format(s fmt.State, verb rune) {
 //	//	err = Unwrap(err)
 //	//}
 //	//return false
-//}
+// }
 
-//// Unwrap returns the result of calling the Unwrap method on err, if
-//// `err`'s type contains an Unwrap method returning error.
-//// Otherwise, Unwrap returns nil.
-//func (w *WithStackInfo) Unwrap() error {
+// // Unwrap returns the result of calling the Unwrap method on err, if
+// // `err`'s type contains an Unwrap method returning error.
+// // Otherwise, Unwrap returns nil.
+// func (w *WithStackInfo) Unwrap() error {
 //	if w.error != nil {
 //		return w.error
 //	}
@@ -323,12 +338,12 @@ func (w *WithStackInfo) Format(s fmt.State, verb rune) {
 //	//	return x.Unwrap()
 //	//}
 //	return nil
-//}
+// }
 
-//// IsEmpty tests has attached errors
-//func (w *WithStackInfo) IsEmpty() bool {
+// // IsEmpty tests has attached errors
+// func (w *WithStackInfo) IsEmpty() bool {
 //	if x, ok := w.error.(interface{ IsEmpty() bool }); ok {
 //		return x.IsEmpty()
 //	}
 //	return false
-//}
+// }
