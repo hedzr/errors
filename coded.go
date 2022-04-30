@@ -151,7 +151,7 @@ const (
 	// Timeout generates a Timeout error.
 	Timeout Code = -23
 
-	// MinErrorCode is the lower bound
+	// MinErrorCode is the lower bound for user-defined Code.
 	MinErrorCode Code = -1000
 )
 
@@ -246,6 +246,49 @@ func (c Code) Register(codeName string) (errno Code) {
 				errno = OK
 			}
 		}
+	}
+	return
+}
+
+// RegisterCode makes a code integer associated with a name, and
+// returns the available Code number.
+//
+// When a positive integer given as codePositive (such as 3),
+// it'll be negatived and added errors.MinErrorCode (-1000) so
+// the final Code number will be -1003.
+//
+// When a negative integer given and it's less than
+// errors.MinErrorCode, it'll be used as it.
+// Or an errors.AlreadyExists returned.
+//
+// A existing code will be returned directly.
+//
+// RegisterCode provides a shortcut to declare a number as Code
+// as your need.
+//
+// The best way is:
+//
+//     var ErrAck = errors.RegisterCode(3, "cannot ack")     // ErrAck will be -1003
+//     var ErrAck = errors.RegisterCode(-1003, "cannot ack)  // equivelant with last line
+//
+func RegisterCode(codePositive int, codeName string) (errno Code) {
+	errno = AlreadyExists
+	applier := func(c Code) {
+		if v, ok := strToCode[codeName]; !ok {
+			if _, ok = codeToStr[c]; !ok {
+				strToCode[codeName] = c
+				codeToStr[c] = codeName
+				errno = c
+			}
+		} else {
+			errno = v
+		}
+	}
+	if codePositive > 0 {
+		c := MinErrorCode - Code(codePositive)
+		applier(c)
+	} else if c := Code(codePositive); c < MinErrorCode {
+		applier(c)
 	}
 	return
 }
