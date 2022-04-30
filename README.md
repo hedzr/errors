@@ -21,6 +21,14 @@ import "gopkg.in/hedzr/errors.v3"
 
 ## History
 
+- v3.0.21 ..
+    - add: `RegisterCode()` at top level for initialize user-defined Coded decl
+    - godoc and fix/imp Attach() to copy inner errors' StackTrace
+    - fix Is(): Is(err, errors.BadRequest) might be dead lock or cannot return the test result probably
+    - new lint + fmr
+    - imp: remove redundant codes
+    - update withStackInfo.Stack with WithData() - specially for defer recover codes
+
 - v3.0.15
   - fix: make Is() work for go1.12 and below
 
