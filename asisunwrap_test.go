@@ -183,24 +183,24 @@ func TestTypeIsSlice(t *testing.T) {
 func TestAsRaisePanic(t *testing.T) {
 
 	t.Run("1", func(t *testing.T) {
-		defer func() { recover() }() //nolint:errcheck
+		defer func() { recover() }() //nolint:errcheck //no need
 		As(nil, nil)
 	})
 
 	t.Run("2", func(t *testing.T) {
-		defer func() { recover() }() //nolint:errcheck
+		defer func() { recover() }() //nolint:errcheck //no need
 		var v int
 		As(nil, &v)
 	})
 
 	t.Run("3", func(t *testing.T) {
-		defer func() { recover() }() //nolint:errcheck
+		defer func() { recover() }() //nolint:errcheck //no need
 		var err error
 		As(nil, &err)
 	})
 
 	t.Run("4", func(t *testing.T) {
-		defer func() { recover() }() //nolint:errcheck
+		defer func() { recover() }() //nolint:errcheck //no need
 		var err int
 		As(nil, err)
 	})
@@ -210,24 +210,24 @@ func TestAsRaisePanic(t *testing.T) {
 func TestAsSliceRaisePanic(t *testing.T) {
 
 	t.Run("1", func(t *testing.T) {
-		defer func() { recover() }() //nolint:errcheck
+		defer func() { recover() }() //nolint:errcheck //no need
 		AsSlice(nil, nil)
 	})
 
 	t.Run("2", func(t *testing.T) {
-		defer func() { recover() }() //nolint:errcheck
+		defer func() { recover() }() //nolint:errcheck //no need
 		var v int
 		AsSlice(nil, &v)
 	})
 
 	t.Run("3", func(t *testing.T) {
-		defer func() { recover() }() //nolint:errcheck
+		defer func() { recover() }() //nolint:errcheck //no need
 		var err error
 		AsSlice(nil, &err)
 	})
 
 	t.Run("4", func(t *testing.T) {
-		defer func() { recover() }() //nolint:errcheck
+		defer func() { recover() }() //nolint:errcheck //no need
 		var err int
 		AsSlice(nil, err)
 	})

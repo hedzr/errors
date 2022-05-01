@@ -6,11 +6,11 @@ import (
 	"testing"
 )
 
-type bizErr struct { //nolint:unused
+type bizErr struct { //nolint:unused //usable
 	num int
 }
 
-func (e *bizErr) Error() string { //nolint:unused
+func (e *bizErr) Error() string { //nolint:unused //usable
 	return fmt.Sprintf("%v", e.num)
 }
 
