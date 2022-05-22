@@ -4,6 +4,15 @@ import "fmt"
 
 // New returns an error with the supplied message.
 // New also records the Stack trace at the point where it was called.
+//
+// New supports two kind of args: an Opt option or a message format
+// with variadic args.
+//
+// Sample 1:
+//    var err = errors.New("message here: %s", "hello")
+// Sample 2:
+//    var err = errors.New(errors.WithErrors(errs...))
+//    var err = errors.New(errors.WithStack(cause))
 func New(args ...interface{}) Error {
 	s := &builder{skip: 1}
 
@@ -26,15 +35,18 @@ func New(args ...interface{}) Error {
 type Opt func(s *builder)
 
 // WithErrors attach child errors into an error container.
-// For a container which has IsEmpty() interface, it would not be attach if it is empty (i.e. no errors).
+// For a container which has IsEmpty() interface, it would not be
+// attached if it is empty (i.e. no errors).
 // For a nil error object, it will be ignored.
+//
 func WithErrors(errs ...error) Opt {
 	return func(s *builder) {
 		s.WithErrors(errs...)
 	}
 }
 
-// Skip sets how many frames will be ignored while we are extracting the stacktrace info.
+// Skip sets how many frames will be ignored while we are extracting
+// the stacktrace info.
 // Skip starts a builder with fluent API style, so you could continue
 // build the error what you want:
 //
@@ -44,7 +56,8 @@ func Skip(skip int) Builder {
 	return &builder{skip: skip}
 }
 
-// Message formats a message and starts a builder to create the final error object.
+// Message formats a message and starts a builder to create the final
+// error object.
 //
 //     err := errors.Message("hello %v", "you").Attach(causer).Build()
 func Message(message string, args ...interface{}) Builder {
@@ -66,13 +79,16 @@ func NewBuilder() Builder {
 	return &builder{skip: 1}
 }
 
-// Builder provides a fluent calling interface to make error building easy.
+// Builder provides a fluent calling interface to make error
+// building easy.
 type Builder interface {
 
-	// WithSkip specifies a special number of stack frames that will be ignored.
+	// WithSkip specifies a special number of stack frames that will
+	// be ignored.
 	WithSkip(skip int) Builder
 	// WithErrors attaches the given errs as inner errors.
-	// For a container which has IsEmpty() interface, it would not be attach if it is empty (i.e. no errors).
+	// For a container which has IsEmpty() interface, it would not
+	// be attached if it is empty (i.e. no errors).
 	// For a nil error object, it will be ignored.
 	WithErrors(errs ...error) Builder
 	// WithMessage formats the error message
@@ -80,7 +96,8 @@ type Builder interface {
 	// WithCode specifies an error code.
 	WithCode(code Code) Builder
 
-	// Build builds the final error object (with Buildable interface bound)
+	// Build builds the final error object (with Buildable interface
+	// bound)
 	Build() Error
 
 	// BREAK - Use WithErrors() for instead
@@ -95,7 +112,8 @@ type builder struct {
 	taggedSites TaggedData
 }
 
-// WithSkip specifies a special number of stack frames that will be ignored.
+// WithSkip specifies a special number of stack frames that will
+// be ignored.
 func (s *builder) WithSkip(skip int) Builder {
 	s.skip = skip
 	return s
@@ -123,7 +141,8 @@ func (s *builder) WithMessage(message string, args ...interface{}) Builder {
 }
 
 // WithErrors attaches the given errs as inner errors.
-// For a container which has IsEmpty() interface, it would not be attach if it is empty (i.e. no errors).
+// For a container which has IsEmpty() interface, it would not
+// be attached if it is empty (i.e. no errors).
 // For a nil error object, it will be ignored.
 func (s *builder) WithErrors(errs ...error) Builder {
 	_ = s.causes2.WithErrors(errs...)

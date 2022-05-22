@@ -64,7 +64,9 @@ func (w *causes2) Defer(err *error) {
 // WithStackInfo.Attach() can only wrap and hold one child error object.
 //
 // WithErrors attach child errors into an error container.
-// For a container which has IsEmpty() interface, it would not be attach if it is empty (i.e. no errors).
+// For a container which has IsEmpty() interface, it would not
+// be attached if it is empty (i.e. no errors).
+//
 // For a nil error object, it will be ignored.
 func (w *causes2) WithErrors(errs ...error) *causes2 {
 	if len(errs) > 0 {
@@ -248,8 +250,8 @@ func (w *causes2) TypeIs(target error) bool {
 	return TypeIsSlice(w.Causers, target)
 }
 
-// As finds the first error in `err`'s chain that matches target, and if so, sets
-// target to that error value and returns true.
+// As finds the first error in `err`'s chain that matches target,
+// and if so, sets target to that error value and returns true.
 func (w *causes2) As(target interface{}) bool {
 	if c, ok := target.(*Code); ok {
 		*c = w.Code

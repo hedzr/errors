@@ -6,7 +6,8 @@ type Error interface {
 	Buildable
 
 	// Data returns the wrapped common user data by Buildable.WithData.
-	// The error objects with passed Buildable.WithData will be moved
+	//
+	// The error objects with a passed Buildable.WithData will be moved
 	// into inner errors set, so its are excluded from Data().
 	Data() []interface{}
 	// TaggedData returns the wrapped tagged user data by
@@ -86,7 +87,9 @@ type Buildable interface {
 	// StackTrace of errs will be copied to callee so that you can get a
 	// trace output nearer by the last error.
 	//
-	// defer-recover block typically is a better place of WithData(). For example:
+	// defer-recover block typically is a better place of WithData().
+	//
+	// For example:
 	//
 	//    defer func() {
 	//      if e := recover(); e != nil {
@@ -105,7 +108,8 @@ type Buildable interface {
 	// WithCause sets the underlying error manually if necessary.
 	WithCause(cause error) Buildable
 
-	// End could terminate the with-build stream calls without any return value.
+	// End could terminate the with-build stream calls without any
+	// returned value.
 	End()
 
 	// Container _
@@ -200,8 +204,8 @@ type Container interface {
 type Attachable interface {
 	// Attach collects the errors except it's nil
 	//
-	// StackTrace of errs will be copied to callee so that you can get a
-	// trace output nearer by the last error.
+	// StackTrace of errs will be copied to callee so that you can
+	// get a trace output nearer by the last error.
 	//
 	Attach(errs ...error)
 }

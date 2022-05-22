@@ -4,7 +4,8 @@ import (
 	"runtime"
 )
 
-// DumpStacksAsString returns stack tracing information like debug.PrintStack()
+// DumpStacksAsString returns stack tracing information like
+// debug.PrintStack()
 func DumpStacksAsString(allRoutines bool) string {
 	buf := make([]byte, 16384)
 	buf = buf[:runtime.Stack(buf, allRoutines)]

@@ -18,28 +18,28 @@ const (
 	Unknown Code = -2
 
 	// InvalidArgument indicates client specified an invalid argument.
-	// Note that this differs from FailedPrecondition. It indicates arguments
-	// that are problematic regardless of the state of the system
-	// (e.g., a malformed file name).
+	// Note that this differs from FailedPrecondition. It indicates
+	// arguments that are problematic regardless of the state of the
+	// system (e.g., a malformed file name).
 	InvalidArgument Code = -3
 
 	// DeadlineExceeded means operation expired before completion.
-	// For operations that change the state of the system, this error may be
-	// returned even if the operation has completed successfully. For
-	// example, a successful response from a server could have been delayed
-	// long enough for the deadline to expire.
+	// For operations that change the state of the system, this error
+	// might be returned even if the operation has completed
+	// successfully. For example, a successful response from a server
+	// could have been delayed long enough for the deadline to expire.
 	//
 	// = HTTP 408 Timeout
 	DeadlineExceeded Code = -4
 
-	// NotFound means some requested entity (e.g., file or directory) was
-	// not found.
+	// NotFound means some requested entity (e.g., file or directory)
+	// wasn't found.
 	//
 	// = HTTP 404
 	NotFound Code = -5
 
-	// AlreadyExists means an attempt to create an entity failed because one
-	// already exists.
+	// AlreadyExists means an attempt to create an entity failed
+	// because one already exists.
 	AlreadyExists Code = -6
 
 	// PermissionDenied indicates the caller does not have permission to
@@ -50,8 +50,9 @@ const (
 	// instead for those errors).
 	PermissionDenied Code = -7
 
-	// ResourceExhausted indicates some resource has been exhausted, perhaps
-	// a per-user quota, or perhaps the entire file system is out of space.
+	// ResourceExhausted indicates some resource has been exhausted,
+	// perhaps a per-user quota, or perhaps the entire file system
+	// is out of space.
 	ResourceExhausted Code = -8
 
 	// FailedPrecondition indicates operation was rejected because the
@@ -111,8 +112,8 @@ const (
 
 	// Unavailable indicates the service is currently unavailable.
 	// This is a most likely a transient condition and may be corrected
-	// by retrying with a backoff. Note that it is not always safe to retry
-	// non-idempotent operations.
+	// by retrying with a backoff. Note that it is not always safe to
+	// retry non-idempotent operations.
 	//
 	// See litmus test above for deciding between FailedPrecondition,
 	// Aborted, and Unavailable.
@@ -127,15 +128,19 @@ const (
 	// = HTTP 401 Unauthorized
 	Unauthenticated Code = -16
 
-	// RateLimited indicates some flow control algorithm is running and applied.
+	// RateLimited indicates some flow control algorithm is running
+	// and applied.
+	//
 	// = HTTP Code 429
 	RateLimited Code = -17
 
 	// BadRequest generates a 400 error.
+	//
 	// = HTTP 400
 	BadRequest Code = -18
 
 	// Conflict generates a 409 error.
+	//
 	// = hTTP 409
 	Conflict Code = -19
 

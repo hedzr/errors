@@ -2,7 +2,8 @@
  * Copyright © 2019 Hedzr Yeh.
  */
 
-// Package errors provides some error handling primitives for wrapped, coded, messaged errors.
+// Package errors provides some error handling primitives for
+// wrapped, coded, messaged errors.
 //
 package errors
 

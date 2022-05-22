@@ -22,7 +22,9 @@ func (w *WithStackInfo) IsDescended(descendant error) bool {
 	return false
 }
 
-// WithStack annotates err with a Stack trace at the point WithStack was called.
+// WithStack annotates err with a Stack trace at the point WithStack
+// was called.
+//
 // If err is nil, WithStack returns nil.
 func WithStack(cause error) error {
 	if cause == nil {
@@ -36,11 +38,12 @@ func WithStack(cause error) error {
 // For instance, the construction of an error without warnings looks like:
 //
 //      err := New("hello %v", "world")
-//      _ = err.WithErrors(io.EOF, io.ErrShortWrite).
+//      _ = err.
+//          WithErrors(io.EOF, io.ErrShortWrite).
 //          WithErrors(io.ErrClosedPipe).
 //          WithCode(Internal)
 //
-// To avoid the `_ =`, you might belove with a End() call:
+// To avoid the `_ =`, you might beloved with a End() call:
 //
 //      err := New("hello %v", "world")
 //      err.WithErrors(io.EOF, io.ErrShortWrite).
@@ -78,7 +81,8 @@ func (w *WithStackInfo) rebuild() Buildable {
 	return w
 }
 
-// WithSkip specifies a special number of stack frames that will be ignored.
+// WithSkip specifies a special number of stack frames that will
+// be ignored.
 func (w *WithStackInfo) WithSkip(skip int) Buildable {
 	w.Stack = callers(skip)
 	return w
@@ -147,7 +151,9 @@ func (w *WithStackInfo) WithErrors(errs ...error) Buildable {
 // StackTrace of errs will be copied to callee so that you can get a
 // trace output nearer by the last error.
 //
-// defer-recover block typically is a better place of WithData(). For example:
+// defer-recover block typically is a better place of WithData().
+//
+// For example:
 //
 //    defer func() {
 //      if e := recover(); e != nil {
@@ -245,8 +251,8 @@ func (w *WithStackInfo) Clone() *WithStackInfo {
 
 // Format formats the stack of Frames according to the fmt.Formatter interface.
 //
-//    %s	lists source files for each Frame in the stack
-//    %v	lists the source file and line number for each Frame in the stack
+//    %s   lists source files for each Frame in the stack
+//    %v   lists the source file and line number for each Frame in the stack
 //
 // Format accepts flags that alter the printing of some verbs, as follows:
 //
