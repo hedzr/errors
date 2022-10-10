@@ -78,6 +78,16 @@ func AsSlice(errs []error, target interface{}) bool {
 
 var errorType = reflect.TypeOf((*error)(nil)).Elem()
 
+// IsAnyOf tests whether any of `targets` is in `err`.
+func IsAnyOf(err error, targets ...error) bool {
+	for _, tgt := range targets {
+		if Is(err, tgt) {
+			return true
+		}
+	}
+	return false
+}
+
 // Is reports whether any error in `err`'s chain matches target.
 //
 // The chain consists of err itself followed by the sequence of
@@ -235,13 +245,12 @@ func TypeIsSlice(errs []error, target error) bool {
 //
 // Examples for Unwrap:
 //
-//      var err = errors.New("hello").WithErrors(io.EOF, io.ShortBuffers)
-//      var e error = err
-//      for e != nil {
-//          e = errors.Unwrap(err)
-//          // test if e is not nil and process it...
-//      }
-//
+//	var err = errors.New("hello").WithErrors(io.EOF, io.ShortBuffers)
+//	var e error = err
+//	for e != nil {
+//	    e = errors.Unwrap(err)
+//	    // test if e is not nil and process it...
+//	}
 func Unwrap(err error) error {
 	u, ok := err.(interface {
 		Unwrap() error
