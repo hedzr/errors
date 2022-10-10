@@ -172,7 +172,9 @@ type causers interface {
 // Container represents an error container which can hold a group
 // of inner errors.
 type Container interface {
-	// IsEmpty tests has attached errors
+	// IsEmpty returns true if Error is an error container which holded any inner errors.
+	//
+	// IsEmpty tests if it has any attached errors
 	IsEmpty() bool
 	// Defer can be used as a defer function to simplify your codes.
 	//
