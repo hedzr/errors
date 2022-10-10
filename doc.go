@@ -4,14 +4,13 @@
 
 // Package errors provides some error handling primitives for
 // wrapped, coded, messaged errors.
-//
 package errors
 
 const (
 	// AppName const
 	AppName = "errors"
 	// Version const
-	Version = "3.0.21"
+	Version = "3.0.23"
 	// VersionInt const
-	VersionInt = 0x030015
+	VersionInt = 0x030017
 )
