@@ -9,10 +9,17 @@ import "fmt"
 // with variadic args.
 //
 // Sample 1:
-//    var err = errors.New("message here: %s", "hello")
+//
+//	var err = errors.New("message here: %s", "hello")
+//
 // Sample 2:
-//    var err = errors.New(errors.WithErrors(errs...))
-//    var err = errors.New(errors.WithStack(cause))
+//
+//	var err = errors.New(errors.WithErrors(errs...))
+//	var err = errors.New(errors.WithStack(cause))
+//
+// Sample 3:
+//
+//	var err = errors.New().WithErrors(errs...)
 func New(args ...interface{}) Error {
 	s := &builder{skip: 1}
 
@@ -39,6 +46,9 @@ type Opt func(s *builder)
 // attached if it is empty (i.e. no errors).
 // For a nil error object, it will be ignored.
 //
+// Sample:
+//
+//	err := errors.New(errors.WithErrors(errs...))
 func WithErrors(errs ...error) Opt {
 	return func(s *builder) {
 		s.WithErrors(errs...)
@@ -50,8 +60,7 @@ func WithErrors(errs ...error) Opt {
 // Skip starts a builder with fluent API style, so you could continue
 // build the error what you want:
 //
-//     err := errors.Skip(1).Message("hello %v", "you").Build()
-//
+//	err := errors.Skip(1).Message("hello %v", "you").Build()
 func Skip(skip int) Builder {
 	return &builder{skip: skip}
 }
@@ -59,7 +68,7 @@ func Skip(skip int) Builder {
 // Message formats a message and starts a builder to create the final
 // error object.
 //
-//     err := errors.Message("hello %v", "you").Attach(causer).Build()
+//	err := errors.Message("hello %v", "you").Attach(causer).Build()
 func Message(message string, args ...interface{}) Builder {
 	return NewBuilder().WithMessage(message, args...)
 }
@@ -68,13 +77,12 @@ func Message(message string, args ...interface{}) Builder {
 //
 // Typically, you could make an error with fluent calls:
 //
-//    err = errors.NewBuilder().
-//    	WithCode(Internal).
-//    	WithErrors(io.EOF).
-//    	WithErrors(io.ErrShortWrite).
-//    	Build()
-//    t.Logf("failed: %+v", err)
-//
+//	err = errors.NewBuilder().
+//		WithCode(Internal).
+//		WithErrors(io.EOF).
+//		WithErrors(io.ErrShortWrite).
+//		Build()
+//	t.Logf("failed: %+v", err)
 func NewBuilder() Builder {
 	return &builder{skip: 1}
 }
@@ -152,16 +160,15 @@ func (s *builder) WithErrors(errs ...error) Builder {
 // WithData appends errs if the general object is a error object.
 // It can be used in defer-recover block typically. For example:
 //
-//    defer func() {
-//      if e := recover(); e != nil {
-//        err = errors.New("[recovered] copyTo unsatisfied ([%v] %v -> [%v] %v), causes: %v",
-//          c.indirectType(from.Type()), from, c.indirectType(to.Type()), to, e).
-//          WithData(e)
-//        n := log.CalcStackFrames(1)   // skip defer-recover frame at first
-//        log.Skip(n).Errorf("%v", err) // skip go-lib frames and defer-recover frame, back to the point throwing panic
-//      }
-//    }()
-//
+//	defer func() {
+//	  if e := recover(); e != nil {
+//	    err = errors.New("[recovered] copyTo unsatisfied ([%v] %v -> [%v] %v), causes: %v",
+//	      c.indirectType(from.Type()), from, c.indirectType(to.Type()), to, e).
+//	      WithData(e)
+//	    n := log.CalcStackFrames(1)   // skip defer-recover frame at first
+//	    log.Skip(n).Errorf("%v", err) // skip go-lib frames and defer-recover frame, back to the point throwing panic
+//	  }
+//	}()
 func (s *builder) WithData(errs ...interface{}) Builder {
 	s.sites = append(s.sites, errs...)
 	return s
