@@ -1,0 +1,60 @@
+# CHANGELOG
+
+- v3.1.0
+  - added `Join()` to compliant with go1.20 errors.Join
+  - reviewed all of testcases
+
+- v3.0.21 ..
+    - add: `RegisterCode()` at top level for initialize user-defined Coded decl
+    - godoc and fix/imp Attach() to copy inner errors' StackTrace
+    - fix Is(): Is(err, errors.BadRequest) might be dead lock or cannot return the test result probably
+    - new lint + fmr
+    - imp: remove redundant codes
+    - update withStackInfo.Stack with WithData() - specially for defer recover codes
+
+- v3.0.15
+  - fix: make Is() work for go1.12 and below
+
+- v3.0.13
+  - fea: IsDescended for error template test
+  - fix: code and causes are present at same time
+
+- v3.0.11
+  - changed the `FormatWith` interface to support error template feature.
+
+- v3.0.10
+  - support go1.11-17,18+
+
+- v3.0.9
+  - fix: WithErrors will check IsEmpty on an error container and avoid adding it if empty.
+
+- v3.0.8
+  - restore error message template
+  - all features in v2 are restored with a new fluent style
+
+- v3.0.7
+  - fix coverall upload
+  - godoc
+  - better sites/taggedsites output
+
+- v3.0.6
+  - back to master branch
+
+- v3.0.5
+  - break out `New(...).Attach(...)`, instead of `New(...).WithErrors(...)`, so that we can make the type architecture clearly and concisely.
+  - `Builable` and `Error` interface are the abstract representations about our error objects.
+  - bugs fixed
+  - more godoc
+
+- v3.0.3
+  - review the backward compatibilities
+
+- v3.0.0
+  - rewrite most codes and cleanup multiple small types
+  - use `New(...)` or `NewBuilder()` to make an error with code, message, inner error(s) and customizable stacktrace info.
+
+- v2.x
+
+- v1.x
+
+- v0.x

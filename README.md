@@ -7,19 +7,33 @@
 [![Coverage Status](https://coveralls.io/repos/github/hedzr/errors/badge.svg)](https://coveralls.io/github/hedzr/errors)
 [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fhedzr%2Ferrors.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fhedzr%2Ferrors?ref=badge_shield)
 
-Wrapped errors and more for golang developing (not just for go1.13+).
+Wrapped errors and more for golang developing (not just for go1.13+, go1.20+).
 
-`hedzr/errors` provides the compatbilities to your old project up to go 1.13.
+`hedzr/errors` provides the compatibilities to your old project up to go 1.20.
 
 `hedzr/errors` provides some extra enhancements for better context environment saving on error occurred.
 
-## Import
+## Features
 
-```go
-import "gopkg.in/hedzr/errors.v3"
-```
+- Simple migrating way from std errors: all of standard functions have been copied to
+- Better `New()`:
+  - format message inline: `err := errors.New("hello %s", "world")`
+  - format with `Opt`: `err := errors.New(errors.WithErrors(errs...))`
+  - cascade format: `err := errors.New().WithErrors(errs...)`
+  - Stacktrace awareness
+  - Container for canning errors: [Error Container (Inner/Nested)](#error-container-innernested)
+  - error template: [Format message instantly but the text template can be given at beginning](#error-template) 
+- Codes: treat a number as an error object
+- Unwrap inner canned errors one by one
+- No mental burden
+
+### Others
 
 ## History
+
+- v3.1.0
+  - added `Join()` to compliant with go1.20 errors.Join
+  - reviewed all of testcases
 
 - v3.0.21 ..
     - add: `RegisterCode()` at top level for initialize user-defined Coded decl
@@ -29,48 +43,9 @@ import "gopkg.in/hedzr/errors.v3"
     - imp: remove redundant codes
     - update withStackInfo.Stack with WithData() - specially for defer recover codes
 
-- v3.0.15
-  - fix: make Is() work for go1.12 and below
+- OLDER in [CHANGELOG](https://github.com/hedzr/errors/blob/master/CHANGELOG)
 
-- v3.0.13
-  - fea: IsDescended for error template test
-  - fix: code and causes are present at same time
-
-- v3.0.11
-  - changed the `FormatWith` interface to support error template feature.
-
-- v3.0.10
-  - support go1.11-17,18+
-
-- v3.0.9
-  - fix: WithErrors will check IsEmpty on an error container and avoid adding it if empty.
-
-- v3.0.8
-  - restore error message template
-  - all features in v2 are restored with a new fluent style
-
-- v3.0.7
-  - fix coverall upload
-  - godoc
-  - better sites/taggedsites output
-
-- v3.0.6
-  - back to master branch
-
-- v3.0.5
-  - break out `New(...).Attach(...)`, instead of `New(...).WithErrors(...)`, so that we can make the type architecture clearly and concisely.
-  - `Builable` and `Error` interface are the abstract representations about our error objects.
-  - bugs fixed
-  - more godoc
-
-- v3.0.3
-  - review the backward compatibilities
-
-- v3.0.0
-  - rewrite most codes and cleanup multiple small types
-  - use `New(...)` or `NewBuilder()` to make an error with code, message, inner error(s) and customizable stacktrace info.
-
-## Features
+## Compatibilities
 
 These features are supported for compatibilities.
 
@@ -80,6 +55,7 @@ These features are supported for compatibilities.
 - `func Is(err, target error) bool`
 - `func New(text string) error`
 - `func Unwrap(err error) error`
+- `func Join(errs ...error) error`
 
 #### `pkg/errors` compatibilities
 
@@ -90,14 +66,6 @@ These features are supported for compatibilities.
 - supports Stacktrace
   - in an error by `Wrap()`, stacktrace wrapped;
   - for your error, attached by `WithStack(cause error)`;
-
-#### Others
-
-- Codes
-- Inner errors  
-  We like the flatter inner errors more than the cascade chain, so the `Format("%w)` is a so-so approach to collect the errors. We believe the error slice is a better choice.
-- Unwrap inner errors one by one
-- Error Template
 
 ## Best Practices
 
@@ -188,11 +156,11 @@ func TestForExample(t *testing.T) {
 func TestContainer(t *testing.T) {
   // as a inner errors container
   child := func() (err error) {
-    errContainer := errors.New("multiple tasks have errors")
+    var ec = errors.New("multiple tasks have errors")
+    defer ec.Defer(&err) // package the attached errors as a new one and return it as `err`
 
-    defer errContainer.Defer(&err)
     for _, r := range []error{io.EOF, io.ErrShortWrite, io.ErrClosedPipe, errors.Internal} {
-      errContainer.Attach(r)
+      ec.Attach(r)
     }
     
     doWithItem := func(item Item) (err error) {
@@ -201,13 +169,13 @@ func TestContainer(t *testing.T) {
     }
     for _, item := range SomeItems {
       // nil will be ignored safely, do'nt worry about invalid attaches.
-      errContainer.Attach(doWithItem(item))
+      ec.Attach(doWithItem(item))
     }
 
     return
   }
 
-  err := child()
+  err := child() // get the canned errors as a packaged one
   t.Logf("failed: %+v", err)
 }
 ```
