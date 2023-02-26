@@ -31,6 +31,9 @@ Wrapped errors and more for golang developing (not just for go1.13+, go1.20+).
 
 ## History
 
+- v3.1.1
+  - better message format for a nested error, see [Better format](#better-format-for-a-nested-error)
+
 - v3.1.0
   - added `Join()` to compliant with go1.20 errors.Join
   - reviewed all of testcases
@@ -208,6 +211,47 @@ func TestIsDescended(t *testing.T) {
 		t.Fatalf("bad test on IsDescended(err3, err4)")
 	}
 }
+```
+
+### Better format for a nested error
+
+Since v3.1.1, the better message format will be formatted at Printf("%+v").
+
+```go
+func TestAs_betterFormat(t *testing.T) {
+	var err = New("Have errors").WithErrors(io.EOF, io.ErrShortWrite, io.ErrNoProgress)
+	t.Logf("%v\n", err)
+
+	var nestNestErr = New("Errors FOUND:").WithErrors(err, io.EOF)
+	var nnnErr = New("Nested Errors:").WithErrors(nestNestErr, strconv.ErrRange)
+	t.Logf("%v\n", nnnErr)
+	t.Logf("%+v\n", nnnErr)
+}
+```
+
+The output is:
+
+```bash
+=== RUN   TestAs_betterFormat
+    causes_test.go:23: Have errors [EOF | short write | multiple Read calls return no data or error]
+    causes_test.go:27: Nested Errors: [Errors FOUND: [Have errors [EOF | short write | multiple Read calls return no data or error] | EOF] | value out of range]
+    causes_test.go:28: Nested Errors:
+          - Errors FOUND:
+            - Have errors
+              - EOF
+              - short write
+              - multiple Read calls return no data or error
+            - EOF
+          - value out of range
+        
+        gopkg.in/hedzr/errors%2ev3.TestAs_betterFormat
+        	/Volumes/VolHack/work/godev/cmdr-series/libs/errors/causes_test.go:26
+        testing.tRunner
+        	/usr/local/go/src/testing/testing.go:1576
+        runtime.goexit
+        	/usr/local/go/src/runtime/asm_amd64.s:1598
+--- PASS: TestAs_betterFormat (0.00s)
+PASS
 ```
 
 ## LICENSE

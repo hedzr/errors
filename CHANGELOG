@@ -1,5 +1,8 @@
 # CHANGELOG
 
+- v3.1.1
+  - better message format for a nested error, see [Better format](#better-format-for-a-nested-error)
+
 - v3.1.0
   - added `Join()` to compliant with go1.20 errors.Join
   - reviewed all of testcases
