@@ -3,6 +3,7 @@ package errors
 import (
 	"fmt"
 	"io"
+	"strconv"
 	"testing"
 )
 
@@ -15,6 +16,16 @@ func TestAs_e1(t *testing.T) {
 	} else {
 		t.Fail()
 	}
+}
+
+func TestAs_betterFormat(t *testing.T) {
+	var err = New("Have errors").WithErrors(io.EOF, io.ErrShortWrite, io.ErrNoProgress)
+	t.Logf("%v\n", err)
+
+	var nestNestErr = New("Errors FOUND:").WithErrors(err, io.EOF)
+	var nnnErr = New("Nested Errors:").WithErrors(nestNestErr, strconv.ErrRange)
+	t.Logf("%v\n", nnnErr)
+	t.Logf("%+v\n", nnnErr)
 }
 
 func TestCauses2_WithCode(t *testing.T) {
