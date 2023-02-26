@@ -57,9 +57,9 @@ func TestWithStackInfo(t *testing.T) {
 		WithTaggedData(TaggedData{"1": 1}).
 		End()
 	err.WithCause(io.ErrNoProgress).End()
-	t.Logf("failed: %+v", err)
-	t.Logf("failed: %v", err.Cause())
-	t.Logf("failed: %v", err.Causes())
+	t.Logf(" err is: %+v", err)
+	t.Logf(" err.Cause() is: %v", err.Cause())
+	t.Logf(" err.Causes() are: %v", err.Causes())
 
 	fmt.Printf("%+v", err)
 	fmt.Printf("%#v", err)

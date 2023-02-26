@@ -1,10 +1,106 @@
 package errors
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"testing"
 )
+
+type DivisionError struct {
+	IntA int
+	IntB int
+	Msg  string
+}
+
+func (e *DivisionError) Error() string {
+	return e.Msg
+}
+
+func Divide(a, b int) (int, error) {
+	if b == 0 {
+		return 0, &DivisionError{
+			Msg:  fmt.Sprintf("cannot divide '%d' by zero", a),
+			IntA: a, IntB: b,
+		}
+	}
+	return a / b, nil
+}
+
+func dummy(t *testing.T) error {
+	a, b := 10, 0
+	result, err := Divide(a, b)
+	if err != nil {
+		var divErr *DivisionError
+		switch {
+		case errors.As(err, &divErr):
+			fmt.Printf("%d / %d is not mathematically valid: %s\n",
+				divErr.IntA, divErr.IntB, divErr.Error())
+		default:
+			fmt.Printf("unexpected division error: %s\n", err)
+			t.Fail()
+		}
+		return err
+	}
+
+	fmt.Printf("%d / %d = %d\n", a, b, result)
+	return err
+}
+
+func dummyV3(t *testing.T) error {
+	a, b := 10, 0
+	result, err := Divide(a, b)
+	if err != nil {
+		var divErr *DivisionError
+		switch {
+		case As(err, &divErr):
+			fmt.Printf("%d / %d is not mathematically valid: %s\n",
+				divErr.IntA, divErr.IntB, divErr.Error())
+		default:
+			fmt.Printf("unexpected division error: %s\n", err)
+			t.Fail()
+		}
+		return err
+	}
+
+	fmt.Printf("%d / %d = %d\n", a, b, result)
+	return err
+}
+
+func TestCauses2_errors(t *testing.T) {
+	err := io.EOF
+
+	if !errors.Is(err, io.EOF) {
+		t.Fail()
+	}
+
+	err = dummy(t)
+	err = fmt.Errorf("wrapped: %w", err)
+	t.Logf("divide: %v", err)
+	t.Logf("Unwrap: %v", errors.Unwrap(err))
+}
+
+func TestCauses2_errorsV3(t *testing.T) {
+	err := io.EOF
+
+	if !Is(err, io.EOF) {
+		t.Fail()
+	}
+
+	err = dummyV3(t)
+	err = fmt.Errorf("wrapped: %w", err)
+	t.Logf("divide: %v", err)
+	t.Logf("Unwrap: %v", Unwrap(err))
+
+	// As() on our error wrappers
+	err = New("xx")
+	var e1 *causes2
+	if As(err, &e1) {
+		t.Logf("e1: %v", e1)
+	} else {
+		t.Fail()
+	}
+}
 
 func TestCauses2_WithCode(t *testing.T) {
 	err := &causes2{

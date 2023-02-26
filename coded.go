@@ -273,9 +273,8 @@ func (c Code) Register(codeName string) (errno Code) {
 //
 // The best way is:
 //
-//     var ErrAck = errors.RegisterCode(3, "cannot ack")     // ErrAck will be -1003
-//     var ErrAck = errors.RegisterCode(-1003, "cannot ack)  // equivelant with last line
-//
+//	var ErrAck = errors.RegisterCode(3, "cannot ack")     // ErrAck will be -1003
+//	var ErrAck = errors.RegisterCode(-1003, "cannot ack)  // equivelant with last line
 func RegisterCode(codePositive int, codeName string) (errno Code) {
 	errno = AlreadyExists
 	applier := func(c Code) {

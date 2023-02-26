@@ -22,11 +22,18 @@ func (w *WithStackInfo) IsDescended(descendant error) bool {
 	return false
 }
 
+// String for stringer interface
+func (w *WithStackInfo) String() string { return w.Error() }
+
 // WithStack annotates err with a Stack trace at the point WithStack
 // was called.
 //
 // If err is nil, WithStack returns nil.
 func WithStack(cause error) error {
+	return withStack(cause)
+}
+
+func withStack(cause error) *WithStackInfo {
 	if cause == nil {
 		return nil
 	}
@@ -37,20 +44,19 @@ func WithStack(cause error) error {
 //
 // For instance, the construction of an error without warnings looks like:
 //
-//      err := New("hello %v", "world")
-//      _ = err.
-//          WithErrors(io.EOF, io.ErrShortWrite).
-//          WithErrors(io.ErrClosedPipe).
-//          WithCode(Internal)
+//	err := New("hello %v", "world")
+//	_ = err.
+//	    WithErrors(io.EOF, io.ErrShortWrite).
+//	    WithErrors(io.ErrClosedPipe).
+//	    WithCode(Internal)
 //
 // To avoid the `_ =`, you might beloved with a End() call:
 //
-//      err := New("hello %v", "world")
-//      err.WithErrors(io.EOF, io.ErrShortWrite).
-//          WithErrors(io.ErrClosedPipe).
-//          WithCode(Internal).
-//          End()
-//
+//	err := New("hello %v", "world")
+//	err.WithErrors(io.EOF, io.ErrShortWrite).
+//	    WithErrors(io.ErrClosedPipe).
+//	    WithCode(Internal).
+//	    End()
 func (w *WithStackInfo) End() {}
 
 // Data returns the wrapped common user data by WithData.
@@ -65,9 +71,9 @@ func (w *WithStackInfo) TaggedData() TaggedData { return w.taggedSites }
 // An error value has a cause if it implements the following
 // interface:
 //
-//     type causer interface {
-//            Cause() error
-//     }
+//	type causer interface {
+//	       Cause() error
+//	}
 //
 // If an error object does not implement Cause interface, the
 // original error object will be returned.
@@ -127,14 +133,13 @@ func (w *WithStackInfo) Attach(errs ...error) {
 // represents them all in a singular up-level error object.
 // The wrapped inner errors can be retrieved with errors.Causes:
 //
-//      var err = errors.New("hello").WithErrors(io.EOF, io.ShortBuffers)
-//      var errs []error = errors.Causes(err)
+//	var err = errors.New("hello").WithErrors(io.EOF, io.ShortBuffers)
+//	var errs []error = errors.Causes(err)
 //
 // Or, use As() to extract its:
 //
-//      var errs []error
-//      errors.As(err, &errs)
-//
+//	var errs []error
+//	errors.As(err, &errs)
 func (w *WithStackInfo) WithErrors(errs ...error) Buildable {
 	_ = w.causes2.WithErrors(errs...)
 
@@ -155,16 +160,15 @@ func (w *WithStackInfo) WithErrors(errs ...error) Buildable {
 //
 // For example:
 //
-//    defer func() {
-//      if e := recover(); e != nil {
-//        err = errors.New("[recovered] copyTo unsatisfied ([%v] %v -> [%v] %v), causes: %v",
-//          c.indirectType(from.Type()), from, c.indirectType(to.Type()), to, e).
-//          WithData(e)                 // StackTrace of e -> err
-//        n := log.CalcStackFrames(1)   // skip defer-recover frame at first
-//        log.Skip(n).Errorf("%v", err) // skip go-lib frames and defer-recover frame, back to the point throwing panic
-//      }
-//    }()
-//
+//	defer func() {
+//	  if e := recover(); e != nil {
+//	    err = errors.New("[recovered] copyTo unsatisfied ([%v] %v -> [%v] %v), causes: %v",
+//	      c.indirectType(from.Type()), from, c.indirectType(to.Type()), to, e).
+//	      WithData(e)                 // StackTrace of e -> err
+//	    n := log.CalcStackFrames(1)   // skip defer-recover frame at first
+//	    log.Skip(n).Errorf("%v", err) // skip go-lib frames and defer-recover frame, back to the point throwing panic
+//	  }
+//	}()
 func (w *WithStackInfo) WithData(errs ...interface{}) Buildable {
 	if len(errs) > 0 {
 		for _, e := range errs {
@@ -202,23 +206,22 @@ func (w *WithStackInfo) WithCause(cause error) Buildable {
 //
 // The codes:
 //
-//     func some(){
-//       // as a inner errors container
-//       child := func() (err error) {
-//      	errContainer := errors.New("")
-//      	defer errContainer.Defer(&err)
+//	 func some(){
+//	   // as a inner errors container
+//	   child := func() (err error) {
+//	  	errContainer := errors.New("")
+//	  	defer errContainer.Defer(&err)
 //
-//      	for _, r := range []error{io.EOF, io.ErrClosedPipe, errors.Internal} {
-//      		errContainer.Attach(r)
-//      	}
+//	  	for _, r := range []error{io.EOF, io.ErrClosedPipe, errors.Internal} {
+//	  		errContainer.Attach(r)
+//	  	}
 //
-//      	return
-//       }
+//	  	return
+//	   }
 //
-//       err := child()
-//       t.Logf("failed: %+v", err)
-//    }
-//
+//	   err := child()
+//	   t.Logf("failed: %+v", err)
+//	}
 func (w *WithStackInfo) Defer(err *error) {
 	if !w.IsEmpty() { // no inner errors attached into an error container, that assumed 'is empty'
 		*err = w
@@ -251,17 +254,17 @@ func (w *WithStackInfo) Clone() *WithStackInfo {
 
 // Format formats the stack of Frames according to the fmt.Formatter interface.
 //
-//    %s   lists source files for each Frame in the stack
-//    %v   lists the source file and line number for each Frame in the stack
+//	%s   lists source files for each Frame in the stack
+//	%v   lists the source file and line number for each Frame in the stack
 //
 // Format accepts flags that alter the printing of some verbs, as follows:
 //
-//    %+v   Prints filename, function, and line number for each Frame in the stack.
+//	%+v   Prints filename, function, and line number for each Frame in the stack.
 func (w *WithStackInfo) Format(s fmt.State, verb rune) {
 	switch verb {
 	case 'v':
 		if s.Flag('+') {
-			n, _ := fmt.Fprintf(s, "%+v", w.Error())
+			n, _ := fmt.Fprintf(s, "%+v", w.makeErrorString(true))
 			if len(w.sites) > 0 {
 				if n > 0 {
 					n1, _ := fmt.Fprintf(s, "\n  ")

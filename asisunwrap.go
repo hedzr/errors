@@ -28,12 +28,12 @@ func As(err error, target interface{}) bool {
 	if typ.Kind() != reflect.Ptr || val.IsNil() {
 		panic("errors: target must be a non-nil pointer")
 	}
-	e := typ.Elem()
-	k := e.Kind()
-	if k != reflect.Interface && k != reflect.Slice && !e.Implements(errorType) {
-		// panic("errors: *target must be interface or implement error")
-		return false
-	}
+	// e := typ.Elem()
+	// k := e.Kind()
+	// if k != reflect.Interface && k != reflect.Slice && !e.Implements(errorType) {
+	// 	// panic("errors: *target must be interface or implement error")
+	// 	return false
+	// }
 	targetType := typ.Elem()
 	for err != nil {
 		if x, ok := err.(interface{ As(interface{}) bool }); ok && x.As(target) {

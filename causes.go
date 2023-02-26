@@ -1,9 +1,11 @@
 package errors
 
 import (
+	"bufio"
 	"bytes"
 	"fmt"
 	"io"
+	"strings"
 )
 
 type causes2 struct {
@@ -38,23 +40,22 @@ func (w *causes2) End() {}
 //
 // The codes:
 //
-//     func some(){
-//       // as a inner errors container
-//       child := func() (err error) {
-//      	errContainer := errors.New("")
-//      	defer errContainer.Defer(&err)
+//	 func some(){
+//	   // as a inner errors container
+//	   child := func() (err error) {
+//	  	errContainer := errors.New("")
+//	  	defer errContainer.Defer(&err)
 //
-//      	for _, r := range []error{io.EOF, io.ErrClosedPipe, errors.Internal} {
-//      		errContainer.Attach(r)
-//      	}
+//	  	for _, r := range []error{io.EOF, io.ErrClosedPipe, errors.Internal} {
+//	  		errContainer.Attach(r)
+//	  	}
 //
-//      	return
-//       }
+//	  	return
+//	   }
 //
-//       err := child()
-//       t.Logf("failed: %+v", err)
-//    }
-//
+//	   err := child()
+//	   t.Logf("failed: %+v", err)
+//	}
 func (w *causes2) Defer(err *error) {
 	*err = w
 }
@@ -110,6 +111,49 @@ func (w *causes2) Clone() *causes2 {
 }
 
 func (w *causes2) Error() string {
+	return w.makeErrorString(false)
+	// var buf bytes.Buffer
+	// if w.msg != "" {
+	// 	if len(w.liveArgs) > 0 {
+	// 		msg := fmt.Sprintf(w.msg, w.liveArgs...)
+	// 		buf.WriteString(msg)
+	// 	} else {
+	// 		buf.WriteString(w.msg)
+	// 	}
+	// }
+	//
+	// var needclose, needsep bool
+	// if w.Code != OK {
+	// 	if buf.Len() > 0 {
+	// 		buf.WriteRune(' ')
+	// 	}
+	// 	buf.WriteString("[")
+	// 	buf.WriteString(w.Code.String())
+	// 	needclose = true
+	// 	needsep = true
+	// }
+	// if len(w.Causers) > 0 {
+	// 	if buf.Len() > 0 {
+	// 		buf.WriteRune(' ')
+	// 	}
+	// 	buf.WriteString("[")
+	// 	needclose = true
+	// }
+	//
+	// for i, c := range w.Causers {
+	// 	if i > 0 || needsep {
+	// 		buf.WriteString(" | ")
+	// 	}
+	// 	buf.WriteString(c.Error())
+	// }
+	// if needclose {
+	// 	buf.WriteString("]")
+	// }
+	// // buf.WriteString(w.Stack)
+	// return buf.String()
+}
+
+func (w *causes2) makeErrorString(line bool) string {
 	var buf bytes.Buffer
 	if w.msg != "" {
 		if len(w.liveArgs) > 0 {
@@ -118,6 +162,26 @@ func (w *causes2) Error() string {
 		} else {
 			buf.WriteString(w.msg)
 		}
+	}
+
+	if line {
+		buf.WriteRune('\n')
+		if w.Code != OK {
+			buf.WriteString(w.Code.String())
+		}
+
+		for _, c := range w.Causers {
+			buf.WriteString("  - ")
+			var xc *causes2
+			if As(c, &xc) {
+				buf.WriteString(leftPad(xc.makeErrorString(line), "  ", false))
+			} else {
+				buf.WriteString(leftPad(c.Error(), "    ", false))
+			}
+		}
+
+		// buf.WriteRune('\n')
+		return buf.String()
 	}
 
 	var needclose, needsep bool
@@ -151,19 +215,38 @@ func (w *causes2) Error() string {
 	return buf.String()
 }
 
+func leftPad(s, padStr string, firstLine bool) string {
+	if padStr == "" {
+		return s
+	}
+
+	var ln int
+	var sb strings.Builder
+	scanner := bufio.NewScanner(bufio.NewReader(strings.NewReader(s)))
+	for scanner.Scan() {
+		if ln != 0 || firstLine {
+			sb.WriteString(padStr)
+		}
+		sb.WriteString(scanner.Text())
+		sb.WriteRune('\n')
+		ln++
+	}
+	return sb.String()
+}
+
 // Format formats the stack of Frames according to the fmt.Formatter interface.
 //
-//    %s	lists source files for each Frame in the stack
-//    %v	lists the source file and line number for each Frame in the stack
+//	%s	lists source files for each Frame in the stack
+//	%v	lists the source file and line number for each Frame in the stack
 //
 // Format accepts flags that alter the printing of some verbs, as follows:
 //
-//    %+v   Prints filename, function, and line number for each Frame in the stack.
+//	%+v   Prints filename, function, and line number for each Frame in the stack.
 func (w *causes2) Format(s fmt.State, verb rune) {
 	switch verb {
 	case 'v':
 		if s.Flag('+') {
-			_, _ = fmt.Fprintf(s, "%+v", w.Error())
+			_, _ = fmt.Fprintf(s, "%+v", w.makeErrorString(true))
 			return
 		}
 		fallthrough
@@ -173,6 +256,9 @@ func (w *causes2) Format(s fmt.State, verb rune) {
 		_, _ = fmt.Fprintf(s, "%q", w.Error())
 	}
 }
+
+// String for stringer interface
+func (w *causes2) String() string { return w.Error() }
 
 func (w *causes2) Cause() error {
 	if len(w.Causers) == 0 {
@@ -187,12 +273,11 @@ func (w *causes2) Cause() error {
 // errors.Unwrap for instead. The errors.Unwrap could extract all
 // of them one by one:
 //
-//      var err = errors.New("hello").WithErrors(io.EOF, io.ShortBuffers)
-//      var e error = err
-//      for e != nil {
-//          e = errors.Unwrap(err)
-//      }
-//
+//	var err = errors.New("hello").WithErrors(io.EOF, io.ShortBuffers)
+//	var e error = err
+//	for e != nil {
+//	    e = errors.Unwrap(err)
+//	}
 func (w *causes2) Causes() []error {
 	if len(w.Causers) == 0 {
 		return nil
@@ -259,6 +344,10 @@ func (w *causes2) As(target interface{}) bool {
 	}
 	if c, ok := target.(*[]error); ok {
 		*c = w.Causers
+		return true
+	}
+	if c, ok := target.(**causes2); ok {
+		*c = w
 		return true
 	}
 	return AsSlice(w.Causers, target)
