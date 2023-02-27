@@ -3,6 +3,7 @@ package errors
 import (
 	"fmt"
 	"io"
+	"strings"
 )
 
 // WithStackInfo is exported now
@@ -252,6 +253,13 @@ func (w *WithStackInfo) Clone() *WithStackInfo {
 	return c
 }
 
+func snfmt(sb *strings.Builder, format string, args ...interface{}) (n int) {
+	str := fmt.Sprintf(format, args...)
+	n = len(str)
+	sb.WriteString(str)
+	return
+}
+
 // Format formats the stack of Frames according to the fmt.Formatter interface.
 //
 //	%s   lists source files for each Frame in the stack
@@ -264,21 +272,29 @@ func (w *WithStackInfo) Format(s fmt.State, verb rune) {
 	switch verb {
 	case 'v':
 		if s.Flag('+') {
-			n, _ := fmt.Fprintf(s, "%+v", w.makeErrorString(true))
+			var sb strings.Builder
+			n := snfmt(&sb, "%+v", w.makeErrorString(true))
 			if len(w.sites) > 0 {
 				if n > 0 {
-					n1, _ := fmt.Fprintf(s, "\n  ")
-					n += n1
+					n += snfmt(&sb, "\n  ")
 				}
-				n1, _ := fmt.Fprintf(s, "Sites: %+v", w.sites)
-				n += n1
+				// n += snfmt(&sb, "Sites: %+v", w.sites)
+				n += snfmt(&sb, "Sites:\n")
+				for i, site := range w.sites {
+					n += snfmt(&sb, "    %d. %+v\n", i+1, site)
+				}
 			}
 			if len(w.taggedSites) > 0 {
 				if n > 0 {
-					_, _ = fmt.Fprintf(s, "\n  ")
+					n += snfmt(&sb, "\n  ")
 				}
-				_, _ = fmt.Fprintf(s, "Tagged Sites: %+v", w.taggedSites)
+				// snfmt(&sb, "Tagged Sites: %+v", w.taggedSites)
+				n += snfmt(&sb, "Tagged Sites:\n")
+				for k, site := range w.taggedSites {
+					n += snfmt(&sb, "    %v => %+v\n", k, site)
+				}
 			}
+			_, _ = fmt.Fprintf(s, sb.String())
 			w.Stack.Format(s, verb)
 			return
 		}
