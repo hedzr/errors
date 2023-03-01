@@ -7,7 +7,7 @@
 [![Coverage Status](https://coveralls.io/repos/github/hedzr/errors/badge.svg)](https://coveralls.io/github/hedzr/errors)
 [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fhedzr%2Ferrors.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fhedzr%2Ferrors?ref=badge_shield)
 
-Wrapped errors and more for golang developing (not just for go1.13+, go1.20+).
+Wrapped errors and more for golang developing (not just for go1.11, go1.13, and go1.20+).
 
 `hedzr/errors` provides the compatibilities to your old project up to go 1.20.
 
@@ -30,6 +30,9 @@ Wrapped errors and more for golang developing (not just for go1.13+, go1.20+).
 ### Others
 
 ## History
+
+- v3.1.3
+  - better output of sites and taggedSites
 
 - v3.1.1
   - better message format for a nested error, see [Better format](#better-format-for-a-nested-error)

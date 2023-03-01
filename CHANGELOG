@@ -1,5 +1,8 @@
 # CHANGELOG
 
+- v3.1.3
+  - better output of sites and taggedSites
+
 - v3.1.1
   - better message format for a nested error, see [Better format](#better-format-for-a-nested-error)
 
