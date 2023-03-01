@@ -32,7 +32,8 @@ Wrapped errors and more for golang developing (not just for go1.11, go1.13, and 
 ## History
 
 - v3.1.3
-  - better output of sites and taggedSites
+  - better output of sites and taggedSites  
+    indent and multi-line outputs while formatting with `%+v`
 
 - v3.1.1
   - better message format for a nested error, see [Better format](#better-format-for-a-nested-error)
