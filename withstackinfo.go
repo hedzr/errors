@@ -229,6 +229,11 @@ func (w *WithStackInfo) Defer(err *error) {
 	}
 }
 
+// IsEmpty tests has attached errors
+func (w *WithStackInfo) IsEmpty() bool {
+	return len(w.sites) == 0 && len(w.taggedSites) == 0 && w.causes2.IsEmpty()
+}
+
 // FormatWith _
 func (w *WithStackInfo) FormatWith(args ...interface{}) error {
 	c := w.Clone()
