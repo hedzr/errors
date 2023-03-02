@@ -109,7 +109,7 @@ func (w *WithStackInfo) WithCode(code Code) Buildable {
 	return w.rebuild()
 }
 
-// Attach collects the errors except it's nil
+// Attach collects the errors except an error is nil.
 //
 // StackTrace of errs will be copied to callee so that you can get a
 // trace output nearer by the last error.
@@ -117,7 +117,13 @@ func (w *WithStackInfo) WithCode(code Code) Buildable {
 // Since v3.0.5, we break Attach() and remove its returning value.
 // So WithStackInfo is a Container compliant type now.
 func (w *WithStackInfo) Attach(errs ...error) {
-	_ = w.WithErrors(errs...)
+	// _ = w.WithErrors(errs...)
+
+	for _, e := range errs {
+		if e != nil {
+			w.Causers = append(w.Causers, e)
+		}
+	}
 
 	for _, e := range errs {
 		if e1, ok := e.(*WithStackInfo); ok {
@@ -128,7 +134,15 @@ func (w *WithStackInfo) Attach(errs ...error) {
 
 // WithErrors attaches the given errs as inner errors.
 //
-// WithErrors is like our old version of Attach().
+// WithErrors is similar with Attach() except it collects
+// thees errors:
+//
+// 1. For an error implemented IsEmpty(), only if it is
+// not empty (i.e. IsEmpty() return false). So the inner
+// errors within an error container will be moved out
+// from that container, and be copied into this holder.
+//
+// 2. For a normal error, such as io.EOF, just add it.
 //
 // It wraps the inner errors into underlying container and
 // represents them all in a singular up-level error object.

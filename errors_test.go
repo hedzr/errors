@@ -115,3 +115,15 @@ func TestTemplateFormat(t *testing.T) {
 	_ = err.FormatWith("1", "2", "3", "4")
 	t.Logf("Error: %v", err)
 }
+
+func TestContainerMore(t *testing.T) {
+	var err error
+	var ec = New("copying got errors")
+	ec.Attach(New("some error"))
+	ec.Defer(&err)
+	if err == nil {
+		t.Fatal(`bad`)
+	} else {
+		t.Logf(`wanted err is non-nil: %v`, err)
+	}
+}
