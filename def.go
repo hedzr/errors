@@ -56,6 +56,7 @@ type Buildable interface {
 	// supported.
 	WithCode(code Code) Buildable
 	// WithErrors attaches the given errs as inner errors.
+	//
 	// WithErrors is like our old Attach().
 	//
 	// It wraps the inner errors into underlying container and
@@ -108,6 +109,11 @@ type Buildable interface {
 	// WithCause sets the underlying error manually if necessary.
 	WithCause(cause error) Buildable
 
+	// WithMaxObjectStringLength set limitation for object stringify length.
+	//
+	// The objects of Data/TaggedData will be limited while its' been formatted with "%+v"
+	WithMaxObjectStringLength(maxlen int) Buildable
+
 	// End could terminate the with-build stream calls without any
 	// returned value.
 	End()
@@ -152,18 +158,17 @@ type causer interface {
 // causers is a tool interface. In your scene, use errors.Causes(err)
 // to extract the inner errors. Or, use As():
 //
-//      err := New("many inner errors").WithErrors(e1,e2,e3)
-//      var errs []error
-//      errors.As(err, &errs)
-//      errs = errors.Causes(err)
+//	err := New("many inner errors").WithErrors(e1,e2,e3)
+//	var errs []error
+//	errors.As(err, &errs)
+//	errs = errors.Causes(err)
 //
 // You may extract the inner errors one by one:
 //
-//      var e error = err
-//      for e != nil {
-//          e = errors.Unwrap(err)
-//      }
-//
+//	var e error = err
+//	for e != nil {
+//	    e = errors.Unwrap(err)
+//	}
 type causers interface {
 	// Causes _
 	Causes() []error

@@ -217,6 +217,14 @@ func (w *WithStackInfo) WithCause(cause error) Buildable {
 	return w
 }
 
+// WithMaxObjectStringLength set limitation for object stringify length.
+//
+// The objects of Data/TaggedData will be limited while its' been formatted with "%+v"
+func (w *WithStackInfo) WithMaxObjectStringLength(maxlen int) Buildable {
+	w.causes2.WithMaxObjectStringLength(maxlen)
+	return w
+}
+
 // Defer can be used as a defer function to simplify your codes.
 //
 // The codes:
@@ -300,7 +308,7 @@ func (w *WithStackInfo) Format(s fmt.State, verb rune) {
 				// n += snfmt(&sb, "Sites: %+v", w.sites)
 				n += snfmt(&sb, "Sites:\n")
 				for i, site := range w.sites {
-					n += snfmt(&sb, "    %d. %+v\n", i+1, site)
+					n += snfmt(&sb, "    %d. %+v\n", i+1, w.limitObj(site))
 				}
 			}
 			if len(w.taggedSites) > 0 {
@@ -310,7 +318,7 @@ func (w *WithStackInfo) Format(s fmt.State, verb rune) {
 				// snfmt(&sb, "Tagged Sites: %+v", w.taggedSites)
 				n += snfmt(&sb, "Tagged Sites:\n")
 				for k, site := range w.taggedSites {
-					n += snfmt(&sb, "    %v => %+v\n", k, site)
+					n += snfmt(&sb, "    %v => %+v\n", k, w.limitObj(site))
 				}
 			}
 			_, _ = fmt.Fprintf(s, sb.String())

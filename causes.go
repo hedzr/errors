@@ -14,9 +14,24 @@ type causes2 struct {
 	Causers []error
 	msg     string
 
-	unwrapIndex int
+	unwrapIndex  int // simple index for iterating Unwrap
+	maxStringLen int // the output string max-length for an object (see also sites/taggedSites), negative or zero means no limit.
 
 	liveArgs []interface{} // error message template ?
+}
+
+func (w *causes2) limitObj(obj interface{}) (s string) {
+	s = fmt.Sprintf("%+v", obj)
+	if w.maxStringLen > 0 && len(s) > w.maxStringLen {
+		s = s[0:w.maxStringLen-3] + "..."
+	}
+	return
+}
+
+// WithMaxObjectStringLength for error interface
+func (w *causes2) WithMaxObjectStringLength(maxlen int) *causes2 {
+	w.maxStringLen = maxlen
+	return w
 }
 
 // WithCode for error interface
