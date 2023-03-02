@@ -70,16 +70,14 @@ func (w *causes2) Defer(err *error) {
 //
 // For a nil error object, it will be ignored.
 func (w *causes2) WithErrors(errs ...error) *causes2 {
-	if len(errs) > 0 {
-		for _, e := range errs {
-			if e != nil {
-				if check, ok := e.(interface{ IsEmpty() bool }); ok {
-					if !check.IsEmpty() {
-						w.Causers = append(w.Causers, e)
-					}
-				} else {
+	for _, e := range errs {
+		if e != nil {
+			if check, ok := e.(interface{ IsEmpty() bool }); ok {
+				if !check.IsEmpty() {
 					w.Causers = append(w.Causers, e)
 				}
+			} else {
+				w.Causers = append(w.Causers, e)
 			}
 		}
 	}
