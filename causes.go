@@ -125,45 +125,6 @@ func (w *causes2) Clone() *causes2 {
 
 func (w *causes2) Error() string {
 	return w.makeErrorString(false)
-	// var buf bytes.Buffer
-	// if w.msg != "" {
-	// 	if len(w.liveArgs) > 0 {
-	// 		msg := fmt.Sprintf(w.msg, w.liveArgs...)
-	// 		buf.WriteString(msg)
-	// 	} else {
-	// 		buf.WriteString(w.msg)
-	// 	}
-	// }
-	//
-	// var needclose, needsep bool
-	// if w.Code != OK {
-	// 	if buf.Len() > 0 {
-	// 		buf.WriteRune(' ')
-	// 	}
-	// 	buf.WriteString("[")
-	// 	buf.WriteString(w.Code.String())
-	// 	needclose = true
-	// 	needsep = true
-	// }
-	// if len(w.Causers) > 0 {
-	// 	if buf.Len() > 0 {
-	// 		buf.WriteRune(' ')
-	// 	}
-	// 	buf.WriteString("[")
-	// 	needclose = true
-	// }
-	//
-	// for i, c := range w.Causers {
-	// 	if i > 0 || needsep {
-	// 		buf.WriteString(" | ")
-	// 	}
-	// 	buf.WriteString(c.Error())
-	// }
-	// if needclose {
-	// 	buf.WriteString("]")
-	// }
-	// // buf.WriteString(w.Stack)
-	// return buf.String()
 }
 
 func (w *causes2) makeErrorString(line bool) string {
