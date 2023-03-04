@@ -31,6 +31,13 @@ Wrapped errors and more for golang developing (not just for go1.11, go1.13, and 
 
 ## History
 
+- v3.1.5
+  - fixed `errors.New("").Attach(errs...)` don't skip the `empty` error.  
+    **Attach ignores an error only if it is nil**.
+  - fixed the emptiness test for `WithStackInfo`.
+  - cleanup an unused `if len(errs) > 0`.
+  - added `WithMaxObjectStringLength(maxObjectStringLen)` for long formatting data/taggedData by WithData/WithTaggedData
+
 - v3.1.3
   - better output of sites and taggedSites  
     indent and multi-line outputs while formatting with `%+v`
