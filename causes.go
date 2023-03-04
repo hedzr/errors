@@ -72,7 +72,9 @@ func (w *causes2) End() {}
 //	   t.Logf("failed: %+v", err)
 //	}
 func (w *causes2) Defer(err *error) {
-	*err = w
+	if !w.IsEmpty() {
+		*err = w
+	}
 }
 
 // WithErrors appends errs
@@ -101,7 +103,13 @@ func (w *causes2) WithErrors(errs ...error) *causes2 {
 
 // Attach collects the errors except it's nil
 func (w *causes2) Attach(errs ...error) {
-	_ = w.WithErrors(errs...)
+	// _ = w.WithErrors(errs...)
+
+	for _, e := range errs {
+		if e != nil {
+			w.Causers = append(w.Causers, e)
+		}
+	}
 }
 
 // FormatWith _
@@ -329,5 +337,5 @@ func (w *causes2) As(target interface{}) bool {
 
 // IsEmpty tests has attached errors
 func (w *causes2) IsEmpty() bool {
-	return len(w.Causers) == 0 && w.Code == OK
+	return len(w.Causers) == 0 && w.Code == OK && len(w.liveArgs) == 0
 }
