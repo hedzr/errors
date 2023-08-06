@@ -1,5 +1,12 @@
 package errors
 
+import (
+	"bytes"
+	"fmt"
+	"io"
+	"strconv"
+)
+
 // A Code is an signed 32-bit error code copied from gRPC spec but negatived.
 type Code int32
 
@@ -238,6 +245,39 @@ func (c Code) String() string {
 		return x
 	}
 	return codeToStr[Unknown]
+}
+
+func (w Code) makeErrorString(line bool) string {
+	var buf bytes.Buffer
+	buf.WriteString(w.Error())
+	buf.WriteRune(' ')
+	buf.WriteRune('(')
+	buf.WriteString(strconv.Itoa(int(w)))
+	buf.WriteRune(')')
+	return buf.String()
+}
+
+// Format formats the stack of Frames according to the fmt.Formatter interface.
+//
+//	%s	lists source files for each Frame in the stack
+//	%v	lists the source file and line number for each Frame in the stack
+//
+// Format accepts flags that alter the printing of some verbs, as follows:
+//
+//	%+v   Prints filename, function, and line number for each Frame in the stack.
+func (w Code) Format(s fmt.State, verb rune) {
+	switch verb {
+	case 'v':
+		if s.Flag('+') {
+			_, _ = fmt.Fprintf(s, "%+v", w.makeErrorString(true))
+			return
+		}
+		fallthrough
+	case 's':
+		_, _ = io.WriteString(s, w.makeErrorString(false))
+	case 'q':
+		_, _ = fmt.Fprintf(s, "%q", w.makeErrorString(false))
+	}
 }
 
 // Register registers a code and its token string for using later

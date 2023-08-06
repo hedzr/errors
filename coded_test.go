@@ -3,6 +3,7 @@ package errors
 import (
 	"fmt"
 	"io"
+	"log"
 	"testing"
 )
 
@@ -93,4 +94,10 @@ func TestCodesEqual(t *testing.T) {
 	if !ok {
 		t.Fatal("want Equal() return true but got false")
 	}
+}
+
+func TestCodesRegister(t *testing.T) {
+	const IllegalState Code = MinErrorCode - 1
+	RegisterCode(int(IllegalState), "I'm in an illegal state.")
+	log.Print(IllegalState)
 }
