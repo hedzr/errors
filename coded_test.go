@@ -97,7 +97,8 @@ func TestCodesEqual(t *testing.T) {
 }
 
 func TestCodesRegister(t *testing.T) {
-	const IllegalState Code = MinErrorCode - 1
-	RegisterCode(int(IllegalState), "I'm in an illegal state.")
-	log.Print(IllegalState)
+	const IllegalStateEx Code = MinErrorCode - 1
+	_ = RegisterCode(int(IllegalStateEx), "I'm in an illegal state (ext for testing).")
+	log.Print(IllegalStateEx)
+	log.Printf("%+v", IllegalStateEx)
 }
