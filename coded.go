@@ -7,30 +7,41 @@ import (
 	"strconv"
 )
 
-// A Code is an signed 32-bit error code copied from gRPC spec but negatived.
+// A Code is a signed 32-bit error code copied from gRPC spec
+// but negatived.
+//
+// And more builtin error codes added since hedzr/errors.v3 (v3.1.6).
+//
+// You may register any application-level error codes by calling
+// RegisterCode(codeInt, desc).
 type Code int32
 
 const (
-	// OK is returned on success.
+	// OK is returned on success. [HTTP/non-HTTP]
 	OK Code = 0
 
-	// Canceled indicates the operation was canceled (typically by the caller).
+	// Canceled indicates the operation was canceled (typically by the caller). [HTTP/non-HTTP]
 	Canceled Code = -1
 
-	// Unknown error. An example of where this error may be returned is
+	// Unknown error. [HTTP/non-HTTP]
+	// An example of where this error may be returned is
 	// if a Status value received from another address space belongs to
 	// an error-space that is not known in this address space. Also
 	// errors raised by APIs that do not return enough error information
 	// may be converted to this error.
 	Unknown Code = -2
 
-	// InvalidArgument indicates client specified an invalid argument.
+	// InvalidArgument indicates client specified an invalid argument. [HTTP]
+	//
 	// Note that this differs from FailedPrecondition. It indicates
 	// arguments that are problematic regardless of the state of the
 	// system (e.g., a malformed file name).
+	//
+	// And this also differs from IllegalArgument, who's applied and
+	// identify an application error or a general logical error.
 	InvalidArgument Code = -3
 
-	// DeadlineExceeded means operation expired before completion.
+	// DeadlineExceeded means operation expired before completion. [HTTP]
 	// For operations that change the state of the system, this error
 	// might be returned even if the operation has completed
 	// successfully. For example, a successful response from a server
@@ -40,17 +51,19 @@ const (
 	DeadlineExceeded Code = -4
 
 	// NotFound means some requested entity (e.g., file or directory)
-	// wasn't found.
+	// wasn't found. [HTTP]
 	//
 	// = HTTP 404
 	NotFound Code = -5
 
 	// AlreadyExists means an attempt to create an entity failed
-	// because one already exists.
+	// because one already exists. [HTTP]
 	AlreadyExists Code = -6
 
 	// PermissionDenied indicates the caller does not have permission to
-	// execute the specified operation. It must not be used for rejections
+	// execute the specified operation. [HTTP]
+	//
+	// It must not be used for rejections
 	// caused by exhausting some resource (use ResourceExhausted
 	// instead for those errors). It must not be
 	// used if the caller cannot be identified (use Unauthenticated
@@ -59,13 +72,13 @@ const (
 
 	// ResourceExhausted indicates some resource has been exhausted,
 	// perhaps a per-user quota, or perhaps the entire file system
-	// is out of space.
+	// is out of space. [HTTP]
 	ResourceExhausted Code = -8
 
 	// FailedPrecondition indicates operation was rejected because the
 	// system is not in a state required for the operation's execution.
-	// For example, directory to be deleted may be non-empty, an rmdir
-	// operation is applied to a non-directory, etc.
+	// For example, directory to be deleted may be non-empty, a rmdir
+	// operation is applied to a non-directory, etc. [HTTP]
 	//
 	// A litmus test that may help a service implementor in deciding
 	// between FailedPrecondition, Aborted, and Unavailable:
@@ -73,7 +86,7 @@ const (
 	//  (b) Use Aborted if the client should retry at a higher-level
 	//      (e.g., restarting a read-modify-write sequence).
 	//  (c) Use FailedPrecondition if the client should not retry until
-	//      the system state has been explicitly fixed. E.g., if an "rmdir"
+	//      the system state has been explicitly fixed. E.g., if a "rmdir"
 	//      fails because the directory is non-empty, FailedPrecondition
 	//      should be returned since the client should not retry unless
 	//      they have first fixed up the directory by deleting files from it.
@@ -85,13 +98,14 @@ const (
 
 	// Aborted indicates the operation was aborted, typically due to a
 	// concurrency issue like sequencer check failures, transaction aborts,
-	// etc.
+	// etc. [HTTP]
 	//
 	// See litmus test above for deciding between FailedPrecondition,
 	// Aborted, and Unavailable.
 	Aborted Code = -10
 
-	// OutOfRange means operation was attempted past the valid range.
+	// OutOfRange means operation was attempted past the valid range. [HTTP]
+	//
 	// E.g., seeking or reading past end of file.
 	//
 	// Unlike InvalidArgument, this error indicates a problem that may
@@ -109,15 +123,17 @@ const (
 	OutOfRange Code = -11
 
 	// Unimplemented indicates operation is not implemented or not
-	// supported/enabled in this service.
+	// supported/enabled in this service. [HTTP]
 	Unimplemented Code = -12
 
-	// Internal errors. Means some invariants expected by underlying
+	// Internal errors [HTTP].
+	//
+	// Means some invariants expected by underlying
 	// system has been broken. If you see one of these errors,
 	// something is very broken.
 	Internal Code = -13
 
-	// Unavailable indicates the service is currently unavailable.
+	// Unavailable indicates the service is currently unavailable. [HTTP]
 	// This is a most likely a transient condition and may be corrected
 	// by retrying with a backoff. Note that it is not always safe to
 	// retry non-idempotent operations.
@@ -126,38 +142,38 @@ const (
 	// Aborted, and Unavailable.
 	Unavailable Code = -14
 
-	// DataLoss indicates unrecoverable data loss or corruption.
+	// DataLoss indicates unrecoverable data loss or corruption. [HTTP]
 	DataLoss Code = -15
 
 	// Unauthenticated indicates the request does not have valid
-	// authentication credentials for the operation.
+	// authentication credentials for the operation. [HTTP]
 	//
 	// = HTTP 401 Unauthorized
 	Unauthenticated Code = -16
 
-	// RateLimited indicates some flow control algorithm is running
+	// RateLimited indicates some flow control algorithm is running. [HTTP]
 	// and applied.
 	//
 	// = HTTP Code 429
 	RateLimited Code = -17
 
-	// BadRequest generates a 400 error.
+	// BadRequest generates a 400 error. [HTTP]
 	//
 	// = HTTP 400
 	BadRequest Code = -18
 
-	// Conflict generates a 409 error.
+	// Conflict generates a 409 error. [HTTP]
 	//
 	// = hTTP 409
 	Conflict Code = -19
 
-	// Forbidden generates a 403 error.
+	// Forbidden generates a 403 error. [HTTP]
 	Forbidden Code = -20
 
-	// InternalServerError generates a 500 error.
+	// InternalServerError generates a 500 error. [HTTP]
 	InternalServerError Code = -21
 
-	// MethodNotAllowed generates a 405 error.
+	// MethodNotAllowed generates a 405 error. [HTTP]
 	MethodNotAllowed Code = -22
 
 	// Timeout generates a Timeout error.
@@ -247,12 +263,12 @@ func (c Code) String() string {
 	return codeToStr[Unknown]
 }
 
-func (w Code) makeErrorString(line bool) string {
+func (c Code) makeErrorString(line bool) string {
 	var buf bytes.Buffer
-	buf.WriteString(w.Error())
+	buf.WriteString(c.Error())
 	buf.WriteRune(' ')
 	buf.WriteRune('(')
-	buf.WriteString(strconv.Itoa(int(w)))
+	buf.WriteString(strconv.Itoa(int(c)))
 	buf.WriteRune(')')
 	return buf.String()
 }
@@ -265,18 +281,19 @@ func (w Code) makeErrorString(line bool) string {
 // Format accepts flags that alter the printing of some verbs, as follows:
 //
 //	%+v   Prints filename, function, and line number for each Frame in the stack.
-func (w Code) Format(s fmt.State, verb rune) {
+func (c Code) Format(s fmt.State, verb rune) {
 	switch verb {
 	case 'v':
 		if s.Flag('+') {
-			_, _ = fmt.Fprintf(s, "%+v", w.makeErrorString(true))
+			_, _ = fmt.Fprintf(s, "%+v", c.makeErrorString(true))
+			// c.Stack.Format(s, verb)
 			return
 		}
 		fallthrough
 	case 's':
-		_, _ = io.WriteString(s, w.makeErrorString(false))
+		_, _ = io.WriteString(s, c.makeErrorString(false))
 	case 'q':
-		_, _ = fmt.Fprintf(s, "%q", w.makeErrorString(false))
+		_, _ = fmt.Fprintf(s, "%q", c.makeErrorString(false))
 	}
 }
 
@@ -302,11 +319,11 @@ func (c Code) Register(codeName string) (errno Code) {
 // it'll be negatived and added errors.MinErrorCode (-1000) so
 // the final Code number will be -1003.
 //
-// When a negative integer given and it's less than
+// When a negative integer given, and it's less than
 // errors.MinErrorCode, it'll be used as it.
 // Or an errors.AlreadyExists returned.
 //
-// A existing code will be returned directly.
+// An existing code will be returned directly.
 //
 // RegisterCode provides a shortcut to declare a number as Code
 // as your need.
