@@ -282,8 +282,8 @@ func (w *WithStackInfo) Clone() *WithStackInfo {
 
 func snfmt(sb *strings.Builder, format string, args ...interface{}) (n int) {
 	str := fmt.Sprintf(format, args...)
-	n = len(str)
-	sb.WriteString(str)
+	// n = len(str)
+	n, _ = sb.WriteString(str)
 	return
 }
 

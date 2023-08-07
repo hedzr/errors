@@ -150,6 +150,7 @@ func (w *causes2) makeErrorString(line bool) string {
 		buf.WriteRune('\n')
 		if w.Code != OK {
 			buf.WriteString(w.Code.String())
+			buf.WriteRune('\n')
 		}
 
 		for _, c := range w.Causers {
@@ -175,6 +176,9 @@ func (w *causes2) makeErrorString(line bool) string {
 		buf.WriteString(w.Code.String())
 		needclose = true
 		needsep = true
+	}
+	if w.msg == "" {
+		needsep = false
 	}
 	if len(w.Causers) > 0 {
 		if buf.Len() > 0 {
