@@ -179,6 +179,29 @@ const (
 	// Timeout generates a Timeout error.
 	Timeout Code = -23
 
+	// IllegalState is used for the application is entering a
+	// bad state.
+	IllegalState Code = -24
+
+	// IllegalFormat can be used for Format failed, user input parsing
+	// or analysis failed, etc.
+	IllegalFormat Code = -25
+
+	// IllegalArgument is like InvalidArgument but applied on application.
+	IllegalArgument = -26
+
+	// InitializationFailed is used for application start up unsuccessfully.
+	InitializationFailed = -27
+
+	// DataUnavailable is used for the data fetching failed.
+	DataUnavailable = -28
+
+	// UnsupportedOperation is like MethodNotAllowed but applied on application.
+	UnsupportedOperation = -29
+
+	// UnsupportedVersion can be used for production continuously iteration.
+	UnsupportedVersion = -30
+
 	// MinErrorCode is the lower bound for user-defined Code.
 	MinErrorCode Code = -1000
 )
@@ -208,33 +231,47 @@ var strToCode = map[string]Code{
 	`INTERNAL_SERVER_ERROR`: InternalServerError,
 	`METHOD_NOT_ALLOWED`:    MethodNotAllowed,
 	`TIMEOUT`:               Timeout,
+	"Illegal Format":        IllegalFormat,
+	"Illegal State":         IllegalState,
+	"Illegal Argument":      IllegalArgument,
+	"Initialization Failed": InitializationFailed,
+	"Data Unavailable":      DataUnavailable,
+	"Unsupported Operation": UnsupportedOperation,
+	"Unsupported Version":   UnsupportedVersion,
 }
 
 var codeToStr = map[Code]string{
-	OK:                  `OK`,
-	Canceled:            `CANCELLED`,
-	Unknown:             `UNKNOWN`,
-	InvalidArgument:     `INVALID_ARGUMENT`,
-	DeadlineExceeded:    `DEADLINE_EXCEEDED`,
-	NotFound:            `NOT_FOUND`,
-	AlreadyExists:       `ALREADY_EXISTS`,
-	PermissionDenied:    `PERMISSION_DENIED`,
-	ResourceExhausted:   `RESOURCE_EXHAUSTED`,
-	FailedPrecondition:  `FAILED_PRECONDITION`,
-	Aborted:             `ABORTED`,
-	OutOfRange:          `OUT_OF_RANGE`,
-	Unimplemented:       `UNIMPLEMENTED`,
-	Internal:            `INTERNAL`,
-	Unavailable:         `UNAVAILABLE`,
-	DataLoss:            `DATA_LOSS`,
-	Unauthenticated:     `UNAUTHENTICATED`,
-	RateLimited:         `RATE_LIMITED`,
-	BadRequest:          `BAD_REQUEST`,
-	Conflict:            `CONFLICT`,
-	Forbidden:           `FORBIDDEN`,
-	InternalServerError: `INTERNAL_SERVER_ERROR`,
-	MethodNotAllowed:    `METHOD_NOT_ALLOWED`,
-	Timeout:             `TIMEOUT`,
+	OK:                   `OK`,
+	Canceled:             `CANCELLED`,
+	Unknown:              `UNKNOWN`,
+	InvalidArgument:      `INVALID_ARGUMENT`,
+	DeadlineExceeded:     `DEADLINE_EXCEEDED`,
+	NotFound:             `NOT_FOUND`,
+	AlreadyExists:        `ALREADY_EXISTS`,
+	PermissionDenied:     `PERMISSION_DENIED`,
+	ResourceExhausted:    `RESOURCE_EXHAUSTED`,
+	FailedPrecondition:   `FAILED_PRECONDITION`,
+	Aborted:              `ABORTED`,
+	OutOfRange:           `OUT_OF_RANGE`,
+	Unimplemented:        `UNIMPLEMENTED`,
+	Internal:             `INTERNAL`,
+	Unavailable:          `UNAVAILABLE`,
+	DataLoss:             `DATA_LOSS`,
+	Unauthenticated:      `UNAUTHENTICATED`,
+	RateLimited:          `RATE_LIMITED`,
+	BadRequest:           `BAD_REQUEST`,
+	Conflict:             `CONFLICT`,
+	Forbidden:            `FORBIDDEN`,
+	InternalServerError:  `INTERNAL_SERVER_ERROR`,
+	MethodNotAllowed:     `METHOD_NOT_ALLOWED`,
+	Timeout:              `TIMEOUT`,
+	IllegalState:         "Illegal State",
+	IllegalFormat:        "Illegal Format",
+	IllegalArgument:      "Illegal Argument",
+	InitializationFailed: "Initialization Failed",
+	DataUnavailable:      "Data Unavailable",
+	UnsupportedOperation: "Unsupported Operation",
+	UnsupportedVersion:   "Unsupported Version",
 }
 
 //
