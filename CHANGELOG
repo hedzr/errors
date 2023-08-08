@@ -1,5 +1,12 @@
 # CHANGELOG
 
+- v3.1.6
+  - improved/fixed the formatting algorithm on error object
+  - added more builtin error codes, such as IllegalState
+  - improved godoc
+  - added TestCodeRegister
+  - added integral value as suffix of Code error formatted output.
+
 - v3.1.5
   - fixed `errors.New("").Attach(errs...)` don't skip the `empty` error.  
     **Attach ignores an error only if it is nil**.

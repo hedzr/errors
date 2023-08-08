@@ -31,6 +31,13 @@ Wrapped errors and more for golang developing (not just for go1.11, go1.13, and 
 
 ## History
 
+- v3.1.6
+  - improved/fixed the formatting algorithm on error object
+  - added more builtin error codes, such as IllegalState
+  - improved godoc
+  - added TestCodeRegister
+  - added integral value as suffix of Code error formatted output.
+
 - v3.1.5
   - fixed `errors.New("").Attach(errs...)` don't skip the `empty` error.  
     **Attach ignores an error only if it is nil**.
@@ -49,7 +56,7 @@ Wrapped errors and more for golang developing (not just for go1.11, go1.13, and 
   - added `Join()` to compliant with go1.20 errors.Join
   - reviewed all of testcases
 
-- v3.0.21 ..
+- v3.0.21
     - add: `RegisterCode()` at top level for initialize user-defined Coded decl
     - godoc and fix/imp Attach() to copy inner errors' StackTrace
     - fix Is(): Is(err, errors.BadRequest) might be dead lock or cannot return the test result probably
@@ -80,6 +87,23 @@ These features are supported for compatibilities.
 - supports Stacktrace
   - in an error by `Wrap()`, stacktrace wrapped;
   - for your error, attached by `WithStack(cause error)`;
+
+#### Some Enhancements
+
+- `AsSlice(errs []error, target interface{}) bool`
+- `IsAnyOf(err error, targets ...error) bool`
+- `IsSlice(errs []error, target error) bool`
+- `TypeIs(err, target error) bool`
+- `TypeIsSlice(errs []error, target error) bool`
+- `Join(errs ...error) error`
+- `DumpStacksAsString(allRoutines bool) string`
+- `CanAttach(err interface{}) (ok bool)`
+- `CanCause(err interface{}) (ok bool)`
+- `CanCauses(err interface{}) (ok bool)`
+- `CanUnwrap(err interface{}) (ok bool)`
+- `CanIs(err interface{}) (ok bool)`
+- `CanAs(err interface{}) (ok bool)`
+- `Causes(err error) (errs []error)`
 
 ## Best Practices
 
