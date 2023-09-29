@@ -31,6 +31,11 @@ Wrapped errors and more for golang developing (not just for go1.11, go1.13, and 
 
 ## History
 
+- v3.1.9
+  - fixed error.Is deep test to check two errors' message text contents if matched
+  - fixed errors.v3.Join when msg is not empty in an err obj
+  - fixed causes.WithErrors(): err obj has been ignored even if its message is not empty
+
 - v3.1.6
   - improved/fixed the formatting algorithm on error object
   - added more builtin error codes, such as IllegalState
