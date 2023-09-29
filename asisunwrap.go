@@ -3,6 +3,7 @@ package errors
 import (
 	"fmt"
 	"reflect"
+	"strings"
 )
 
 // As finds the first error in `err`'s chain that matches target,
@@ -102,6 +103,12 @@ func Is(err, target error) bool {
 	}
 
 	isComparable := reflect.TypeOf(target).Comparable()
+	tv := reflect.ValueOf(target)
+	// target is not Code-based, try convert source err with target's type, and test whether its plain text message is equal
+	var savedMsg string
+	if !isNil(tv) {
+		savedMsg = target.Error()
+	}
 	for {
 		if isComparable {
 			if err == target {
@@ -112,7 +119,7 @@ func Is(err, target error) bool {
 			return true
 		}
 		if _, ok := target.(Code); !ok {
-			if ok = As(err, &target); ok {
+			if ok = As(err, &target); ok && !isNil(reflect.ValueOf(target)) && strings.EqualFold(target.Error(), savedMsg) {
 				return true
 			}
 		}
@@ -123,6 +130,36 @@ func Is(err, target error) bool {
 			return false
 		}
 	}
+}
+
+// isNil for go1.12+, the difference is it never panic on unavailable kinds.
+// see also reflect.IsNil.
+func isNil(v reflect.Value) bool {
+	return isNilv(&v)
+}
+
+// IsNilv for go1.12+, the difference is it never panic on unavailable kinds.
+// see also reflect.IsNil.
+func isNilv(v *reflect.Value) bool {
+	if v != nil {
+		switch k := v.Kind(); k { //nolint:exhaustive //no need
+		case reflect.Uintptr:
+			if v.CanAddr() {
+				return v.UnsafeAddr() == 0 // special: reflect.IsNil assumed nil check on an uintptr is illegal, faint!
+			}
+		case reflect.Chan, reflect.Func, reflect.Map, reflect.Ptr:
+			return v.IsNil()
+		case reflect.UnsafePointer:
+			return v.Pointer() == 0 // for go1.11, this is a workaround even not bad
+		case reflect.Interface, reflect.Slice:
+			return v.IsNil()
+			// case reflect.Array:
+			//	// never true, for an array, it is never IsNil
+			// case reflect.String:
+			// case reflect.Struct:
+		}
+	}
+	return false
 }
 
 // IsSlice tests err.Is for errs slice

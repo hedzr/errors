@@ -42,7 +42,7 @@ func TestErrorsIs(t *testing.T) {
 	// t.Logf("e1 = %+v", e1)
 
 	t.Logf("errors.Is(err, strconv.ErrSyntax): %v", Is(err, strconv.ErrSyntax))
-	t.Logf("errors.Is(err, &strconv.NumError{}): %v", Is(err, &strconv.NumError{}))
+	t.Logf("errors.Is(err, &strconv.NumError{}): %v", Is(err, &strconv.NumError{Err: strconv.ErrRange}))
 
 	var e2 *strconv.NumError
 	if As(err, &e2) {
