@@ -26,11 +26,14 @@ func TestErrorCodeIs(t *testing.T) {
 	//
 
 	_, err = strconv.ParseInt("hello", 10, 64)
-	if Is(err, strconv.ErrSyntax) || Is(err, strconv.ErrRange) {
+	if !Is(err, strconv.ErrRange) {
 		t.Logf("'%v' recoganized OK.", err)
 	} else {
 		t.Fatalf("'%+v' CANNOT be recoganized", err)
 	}
+
+	// for v1.11, Is(err, strconv.ErrSyntax) should be false
+	// and for v1.12+, Is(err, strconv.ErrSyntax) must be true
 }
 
 // TestErrorsIs _
