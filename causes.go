@@ -92,6 +92,8 @@ func (w *causes2) WithErrors(errs ...error) *causes2 {
 			if check, ok := e.(interface{ IsEmpty() bool }); ok {
 				if !check.IsEmpty() {
 					w.Causers = append(w.Causers, e)
+				} else if e.Error() != "" {
+					w.Causers = append(w.Causers, e)
 				}
 			} else {
 				w.Causers = append(w.Causers, e)
