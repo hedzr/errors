@@ -107,7 +107,7 @@ func Is(err, target error) bool {
 	// target is not Code-based, try convert source err with target's type, and test whether its plain text message is equal
 	var savedMsg string
 	if !isNil(tv) {
-		savedMsg = target.Error()
+		savedMsg = safeErrorGetMsg(target)
 	}
 	for {
 		if isComparable {
@@ -119,7 +119,7 @@ func Is(err, target error) bool {
 			return true
 		}
 		if _, ok := target.(Code); !ok {
-			if ok = As(err, &target); ok && !isNil(reflect.ValueOf(target)) && strings.EqualFold(target.Error(), savedMsg) {
+			if ok = As(err, &target); ok && !isNil(reflect.ValueOf(target)) && strings.EqualFold(safeErrorGetMsg(target), savedMsg) {
 				return true
 			}
 		}
@@ -130,6 +130,18 @@ func Is(err, target error) bool {
 			return false
 		}
 	}
+}
+
+func safeErrorGetMsg(err error) (msg string) {
+	if err != nil {
+		defer func() {
+			if e := recover(); e != nil {
+				fmt.Printf("some error recovered: %v", e)
+			}
+		}()
+		msg = err.Error()
+	}
+	return
 }
 
 // isNil for go1.12+, the difference is it never panic on unavailable kinds.
