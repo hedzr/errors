@@ -9,6 +9,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"strconv"
 	"testing"
 
 	v3 "gopkg.in/hedzr/errors.v3"
@@ -134,4 +135,26 @@ func TestCauses2_errorsV3(t *testing.T) {
 	err = fmt.Errorf("wrapped: %w", err)
 	t.Logf("divide: %v", err)
 	t.Logf("Unwrap: %v", v3.Unwrap(err))
+}
+
+func TestErrorsIsForNumError(t *testing.T) {
+	_, err := strconv.ParseFloat("hello", 64)
+
+	t.Logf("err = %+v", err)
+
+	e1 := errors.Unwrap(err)
+	t.Logf("e1 = %+v", e1)
+
+	t.Logf("err = %+v", err)
+	t.Logf("errors.Is(err, strconv.ErrSyntax): %v", v3.Is(err, strconv.ErrSyntax))
+	t.Logf("err = %+v", err)
+	t.Logf("errors.Is(err, &strconv.NumError{}): %v", v3.Is(err, &strconv.NumError{}))
+	t.Logf("err = %+v", err)
+
+	var e2 *strconv.NumError
+	if v3.As(err, &e2) {
+		t.Logf("As() ok, e2 = %v", e2)
+	} else {
+		t.Logf("As() not ok")
+	}
 }
