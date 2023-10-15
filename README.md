@@ -31,6 +31,9 @@ Wrapped errors and more for golang developing (not just for go1.11, go1.13, and 
 
 ## History
 
+- v3.1.11
+  - fixed error.Is to avoid panic when testing on some obj
+
 - v3.1.9
   - fixed error.Is deep test to check two errors' message text contents if matched
   - fixed errors.v3.Join when msg is not empty in an err obj
