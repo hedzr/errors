@@ -56,9 +56,6 @@ func TestErrorsIs(t *testing.T) {
 }
 
 func TestIs(t *testing.T) {
-
-	series := []error{io.EOF, io.ErrShortWrite, io.ErrClosedPipe, Internal}
-
 	err := &causes2{
 		Code:    0,
 		Causers: nil,
@@ -72,6 +69,12 @@ func TestIs(t *testing.T) {
 		}
 	}
 
+	t.Logf("the error is: %+v", err)
+}
+
+func TestIs2(t *testing.T) { //nolint:revive
+	series := []error{io.EOF, io.ErrShortWrite, io.ErrClosedPipe, Internal}
+
 	err2 := New("hello %v", "world")
 
 	// the old err2 (i.e. err3) will be moved into err2's slice
@@ -82,29 +85,28 @@ func TestIs(t *testing.T) {
 		WithErrors(io.ErrClosedPipe).
 		WithCode(Internal).
 		End()
+
 	for _, e := range series {
 		if !Is(err2, e) {
 			t.Fatalf("test for Is(%v) failed", e)
 		}
 	}
 
-	t.Logf("failed: %+v", err)
-
 	var code Code
-	if !(As(err2, &code) && code == Internal) {
+	if !(As(err2, &code) && code == Internal) { //nolint:revive
 		t.Fatalf("cannot extract coded error with As()")
 	}
 
 	// so As() will extract the first element in err2's slice container,
 	// that is err3.
 	var ee1 error
-	if !(As(err2, &ee1) && ee1 == io.EOF) {
+	if !(As(err2, &ee1) && ee1 == io.EOF) { //nolint:revive
 		t.Fatalf("cannot extract 'hello world' error with As(), ee1 = %v", ee1)
 	}
 
 	var ee2 []error
 	if !(As(err2, &ee2) && len(ee2) == 3) {
-		t.Fatalf("cannot extract []error error with As(), ee2 = %v", ee2)
+		t.Fatalf("cannot extract []error error with As(), ee2 = %v (len=%v)", ee2, len(ee2))
 	}
 
 	var index int
@@ -138,30 +140,30 @@ func TestTypeIsSlice(t *testing.T) {
 	err := Wrap(Internal, "hello, %v", "world")
 	err.WithErrors(NotFound).End()
 
-	if TypeIsSlice(err.Causes(), NotFound) == false {
+	if !TypeIsSlice(err.Causes(), NotFound) {
 		t.Fatalf("not ok")
 	}
 
-	if TypeIs(err, NotFound) == false {
+	if !TypeIs(err, NotFound) {
 		t.Fatalf("not ok")
 	}
 
 	err2 := New().WithErrors(NotFound, err)
 	err3 := New().WithErrors(NotFound, err2)
-	if TypeIsSlice(Causes(err3), err) == false {
+	if !TypeIsSlice(Causes(err3), err) {
 		t.Fatalf("not ok")
 	}
 
-	if TypeIs(err2, NotFound) == false {
+	if !TypeIs(err2, NotFound) {
 		t.Fatalf("not ok")
 	}
-	if TypeIs(err3, NotFound) == false {
+	if !TypeIs(err3, NotFound) {
 		t.Fatalf("not ok")
 	}
-	if TypeIs(err3, err2) == false {
+	if !TypeIs(err3, err2) {
 		t.Fatalf("not ok")
 	}
-	if TypeIs(err3, err) == false {
+	if !TypeIs(err3, err) {
 		t.Fatalf("not ok")
 	}
 	TypeIs(err3, nil)
@@ -184,7 +186,6 @@ func TestTypeIsSlice(t *testing.T) {
 }
 
 func TestAsRaisePanic(t *testing.T) {
-
 	t.Run("1", func(t *testing.T) {
 		defer func() { recover() }() //nolint:errcheck //no need
 		As(nil, nil)
@@ -207,11 +208,9 @@ func TestAsRaisePanic(t *testing.T) {
 		var err int
 		As(nil, err)
 	})
-
 }
 
 func TestAsSliceRaisePanic(t *testing.T) {
-
 	t.Run("1", func(t *testing.T) {
 		defer func() { recover() }() //nolint:errcheck //no need
 		AsSlice(nil, nil)
@@ -234,5 +233,4 @@ func TestAsSliceRaisePanic(t *testing.T) {
 		var err int
 		AsSlice(nil, err)
 	})
-
 }

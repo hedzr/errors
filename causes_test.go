@@ -19,11 +19,11 @@ func TestAs_e1(t *testing.T) {
 }
 
 func TestAs_betterFormat(t *testing.T) {
-	var err = New("Have errors").WithErrors(io.EOF, io.ErrShortWrite, io.ErrNoProgress)
+	err := New("Have errors").WithErrors(io.EOF, io.ErrShortWrite, io.ErrNoProgress)
 	t.Logf("%v\n", err)
 
-	var nestNestErr = New("Errors FOUND:").WithErrors(err, io.EOF)
-	var nnnErr = New("Nested Errors:").WithErrors(nestNestErr, strconv.ErrRange)
+	nestNestErr := New("Errors FOUND:").WithErrors(err, io.EOF)
+	nnnErr := New("Nested Errors:").WithErrors(nestNestErr, strconv.ErrRange)
 	t.Logf("%v\n", nnnErr)
 	t.Logf("%+v\n", nnnErr)
 }
@@ -66,7 +66,6 @@ func TestCauses2_New(t *testing.T) {
 	}
 	err.WithErrors(io.EOF, io.ErrClosedPipe).End()
 	t.Logf("failed: %+v", err)
-
 }
 
 func TestContainer(t *testing.T) {
@@ -128,5 +127,4 @@ func TestIsDescended(t *testing.T) {
 	if !IsDescended(err3, err4) {
 		t.Fatalf("bad test on IsDescended(err3, err4)")
 	}
-
 }

@@ -8,12 +8,12 @@ import (
 
 func TestFuncname(t *testing.T) {
 	fn := funcname("/home/fine/app.TestFuncname()")
-	println(fn)
+	t.Log(fn)
 }
 
 func TestStack_StackTrace(t *testing.T) {
-	var s = callers(0)
-	println(s.StackTrace())
+	s := callers(0)
+	t.Log(s.StackTrace())
 
 	fmt.Printf("%+v\n", s)
 	fmt.Printf("%#v\n", s)
@@ -34,7 +34,6 @@ func TestStack_StackTrace(t *testing.T) {
 		fmt.Printf("%s\n", frame)
 		fmt.Printf("%q\n", frame)
 		fmt.Printf("%n\n", frame)
-
 	}
 }
 

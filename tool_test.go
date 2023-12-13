@@ -4,6 +4,7 @@ import "testing"
 
 func TestDumpStacksAsString(t *testing.T) {
 	DumpStacksAsString(true)
+	t.Log("OK")
 }
 
 func TestCanAttach(t *testing.T) {

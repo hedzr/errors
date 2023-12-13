@@ -3,6 +3,7 @@ package errors
 import (
 	"fmt"
 	"io"
+	"reflect"
 	"strings"
 )
 
@@ -12,8 +13,8 @@ type WithStackInfo struct {
 
 	*Stack
 
-	sites       []interface{}
-	taggedSites map[string]interface{}
+	sites       []interface{}          //nolint:revive
+	taggedSites map[string]interface{} //nolint:revive
 }
 
 func (w *WithStackInfo) IsDescended(descendant error) bool {
@@ -31,10 +32,10 @@ func (w *WithStackInfo) String() string { return w.Error() }
 //
 // If err is nil, WithStack returns nil.
 func WithStack(cause error) error {
-	return withStack(cause)
+	return withStackZ(cause)
 }
 
-func withStack(cause error) *WithStackInfo {
+func withStackZ(cause error) *WithStackInfo {
 	if cause == nil {
 		return nil
 	}
@@ -63,7 +64,7 @@ func (w *WithStackInfo) End() {}
 // Data returns the wrapped common user data by WithData.
 // The error objects with passed WithData will be moved into inner
 // errors set, so its are excluded from Data().
-func (w *WithStackInfo) Data() []interface{} { return w.sites }
+func (w *WithStackInfo) Data() []interface{} { return w.sites } //nolint:revive
 
 // TaggedData returns the wrapped tagged user data by WithTaggedData.
 func (w *WithStackInfo) TaggedData() TaggedData { return w.taggedSites }
@@ -96,7 +97,7 @@ func (w *WithStackInfo) WithSkip(skip int) Buildable {
 }
 
 // WithMessage formats the error message
-func (w *WithStackInfo) WithMessage(message string, args ...interface{}) Buildable {
+func (w *WithStackInfo) WithMessage(message string, args ...interface{}) Buildable { //nolint:revive
 	_ = w.causes2.WithMessage(message, args...)
 	return w
 }
@@ -184,7 +185,7 @@ func (w *WithStackInfo) WithErrors(errs ...error) Buildable {
 //	    log.Skip(n).Errorf("%v", err) // skip go-lib frames and defer-recover frame, back to the point throwing panic
 //	  }
 //	}()
-func (w *WithStackInfo) WithData(errs ...interface{}) Buildable {
+func (w *WithStackInfo) WithData(errs ...interface{}) Buildable { //nolint:revive
 	if len(errs) > 0 {
 		for _, e := range errs {
 			if e1, ok := e.(error); ok {
@@ -221,7 +222,7 @@ func (w *WithStackInfo) WithCause(cause error) Buildable {
 //
 // The objects of Data/TaggedData will be limited while its' been formatted with "%+v"
 func (w *WithStackInfo) WithMaxObjectStringLength(maxlen int) Buildable {
-	w.causes2.WithMaxObjectStringLength(maxlen)
+	w.causes2.WithMaxObjectStringLength(maxlen) //nolint:errcheck
 	return w
 }
 
@@ -245,10 +246,21 @@ func (w *WithStackInfo) WithMaxObjectStringLength(maxlen int) Buildable {
 //	   err := child()
 //	   t.Logf("failed: %+v", err)
 //	}
-func (w *WithStackInfo) Defer(err *error) {
-	if !w.IsEmpty() { // no inner errors attached into an error container, that assumed 'is empty'
-		*err = w
+func (w *WithStackInfo) Defer(err *error) { //nolint:gocritic
+	if w.IsEmpty() {
+		*err = nil
+	} else {
+		*err = w // no inner errors attached into an error container, that assumed 'is empty'
 	}
+}
+
+func (w *WithStackInfo) Clear() Container {
+	w.msg = ""
+	w.sites = nil
+	w.taggedSites = nil
+	w.Causers = nil
+	w.liveArgs = nil
+	return w
 }
 
 // IsEmpty tests has attached errors
@@ -257,7 +269,7 @@ func (w *WithStackInfo) IsEmpty() bool {
 }
 
 // FormatWith _
-func (w *WithStackInfo) FormatWith(args ...interface{}) error {
+func (w *WithStackInfo) FormatWith(args ...interface{}) error { //nolint:revive
 	c := w.Clone()
 	c.liveArgs = args
 	return c
@@ -280,7 +292,7 @@ func (w *WithStackInfo) Clone() *WithStackInfo {
 	return c
 }
 
-func snfmt(sb *strings.Builder, format string, args ...interface{}) (n int) {
+func snfmt(sb *strings.Builder, format string, args ...interface{}) (n int) { //nolint:revive
 	str := fmt.Sprintf(format, args...)
 	// n = len(str)
 	n, _ = sb.WriteString(str)
@@ -295,7 +307,7 @@ func snfmt(sb *strings.Builder, format string, args ...interface{}) (n int) {
 // Format accepts flags that alter the printing of some verbs, as follows:
 //
 //	%+v   Prints filename, function, and line number for each Frame in the stack.
-func (w *WithStackInfo) Format(s fmt.State, verb rune) {
+func (w *WithStackInfo) Format(s fmt.State, verb rune) { //nolint:revive
 	switch verb {
 	case 'v':
 		if s.Flag('+') {
@@ -321,7 +333,7 @@ func (w *WithStackInfo) Format(s fmt.State, verb rune) {
 					n += snfmt(&sb, "    %v => %+v\n", k, w.limitObj(site))
 				}
 			}
-			_, _ = fmt.Fprintf(s, sb.String())
+			_, _ = fmt.Fprint(s, sb.String())
 			w.Stack.Format(s, verb)
 			return
 		}
@@ -333,13 +345,34 @@ func (w *WithStackInfo) Format(s fmt.State, verb rune) {
 	}
 }
 
-// // Is reports whether any error in `err`'s chain matches target.
-// func (w *WithStackInfo) Is(target error) bool {
-//	if x, ok := w.error.(interface{ Is(error) bool }); ok && x.Is(target) {
-//		return true
-//	}
-//	return w.error == target
-// }
+// Is reports whether any error in `err`'s chain matches target.
+func (w *WithStackInfo) Is(target error) bool {
+	if te, ok := target.(*WithStackInfo); ok {
+		return w.equal(te)
+	}
+	for _, e := range w.Causers {
+		if Is(e, target) {
+			return true
+		}
+	}
+	return w.causes2.Is(target)
+}
+
+func (w *WithStackInfo) equal(target *WithStackInfo) bool {
+	if w.causes2.equal(&target.causes2) &&
+		reflect.DeepEqual(w.sites, target.sites) &&
+		reflect.DeepEqual(w.taggedSites, target.taggedSites) {
+		return true
+	}
+
+	for _, e := range w.Causers {
+		if Is(target, e) {
+			return true
+		}
+	}
+
+	return false
+}
 
 // // TypeIs reports whether any error in `err`'s chain matches target.
 // func (w *WithStackInfo) TypeIs(target error) bool {

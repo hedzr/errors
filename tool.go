@@ -14,7 +14,7 @@ func DumpStacksAsString(allRoutines bool) string {
 }
 
 // CanAttach tests if err is attach-able
-func CanAttach(err interface{}) (ok bool) {
+func CanAttach(err interface{}) (ok bool) { //nolint:revive
 	_, ok = err.(interface{ Attach(errs ...error) })
 	if !ok {
 		_, ok = err.(interface {
@@ -25,13 +25,13 @@ func CanAttach(err interface{}) (ok bool) {
 }
 
 // CanCause tests if err is cause-able
-func CanCause(err interface{}) (ok bool) {
+func CanCause(err interface{}) (ok bool) { //nolint:revive
 	_, ok = err.(causer)
 	return
 }
 
 // CanCauses tests if err is cause-able
-func CanCauses(err interface{}) (ok bool) {
+func CanCauses(err interface{}) (ok bool) { //nolint:revive
 	_, ok = err.(causers)
 	return
 }
@@ -42,12 +42,11 @@ func CanCauses(err interface{}) (ok bool) {
 // errors.Unwrap for instead. The errors.Unwrap could extract all
 // of them one by one:
 //
-//      var err = errors.New("hello").WithErrors(io.EOF, io.ShortBuffers)
-//      var e error = err
-//      for e != nil {
-//          e = errors.Unwrap(err)
-//      }
-//
+//	var err = errors.New("hello").WithErrors(io.EOF, io.ShortBuffers)
+//	var e error = err
+//	for e != nil {
+//	    e = errors.Unwrap(err)
+//	}
 func Causes(err error) (errs []error) {
 	if e, ok := err.(causers); ok {
 		errs = e.Causes()
@@ -68,19 +67,19 @@ func Causes(err error) (errs []error) {
 // }
 
 // CanUnwrap tests if err is unwrap-able
-func CanUnwrap(err interface{}) (ok bool) {
+func CanUnwrap(err interface{}) (ok bool) { //nolint:revive
 	_, ok = err.(interface{ Unwrap() error })
 	return
 }
 
 // CanIs tests if err is is-able
-func CanIs(err interface{}) (ok bool) {
+func CanIs(err interface{}) (ok bool) { //nolint:revive
 	_, ok = err.(interface{ Is(error) bool })
 	return
 }
 
 // CanAs tests if err is as-able
-func CanAs(err interface{}) (ok bool) {
-	_, ok = err.(interface{ As(interface{}) bool })
+func CanAs(err interface{}) (ok bool) { //nolint:revive
+	_, ok = err.(interface{ As(interface{}) bool }) //nolint:revive
 	return
 }

@@ -3,7 +3,6 @@ package errors
 import (
 	"fmt"
 	"io"
-	"log"
 	"testing"
 )
 
@@ -16,14 +15,13 @@ func (e *bizErr) Error() string { //nolint:unused //usable
 }
 
 func TestCode_WithCode(t *testing.T) {
-	var c = Internal
+	c := Internal
 	c1 := (&c).WithCode(NotFound)
 
 	t.Logf("failed: %+v", c1)
 
 	c = Code(111)
 	t.Logf("failed: %+v", c)
-
 }
 
 func TestCode_Register(t *testing.T) {
@@ -97,8 +95,8 @@ func TestCodesEqual(t *testing.T) {
 }
 
 func TestCodesRegister(t *testing.T) {
-	const IllegalStateEx Code = MinErrorCode - 1
-	_ = RegisterCode(int(IllegalStateEx), "I'm in an illegal state (ext for testing).")
-	log.Print(IllegalStateEx)
-	log.Printf("%+v", IllegalStateEx)
+	const illegalStateEx Code = MinErrorCode - 1
+	_ = RegisterCode(int(illegalStateEx), "I'm in an illegal state (ext for testing).")
+	t.Log(illegalStateEx)
+	t.Logf("%+v", illegalStateEx)
 }

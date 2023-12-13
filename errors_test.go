@@ -7,7 +7,6 @@ import (
 )
 
 func TestNew(t *testing.T) {
-
 	err := New("hello %v", "world")
 
 	t.Logf("failed: %+v", err)
@@ -52,7 +51,6 @@ func TestNew(t *testing.T) {
 	// since v3.0.5, Attach() has no return value
 	// err = New("hello").Attach(io.EOF)
 	// t.Logf("failed: %+v", err)
-
 }
 
 func TestUnwrap(t *testing.T) {
@@ -79,7 +77,6 @@ func TestUnwrap(t *testing.T) {
 }
 
 func TestWithStackInfo_New(t *testing.T) {
-
 	err := New("hello %v", "world")
 
 	err.WithErrors(io.EOF, io.ErrShortWrite).
@@ -118,12 +115,28 @@ func TestTemplateFormat(t *testing.T) {
 
 func TestContainerMore(t *testing.T) {
 	var err error
-	var ec = New("copying got errors")
+	ec := New("copying got errors")
 	ec.Attach(New("some error"))
 	ec.Defer(&err)
 	if err == nil {
 		t.Fatal(`bad`)
 	} else {
 		t.Logf(`wanted err is non-nil: %v`, err)
+	}
+}
+
+func TestIsDeep(t *testing.T) {
+	var err error
+	ec := New("copying got errors")
+	in := New("unmatched %q")
+	ec.Attach(in.FormatWith("demo"))
+	ec.Defer(&err)
+	if err == nil {
+		t.Fatal(`bad`)
+	} else {
+		t.Logf(`wanted err is non-nil: %v`, err)
+		if !Is(err, in) {
+			t.Fatal("expecting Is() got returning true")
+		}
 	}
 }

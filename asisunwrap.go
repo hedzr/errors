@@ -20,7 +20,7 @@ import (
 // As will panic if target is not a non-nil pointer to either a
 // type that implements error, or to any interface type. "As"
 // returns false if err is nil.
-func As(err error, target interface{}) bool {
+func As(err error, target interface{}) bool { //nolint:revive
 	if target == nil {
 		panic("errors: target cannot be nil")
 	}
@@ -37,20 +37,20 @@ func As(err error, target interface{}) bool {
 	// }
 	targetType := typ.Elem()
 	for err != nil {
-		if x, ok := err.(interface{ As(interface{}) bool }); ok && x.As(target) {
+		if x, ok := err.(interface{ As(interface{}) bool }); ok && x.As(target) { //nolint:revive
 			return true
 		}
 		if reflect.TypeOf(err).AssignableTo(targetType) {
 			val.Elem().Set(reflect.ValueOf(err))
 			return true
 		}
-		err = Unwrap(err)
+		err = Unwrap(err) //nolint:revive
 	}
 	return false
 }
 
 // AsSlice tests err.As for errs slice
-func AsSlice(errs []error, target interface{}) bool {
+func AsSlice(errs []error, target interface{}) bool { //nolint:revive
 	if target == nil {
 		panic("errors: target cannot be nil")
 	}
@@ -69,7 +69,7 @@ func AsSlice(errs []error, target interface{}) bool {
 			val.Elem().Set(reflect.ValueOf(err))
 			return true
 		}
-		if x, ok := err.(interface{ As(interface{}) bool }); ok && x.As(target) {
+		if x, ok := err.(interface{ As(interface{}) bool }); ok && x.As(target) { //nolint:revive
 			return true
 		}
 		err = Unwrap(err) //nolint:ineffassign,staticcheck
@@ -97,9 +97,9 @@ func IsAnyOf(err error, targets ...error) bool {
 // An error is considered to match a target if it is equal to that
 // target or if it implements a method Is(error) bool such that
 // Is(target) returns true.
-func Is(err, target error) bool {
+func Is(err, target error) bool { //nolint:revive
 	if target == nil {
-		return err == target
+		return err == nil
 	}
 
 	isComparable := reflect.TypeOf(target).Comparable()
@@ -107,39 +107,134 @@ func Is(err, target error) bool {
 	// target is not Code-based, try convert source err with target's type, and test whether its plain text message is equal
 	var savedMsg string
 	if !isNil(tv) {
-		savedMsg = safeErrorGetMsg(target)
+		savedMsg = target.Error()
 	}
 	for {
-		if isComparable {
-			if err == target {
-				return true
-			}
+		if isComparable && err == target {
+			return true
 		}
 		if x, ok := err.(interface{ Is(error) bool }); ok && x.Is(target) {
 			return true
 		}
 		if _, ok := target.(Code); !ok {
-			if ok = As(err, &target); ok && !isNil(reflect.ValueOf(target)) && strings.EqualFold(safeErrorGetMsg(target), savedMsg) {
+			var te Code
+			if ok = As(err, &te); ok && !isNil(reflect.ValueOf(err)) && strings.EqualFold(te.Error(), savedMsg) {
 				return true
 			}
 		}
-		// TODO: consider supporting target.Is(err). This would allow
-		// user-definable predicates, but also may allow for coping with sloppy
-		// APIs, thereby making it easier to get away with them.
-		if err = Unwrap(err); err == nil {
+
+		// // TODO: consider supporting target.Is(err). This would allow
+		// // user-definable predicates, but also may allow for coping with sloppy
+		// // APIs, thereby making it easier to get away with them.
+		// if err = Unwrap(err); err == nil {
+		// 	errors.Is()
+		// 	return false
+		// }
+
+		switch x := err.(type) {
+		case interface{ Unwrap() error }:
+			err = x.Unwrap() //nolint:revive
+			if err == nil {
+				return false
+			}
+		case interface{ Unwrap() []error }:
+			for _, err := range x.Unwrap() {
+				if Is(err, target) {
+					return true
+				}
+			}
+			return false
+		default:
 			return false
 		}
 	}
 }
 
-func safeErrorGetMsg(err error) (msg string) {
-	if err != nil {
-		defer func() {
-			if e := recover(); e != nil {
-				fmt.Printf("some error recovered: %v", e)
+func IsStd(err, target error) bool { //nolint:revive
+	if target == nil {
+		return err == target
+	}
+
+	isComparable := reflect.TypeOf(target).Comparable()
+	for {
+		if isComparable && err == target {
+			return true
+		}
+		if x, ok := err.(interface{ Is(error) bool }); ok && x.Is(target) {
+			return true
+		}
+		switch x := err.(type) {
+		case interface{ Unwrap() error }:
+			err = x.Unwrap() //nolint:revive
+			if err == nil {
+				return false
 			}
-		}()
-		msg = err.Error()
+		case interface{ Unwrap() []error }:
+			for _, err := range x.Unwrap() {
+				if Is(err, target) {
+					return true
+				}
+			}
+			return false
+		default:
+			return false
+		}
+	}
+}
+
+func Iss(err error, targets ...error) (matched bool) { //nolint:revive
+	if targets == nil {
+		return err == nil
+	}
+	if err == nil {
+		return true
+	}
+
+	for _, target := range targets {
+		isComparable := reflect.TypeOf(target).Comparable()
+		tv := reflect.ValueOf(target)
+		// target is not Code-based, try convert source err with target's type, and test whether its plain text message is equal
+		var savedMsg string
+		if !isNil(tv) {
+			savedMsg = target.Error()
+		}
+		for {
+			if isComparable && err == target {
+				return true
+			}
+			if x, ok := err.(interface{ Is(error) bool }); ok && x.Is(target) {
+				return true
+			}
+			if _, ok := target.(Code); !ok {
+				if ok = As(err, &target); ok && !isNil(reflect.ValueOf(target)) && strings.EqualFold(target.Error(), savedMsg) {
+					return true
+				}
+			}
+
+			// // TODO: consider supporting target.Is(err). This would allow
+			// // user-definable predicates, but also may allow for coping with sloppy
+			// // APIs, thereby making it easier to get away with them.
+			// if err = Unwrap(err); err == nil {
+			// 	return false
+			// }
+
+			switch x := err.(type) {
+			case interface{ Unwrap() error }:
+				err = x.Unwrap() //nolint:revive
+				if err == nil {
+					return false
+				}
+			case interface{ Unwrap() []error }:
+				for _, err := range x.Unwrap() {
+					if Is(err, target) {
+						return true
+					}
+				}
+				return false
+			default:
+				return false
+			}
+		}
 	}
 	return
 }
@@ -175,7 +270,7 @@ func isNilv(v *reflect.Value) bool {
 }
 
 // IsSlice tests err.Is for errs slice
-func IsSlice(errs []error, target error) bool {
+func IsSlice(errs []error, target error) bool { //nolint:revive
 	if target == nil {
 		// for _, e := range errs {
 		//	if e == target {
@@ -215,7 +310,7 @@ func IsSlice(errs []error, target error) bool {
 //
 // An error is considered to match a target if it is equal to that target or if
 // it implements a method Is(error) bool such that Is(target) returns true.
-func TypeIs(err, target error) bool {
+func TypeIs(err, target error) bool { //nolint:revive
 	if target == nil {
 		return err == target
 	}
@@ -230,17 +325,35 @@ func TypeIs(err, target error) bool {
 		if x, ok := err.(interface{ Is(error) bool }); ok && x.Is(target) {
 			return true
 		}
-		// TODO: consider supporting target.Is(err). This would allow
-		// user-definable predicates, but also may allow for coping with sloppy
-		// APIs, thereby making it easier to get away with them.
-		if err = Unwrap(err); err == nil {
+
+		// // TODO: consider supporting target.Is(err). This would allow
+		// // user-definable predicates, but also may allow for coping with sloppy
+		// // APIs, thereby making it easier to get away with them.
+		// if err = Unwrap(err); err == nil {
+		// 	return false
+		// }
+
+		switch x := err.(type) {
+		case interface{ Unwrap() error }:
+			err = x.Unwrap() //nolint:revive
+			if err == nil {
+				return false
+			}
+		case interface{ Unwrap() []error }:
+			for _, err := range x.Unwrap() {
+				if Is(err, target) {
+					return true
+				}
+			}
+			return false
+		default:
 			return false
 		}
 	}
 }
 
 // TypeIsSlice tests err.Is for errs slice
-func TypeIsSlice(errs []error, target error) bool {
+func TypeIsSlice(errs []error, target error) bool { //nolint:revive
 	if target == nil {
 		// for _, e := range errs {
 		//	if e == target {
@@ -313,13 +426,13 @@ func Unwrap(err error) error {
 // Wrap returns an error annotating err with a Stack trace
 // at the point Wrap is called, and the supplied message.
 // If err is nil, Wrap returns nil.
-func Wrap(err error, message string, args ...interface{}) *WithStackInfo {
+func Wrap(err error, message string, args ...interface{}) *WithStackInfo { //nolint:revive
 	if err == nil {
 		return nil
 	}
 
 	if len(args) > 0 {
-		message = fmt.Sprintf(message, args...)
+		message = fmt.Sprintf(message, args...) //nolint:revive
 	}
 
 	return &WithStackInfo{

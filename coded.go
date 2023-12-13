@@ -279,7 +279,7 @@ var codeToStr = map[Code]string{
 //
 
 // New create a new *CodedErr object based an error code
-func (c Code) New(msg string, args ...interface{}) Buildable {
+func (c Code) New(msg string, args ...interface{}) Buildable { //nolint:revive
 	return Message(msg, args...).WithCode(c).Build()
 }
 
@@ -300,14 +300,21 @@ func (c Code) String() string {
 	return codeToStr[Unknown]
 }
 
-func (c Code) makeErrorString(line bool) string {
+func (c Code) makeErrorString(line bool) string { //nolint:revive,unparam
 	var buf bytes.Buffer
-	buf.WriteString(c.Error())
-	buf.WriteRune(' ')
-	buf.WriteRune('(')
-	buf.WriteString(strconv.Itoa(int(c)))
-	buf.WriteRune(')')
+	_, _ = buf.WriteString(c.Error())
+	_, _ = buf.WriteRune(' ')
+	_, _ = buf.WriteRune('(')
+	_, _ = buf.WriteString(strconv.Itoa(int(c)))
+	_, _ = buf.WriteRune(')')
 	return buf.String()
+}
+
+func (c Code) Is(other error) bool {
+	if o, ok := other.(Code); ok && o == c {
+		return true
+	}
+	return false
 }
 
 // Format formats the stack of Frames according to the fmt.Formatter interface.
@@ -368,7 +375,7 @@ func (c Code) Register(codeName string) (errno Code) {
 // The best way is:
 //
 //	var ErrAck = errors.RegisterCode(3, "cannot ack")     // ErrAck will be -1003
-//	var ErrAck = errors.RegisterCode(-1003, "cannot ack)  // equivelant with last line
+//	var ErrAck = errors.RegisterCode(-1003, "cannot ack)  // equivalent with last line
 func RegisterCode(codePositive int, codeName string) (errno Code) {
 	errno = AlreadyExists
 	applier := func(c Code) {

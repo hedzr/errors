@@ -9,7 +9,7 @@ type Error interface {
 	//
 	// The error objects with a passed Buildable.WithData will be moved
 	// into inner errors set, so its are excluded from Data().
-	Data() []interface{}
+	Data() []interface{} //nolint:revive
 	// TaggedData returns the wrapped tagged user data by
 	// Buildable.WithTaggedData.
 	TaggedData() TaggedData
@@ -50,7 +50,7 @@ type Buildable interface {
 	// WithSkip specifies a special number of stack frames that will be ignored.
 	WithSkip(skip int) Buildable
 	// WithMessage formats the error message
-	WithMessage(message string, args ...interface{}) Buildable
+	WithMessage(message string, args ...interface{}) Buildable //nolint:revive
 	// WithCode specifies an error code.
 	// An error code `Code` is a integer number with error interface
 	// supported.
@@ -102,7 +102,7 @@ type Buildable interface {
 	//      }
 	//    }()
 	//
-	WithData(errs ...interface{}) Buildable
+	WithData(errs ...interface{}) Buildable //nolint:revive
 	// WithTaggedData appends user data with tag into internal container.
 	// These data can be retrieved by
 	WithTaggedData(siteScenes TaggedData) Buildable
@@ -136,7 +136,7 @@ type Buildable interface {
 	//    err = errTmpl.FormatWith("bye")
 	//    println(err)   // got: template here: bye
 	//
-	FormatWith(args ...interface{}) error
+	FormatWith(args ...interface{}) error //nolint:revive
 }
 
 type causer interface {
@@ -203,6 +203,7 @@ type Container interface {
 	//    }
 	//
 	Defer(err *error)
+	Clear() Container // clear all nested errors, internal states
 	// Attachable _
 	Attachable
 }
@@ -218,4 +219,4 @@ type Attachable interface {
 }
 
 // TaggedData _
-type TaggedData map[string]interface{}
+type TaggedData map[string]interface{} //nolint:revive

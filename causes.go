@@ -17,10 +17,10 @@ type causes2 struct {
 	unwrapIndex  int // simple index for iterating Unwrap
 	maxStringLen int // the output string max-length for an object (see also sites/taggedSites), negative or zero means no limit.
 
-	liveArgs []interface{} // error message template ?
+	liveArgs []interface{} //nolint:revive // error message template ?
 }
 
-func (w *causes2) limitObj(obj interface{}) (s string) {
+func (w *causes2) limitObj(obj interface{}) (s string) { //nolint:revive
 	s = fmt.Sprintf("%+v", obj)
 	if w.maxStringLen > 0 && len(s) > w.maxStringLen {
 		s = s[0:w.maxStringLen-3] + "..."
@@ -40,9 +40,9 @@ func (w *causes2) WithCode(code Code) *causes2 {
 	return w
 }
 
-func (w *causes2) WithMessage(message string, args ...interface{}) *causes2 {
+func (w *causes2) WithMessage(message string, args ...interface{}) *causes2 { //nolint:revive
 	if len(args) > 0 {
-		message = fmt.Sprintf(message, args...)
+		message = fmt.Sprintf(message, args...) //nolint:revive
 	}
 	w.msg = message
 	return w
@@ -71,10 +71,22 @@ func (w *causes2) End() {}
 //	   err := child()
 //	   t.Logf("failed: %+v", err)
 //	}
-func (w *causes2) Defer(err *error) {
-	if !w.IsEmpty() {
+func (w *causes2) Defer(err *error) { //nolint:gocritic
+	if w.IsEmpty() {
+		*err = nil
+	} else {
 		*err = w
 	}
+}
+
+func (w *causes2) Clear() Container {
+	w.msg = ""
+	w.Causers = nil
+	w.liveArgs = nil
+	w.Code = OK
+	w.unwrapIndex = 0
+	w.maxStringLen = 0
+	return w
 }
 
 // WithErrors appends errs
@@ -86,7 +98,7 @@ func (w *causes2) Defer(err *error) {
 // be attached if it is empty (i.e. no errors).
 //
 // For a nil error object, it will be ignored.
-func (w *causes2) WithErrors(errs ...error) *causes2 {
+func (w *causes2) WithErrors(errs ...error) *causes2 { //nolint:revive
 	for _, e := range errs {
 		if e != nil {
 			if check, ok := e.(interface{ IsEmpty() bool }); ok {
@@ -115,7 +127,7 @@ func (w *causes2) Attach(errs ...error) {
 }
 
 // FormatWith _
-func (w *causes2) FormatWith(args ...interface{}) error {
+func (w *causes2) FormatWith(args ...interface{}) error { //nolint:revive
 	c := w.Clone()
 	c.liveArgs = args
 	return c
@@ -137,31 +149,31 @@ func (w *causes2) Error() string {
 	return w.makeErrorString(false)
 }
 
-func (w *causes2) makeErrorString(line bool) string {
+func (w *causes2) makeErrorString(line bool) string { //nolint:revive
 	var buf bytes.Buffer
 	if w.msg != "" {
 		if len(w.liveArgs) > 0 {
 			msg := fmt.Sprintf(w.msg, w.liveArgs...)
-			buf.WriteString(msg)
+			_, _ = buf.WriteString(msg)
 		} else {
-			buf.WriteString(w.msg)
+			_, _ = buf.WriteString(w.msg)
 		}
 	}
 
 	if line {
-		buf.WriteRune('\n')
+		_, _ = buf.WriteRune('\n')
 		if w.Code != OK {
-			buf.WriteString(w.Code.String())
-			buf.WriteRune('\n')
+			_, _ = buf.WriteString(w.Code.String())
+			_, _ = buf.WriteRune('\n')
 		}
 
 		for _, c := range w.Causers {
-			buf.WriteString("  - ")
+			_, _ = buf.WriteString("  - ")
 			var xc *causes2
 			if As(c, &xc) {
-				buf.WriteString(leftPad(xc.makeErrorString(line), "  ", false))
+				_, _ = buf.WriteString(leftPad(xc.makeErrorString(line), "  ", false))
 			} else {
-				buf.WriteString(leftPad(c.Error(), "    ", false))
+				_, _ = buf.WriteString(leftPad(c.Error(), "    ", false))
 			}
 		}
 
@@ -172,10 +184,10 @@ func (w *causes2) makeErrorString(line bool) string {
 	var needclose, needsep bool
 	if w.Code != OK {
 		if buf.Len() > 0 {
-			buf.WriteRune(' ')
+			_, _ = buf.WriteRune(' ')
 		}
-		buf.WriteString("[")
-		buf.WriteString(w.Code.String())
+		_, _ = buf.WriteString("[")
+		_, _ = buf.WriteString(w.Code.String())
 		needclose = true
 		needsep = true
 	}
@@ -184,26 +196,26 @@ func (w *causes2) makeErrorString(line bool) string {
 	}
 	if len(w.Causers) > 0 {
 		if buf.Len() > 0 {
-			buf.WriteRune(' ')
+			_, _ = buf.WriteRune(' ')
 		}
-		buf.WriteString("[")
+		_, _ = buf.WriteString("[")
 		needclose = true
 	}
 
 	for i, c := range w.Causers {
 		if i > 0 || needsep {
-			buf.WriteString(" | ")
+			_, _ = buf.WriteString(" | ")
 		}
-		buf.WriteString(c.Error())
+		_, _ = buf.WriteString(c.Error())
 	}
 	if needclose {
-		buf.WriteString("]")
+		_, _ = buf.WriteString("]")
 	}
 	// buf.WriteString(w.Stack)
 	return buf.String()
 }
 
-func leftPad(s, padStr string, firstLine bool) string {
+func leftPad(s, padStr string, firstLine bool) string { //nolint:revive
 	if padStr == "" {
 		return s
 	}
@@ -213,10 +225,10 @@ func leftPad(s, padStr string, firstLine bool) string {
 	scanner := bufio.NewScanner(bufio.NewReader(strings.NewReader(s)))
 	for scanner.Scan() {
 		if ln != 0 || firstLine {
-			sb.WriteString(padStr)
+			_, _ = sb.WriteString(padStr)
 		}
-		sb.WriteString(scanner.Text())
-		sb.WriteRune('\n')
+		_, _ = sb.WriteString(scanner.Text())
+		_, _ = sb.WriteRune('\n')
 		ln++
 	}
 	return sb.String()
@@ -316,7 +328,33 @@ func (w *causes2) Is(target error) bool {
 			return true
 		}
 	}
-	return IsSlice(w.Causers, target)
+	if IsSlice(w.Causers, target) {
+		return true
+	}
+	if te, ok := target.(*causes2); ok {
+		return w.equal(te)
+	}
+	return false
+}
+
+func (w *causes2) equal(target *causes2) bool {
+	return w.Code == target.Code &&
+		w.msg == target.msg &&
+		w.arrayEqual(w.Causers, target.Causers)
+}
+
+func (w *causes2) arrayEqual(a, b []error) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	yes := true
+	for i := 0; i < len(a); i++ {
+		if Is(a[i], b[i]) {
+			yes = false
+			break
+		}
+	}
+	return yes
 }
 
 func (w *causes2) TypeIs(target error) bool {
@@ -325,7 +363,7 @@ func (w *causes2) TypeIs(target error) bool {
 
 // As finds the first error in `err`'s chain that matches target,
 // and if so, sets target to that error value and returns true.
-func (w *causes2) As(target interface{}) bool {
+func (w *causes2) As(target interface{}) bool { //nolint:revive
 	if c, ok := target.(*Code); ok {
 		*c = w.Code
 		return true
@@ -343,5 +381,5 @@ func (w *causes2) As(target interface{}) bool {
 
 // IsEmpty tests has attached errors
 func (w *causes2) IsEmpty() bool {
-	return len(w.Causers) == 0 && w.Code == OK && len(w.liveArgs) == 0
+	return w.Code == OK && len(w.Causers) == 0 && len(w.liveArgs) == 0
 }

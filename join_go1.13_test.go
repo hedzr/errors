@@ -8,16 +8,14 @@ package errors_test
 import (
 	"errors"
 	"fmt"
-	"io"
-	"strconv"
 	"testing"
 
 	v3 "gopkg.in/hedzr/errors.v3"
 )
 
 func TestJoinErrorsStdFormat(t *testing.T) {
-	err1 := v3.New("err1")
-	err2 := v3.New("err2")
+	err1 := errors.New("err1")
+	err2 := errors.New("err2")
 
 	err := v3.Join(err1, err2)
 
@@ -26,13 +24,13 @@ func TestJoinErrorsStdFormat(t *testing.T) {
 	if v3.Is(err, err1) {
 		t.Log("err is err1")
 	} else {
-		t.Fatal("expecting err is err1")
+		t.Fatal("FAILED: expecting err is err1")
 	}
 
 	if v3.Is(err, err2) {
 		t.Log("err is err2")
 	} else {
-		t.Fatal("expecting err is err2")
+		t.Fatal("FAILED: expecting err is err2")
 	}
 
 	err3 := fmt.Errorf("error3: %w", err)
@@ -41,120 +39,18 @@ func TestJoinErrorsStdFormat(t *testing.T) {
 	if v3.Is(err3, err1) {
 		t.Log("err3 is err1")
 	} else {
-		t.Fatal("expecting err3 is err1")
+		t.Fatal("FAILED: expecting err3 is err1")
 	}
 
 	if v3.Is(err3, err2) {
 		t.Log("err3 is err2")
 	} else {
-		t.Fatal("expecting err3 is err1")
-	}
-}
-
-type DivisionError struct {
-	IntA int
-	IntB int
-	Msg  string
-}
-
-func (e *DivisionError) Error() string {
-	return e.Msg
-}
-
-func Divide(a, b int) (int, error) {
-	if b == 0 {
-		return 0, &DivisionError{
-			Msg:  fmt.Sprintf("cannot divide '%d' by zero", a),
-			IntA: a, IntB: b,
-		}
-	}
-	return a / b, nil
-}
-
-func dummy(t *testing.T) error {
-	a, b := 10, 0
-	result, err := Divide(a, b)
-	if err != nil {
-		var divErr *DivisionError
-		switch {
-		case errors.As(err, &divErr):
-			fmt.Printf("%d / %d is not mathematically valid: %s\n",
-				divErr.IntA, divErr.IntB, divErr.Error())
-		default:
-			fmt.Printf("unexpected division error: %s\n", err)
-			t.Fail()
-		}
-		return err
+		t.Fatal("FAILED: expecting err3 is err2")
 	}
 
-	fmt.Printf("%d / %d = %d\n", a, b, result)
-	return err
-}
-
-func dummyV3(t *testing.T) error {
-	a, b := 10, 0
-	result, err := Divide(a, b)
-	if err != nil {
-		var divErr *DivisionError
-		switch {
-		case v3.As(err, &divErr):
-			fmt.Printf("%d / %d is not mathematically valid: %s\n",
-				divErr.IntA, divErr.IntB, divErr.Error())
-		default:
-			fmt.Printf("unexpected division error: %s\n", err)
-			t.Fail()
-		}
-		return err
-	}
-
-	fmt.Printf("%d / %d = %d\n", a, b, result)
-	return err
-}
-
-func TestCauses2_errors(t *testing.T) {
-	err := io.EOF
-
-	if !errors.Is(err, io.EOF) {
-		t.Fail()
-	}
-
-	err = dummy(t)
-	err = fmt.Errorf("wrapped: %w", err)
-	t.Logf("divide: %v", err)
-	t.Logf("Unwrap: %v", errors.Unwrap(err))
-}
-
-func TestCauses2_errorsV3(t *testing.T) {
-	err := io.EOF
-
-	if !v3.Is(err, io.EOF) {
-		t.Fail()
-	}
-
-	err = dummyV3(t)
-	err = fmt.Errorf("wrapped: %w", err)
-	t.Logf("divide: %v", err)
-	t.Logf("Unwrap: %v", v3.Unwrap(err))
-}
-
-func TestErrorsIsForNumError(t *testing.T) {
-	_, err := strconv.ParseFloat("hello", 64)
-
-	t.Logf("err = %+v", err)
-
-	e1 := errors.Unwrap(err)
-	t.Logf("e1 = %+v", e1)
-
-	t.Logf("err = %+v", err)
-	t.Logf("errors.Is(err, strconv.ErrSyntax): %v", v3.Is(err, strconv.ErrSyntax))
-	t.Logf("err = %+v", err)
-	t.Logf("errors.Is(err, &strconv.NumError{}): %v", v3.Is(err, &strconv.NumError{}))
-	t.Logf("err = %+v", err)
-
-	var e2 *strconv.NumError
-	if v3.As(err, &e2) {
-		t.Logf("As() ok, e2 = %v", e2)
+	if !v3.Is(err2, err3) {
+		t.Log("err2 isn't err3")
 	} else {
-		t.Logf("As() not ok")
+		t.Fatal("FAILED: expecting err2 is err3")
 	}
 }

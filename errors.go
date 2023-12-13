@@ -1,6 +1,9 @@
 package errors
 
-import "fmt"
+import (
+	"errors"
+	"fmt"
+)
 
 // New returns an error with the supplied message.
 // New also records the Stack trace at the point where it was called.
@@ -20,13 +23,14 @@ import "fmt"
 // Sample 3:
 //
 //	var err = errors.New().WithErrors(errs...)
-func New(args ...interface{}) Error {
-	s := &builder{skip: 1}
-
+func New(args ...interface{}) Error { //nolint:revive
 	if len(args) > 0 {
+		s := &builder{skip: 1}
+
 		if message, ok := args[0].(string); ok {
 			return s.WithSkip(2).WithMessage(message, args[1:]...).Build()
 		}
+
 		for _, opt := range args {
 			if o, ok := opt.(Opt); ok {
 				o(s)
@@ -36,6 +40,32 @@ func New(args ...interface{}) Error {
 	}
 
 	return &WithStackInfo{Stack: callers(1)}
+}
+
+// NewLite returns a simple message error object via stdlib (errors.New).
+//
+// Sample:
+//
+//	var err1 = errors.New("message") // simple message
+//	var err1 = errors.New(errors.WithStack(cause)) // return Error object with Opt
+func NewLite(args ...interface{}) error { //nolint:revive
+	if len(args) > 0 {
+		if message, ok := args[0].(string); ok {
+			if len(args) > 1 {
+				message = fmt.Sprintf(message, args[1:]...)
+			}
+			return errors.New(message)
+		}
+
+		s := &builder{skip: 1}
+		for _, opt := range args {
+			if o, ok := opt.(Opt); ok {
+				o(s)
+			}
+		}
+		return s.Build()
+	}
+	return errors.ErrUnsupported
 }
 
 // Opt _
@@ -69,7 +99,7 @@ func Skip(skip int) Builder {
 // error object.
 //
 //	err := errors.Message("hello %v", "you").Attach(causer).Build()
-func Message(message string, args ...interface{}) Builder {
+func Message(message string, args ...interface{}) Builder { //nolint:revive
 	return NewBuilder().WithMessage(message, args...)
 }
 
@@ -90,7 +120,6 @@ func NewBuilder() Builder {
 // Builder provides a fluent calling interface to make error
 // building easy.
 type Builder interface {
-
 	// WithSkip specifies a special number of stack frames that will
 	// be ignored.
 	WithSkip(skip int) Builder
@@ -100,7 +129,7 @@ type Builder interface {
 	// For a nil error object, it will be ignored.
 	WithErrors(errs ...error) Builder
 	// WithMessage formats the error message
-	WithMessage(message string, args ...interface{}) Builder
+	WithMessage(message string, args ...interface{}) Builder //nolint:revive
 	// WithCode specifies an error code.
 	WithCode(code Code) Builder
 
@@ -116,7 +145,7 @@ type Builder interface {
 type builder struct {
 	skip        int
 	causes2     causes2
-	sites       []interface{}
+	sites       []interface{} //nolint:revive
 	taggedSites TaggedData
 }
 
@@ -140,9 +169,9 @@ func (s *builder) WithCode(code Code) Builder {
 // }
 
 // WithMessage formats the error message
-func (s *builder) WithMessage(message string, args ...interface{}) Builder {
+func (s *builder) WithMessage(message string, args ...interface{}) Builder { //nolint:revive
 	if len(args) > 0 {
-		message = fmt.Sprintf(message, args...)
+		message = fmt.Sprintf(message, args...) //nolint:revive
 	}
 	s.causes2.msg = message
 	return s
@@ -169,7 +198,7 @@ func (s *builder) WithErrors(errs ...error) Builder {
 //	    log.Skip(n).Errorf("%v", err) // skip go-lib frames and defer-recover frame, back to the point throwing panic
 //	  }
 //	}()
-func (s *builder) WithData(errs ...interface{}) Builder {
+func (s *builder) WithData(errs ...interface{}) Builder { //nolint:revive
 	s.sites = append(s.sites, errs...)
 	return s
 }
