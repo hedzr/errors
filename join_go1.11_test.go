@@ -1,20 +1,19 @@
 // Copyright © 2023 Hedzr Yeh.
 
-//go:build go1.13
-// +build go1.13
+//go:build go1.11
+// +build go1.11
 
 package errors_test
 
 import (
 	"errors"
 	"fmt"
-	"io"
 	"testing"
 
 	v3 "gopkg.in/hedzr/errors.v3"
 )
 
-func TestJoinErrorsStdFormat(t *testing.T) {
+func TestJoinErrorsStdFormatGo111(t *testing.T) {
 	err1 := errors.New("err1")
 	err2 := errors.New("err2")
 
@@ -54,17 +53,4 @@ func TestJoinErrorsStdFormat(t *testing.T) {
 	} else {
 		t.Fatal("FAILED: expecting err2 is err3")
 	}
-}
-
-func TestCauses2_errors(t *testing.T) {
-	err := io.EOF
-
-	if !errors.Is(err, io.EOF) {
-		t.Fail()
-	}
-
-	err = dummy(t)
-	err = fmt.Errorf("wrapped: %w", err)
-	t.Logf("divide: %v", err)
-	t.Logf("Unwrap: %v", errors.Unwrap(err))
 }
