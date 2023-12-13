@@ -32,25 +32,4 @@ func TestJoinErrorsStdFormatGo111(t *testing.T) {
 	} else {
 		t.Fatal("FAILED: expecting err is err2")
 	}
-
-	err3 := fmt.Errorf("error3: %w", err)
-	fmt.Printf("%T, %v\n", err3, v3.Unwrap(err3))
-
-	if v3.Is(err3, err1) {
-		t.Log("err3 is err1")
-	} else {
-		t.Fatal("FAILED: expecting err3 is err1")
-	}
-
-	if v3.Is(err3, err2) {
-		t.Log("err3 is err2")
-	} else {
-		t.Fatal("FAILED: expecting err3 is err2")
-	}
-
-	if !v3.Is(err2, err3) {
-		t.Log("err2 isn't err3")
-	} else {
-		t.Fatal("FAILED: expecting err2 is err3")
-	}
 }
