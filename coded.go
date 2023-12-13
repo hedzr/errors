@@ -188,19 +188,19 @@ const (
 	IllegalFormat Code = -25
 
 	// IllegalArgument is like InvalidArgument but applied on application.
-	IllegalArgument = -26
+	IllegalArgument Code = -26
 
 	// InitializationFailed is used for application start up unsuccessfully.
-	InitializationFailed = -27
+	InitializationFailed Code = -27
 
 	// DataUnavailable is used for the data fetching failed.
-	DataUnavailable = -28
+	DataUnavailable Code = -28
 
 	// UnsupportedOperation is like MethodNotAllowed but applied on application.
-	UnsupportedOperation = -29
+	UnsupportedOperation Code = -29
 
 	// UnsupportedVersion can be used for production continuously iteration.
-	UnsupportedVersion = -30
+	UnsupportedVersion Code = -30
 
 	// MinErrorCode is the lower bound for user-defined Code.
 	MinErrorCode Code = -1000

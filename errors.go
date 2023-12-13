@@ -48,6 +48,8 @@ func New(args ...interface{}) Error { //nolint:revive
 //
 //	var err1 = errors.New("message") // simple message
 //	var err1 = errors.New(errors.WithStack(cause)) // return Error object with Opt
+//
+// If no send any args as parameters, Code `UnsupportedOperation` returned.
 func NewLite(args ...interface{}) error { //nolint:revive
 	if len(args) > 0 {
 		if message, ok := args[0].(string); ok {
@@ -65,7 +67,7 @@ func NewLite(args ...interface{}) error { //nolint:revive
 		}
 		return s.Build()
 	}
-	return errors.ErrUnsupported
+	return UnsupportedOperation // errors.ErrUnsupported
 }
 
 // Opt _
