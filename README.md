@@ -17,12 +17,12 @@ Wrapped errors and more for golang developing (not just for go1.11, go1.13, and 
 
 - Simple migrating way from std errors: all of standard functions have been copied to
 - Better `New()`:
-  - format message inline: `err := errors.New("hello %s", "world")`
-  - format with `Opt`: `err := errors.New(errors.WithErrors(errs...))`
-  - cascade format: `err := errors.New().WithErrors(errs...)`
-  - Stacktrace awareness
-  - Container for canning errors: [Error Container (Inner/Nested)](#error-container-innernested)
-  - error template: [Format message instantly but the text template can be given at beginning](#error-template) 
+	- format message inline: `err := errors.New("hello %s", "world")`
+	- format with `WithXXX`: `err := errors.New(errors.WithErrors(errs...))`
+	- cascade format: `err := errors.New().WithErrors(errs...)`
+	- Stacktrace awareness
+	- Container for canning errors: [Error Container (Inner/Nested)](#error-container-innernested)
+	- error template: [Format message instantly but the text template can be given at beginning](#error-template)
 - Codes: treat a number as an error object
 - Unwrap inner canned errors one by one
 - No mental burden
@@ -31,46 +31,51 @@ Wrapped errors and more for golang developing (not just for go1.11, go1.13, and 
 
 ## History
 
-- v3.1.11
-  - fixed error.Is to avoid panic when testing on some obj
+- v3.3.0
+	- added `Iss(err, errs...)` to test if any of errors are included in 'err'.
+  - improved As/Is/Unwrap to fit for new joint error since go1.20
+  - added causes2.Clear, ...
+  - improved Error() string
+  - reviewed
 
 - v3.1.9
-  - fixed error.Is deep test to check two errors' message text contents if matched
-  - fixed errors.v3.Join when msg is not empty in an err obj
-  - fixed causes.WithErrors(): err obj has been ignored even if its message is not empty
+	- fixed error.Is deep test to check two errors' message text contents if matched
+	- fixed errors.v3.Join when msg is not empty in an err obj
+	- fixed causes.WithErrors(): err obj has been ignored even if its message is not empty
 
 - v3.1.6
-  - improved/fixed the formatting algorithm on error object
-  - added more builtin error codes, such as IllegalState
-  - improved godoc
-  - added TestCodeRegister
-  - added integral value as suffix of Code error formatted output.
+	- improved/fixed the formatting algorithm on error object
+	- added more builtin error codes, such as IllegalState
+	- improved godoc
+	- added TestCodeRegister
+	- added integral value as suffix of Code error formatted output.
 
 - v3.1.5
-  - fixed `errors.New("").Attach(errs...)` don't skip the `empty` error.  
-    **Attach ignores an error only if it is nil**.
-  - fixed the emptiness test for `WithStackInfo`.
-  - cleanup an unused `if len(errs) > 0`.
-  - added `WithMaxObjectStringLength(maxObjectStringLen)` for long formatting data/taggedData by WithData/WithTaggedData
+	- fixed `errors.New("").Attach(errs...)` don't skip the `empty` error.  
+	  **Attach ignores an error only if it is nil**.
+	- fixed the emptiness test for `WithStackInfo`.
+	- cleanup an unused `if len(errs) > 0`.
+	- added `WithMaxObjectStringLength(maxObjectStringLen)` for long formatting data/taggedData by
+	  WithData/WithTaggedData
 
 - v3.1.3
-  - better output of sites and taggedSites  
-    indent and multi-line outputs while formatting with `%+v`
+	- better output of sites and taggedSites  
+	  indent and multi-line outputs while formatting with `%+v`
 
 - v3.1.1
-  - better message format for a nested error, see [Better format](#better-format-for-a-nested-error)
+	- better message format for a nested error, see [Better format](#better-format-for-a-nested-error)
 
 - v3.1.0
-  - added `Join()` to compliant with go1.20 errors.Join
-  - reviewed all of testcases
+	- added `Join()` to compliant with go1.20 errors.Join
+	- reviewed all of testcases
 
 - v3.0.21
-    - add: `RegisterCode()` at top level for initialize user-defined Coded decl
-    - godoc and fix/imp Attach() to copy inner errors' StackTrace
-    - fix Is(): Is(err, errors.BadRequest) might be dead lock or cannot return the test result probably
-    - new lint + fmr
-    - imp: remove redundant codes
-    - update withStackInfo.Stack with WithData() - specially for defer recover codes
+	- add: `RegisterCode()` at top level for initialize user-defined Coded decl
+	- godoc and fix/imp Attach() to copy inner errors' StackTrace
+	- fix Is(): Is(err, errors.BadRequest) might be dead lock or cannot return the test result probably
+	- new lint + fmr
+	- imp: remove redundant codes
+	- update withStackInfo.Stack with WithData() - specially for defer recover codes
 
 - OLDER in [CHANGELOG](https://github.com/hedzr/errors/blob/master/CHANGELOG)
 
@@ -93,11 +98,12 @@ These features are supported for compatibilities.
 - [x] `func Cause1(err error) error`: unwraps just one level
 - `func WithCause(cause error, message string, args ...interface{}) error`, = `Wrap`
 - supports Stacktrace
-  - in an error by `Wrap()`, stacktrace wrapped;
-  - for your error, attached by `WithStack(cause error)`;
+	- in an error by `Wrap()`, stacktrace wrapped;
+	- for your error, attached by `WithStack(cause error)`;
 
 #### Some Enhancements
 
+- `Iss(err error, errs ...error) bool`
 - `AsSlice(errs []error, target interface{}) bool`
 - `IsAnyOf(err error, targets ...error) bool`
 - `IsSlice(errs []error, target error) bool`
@@ -128,7 +134,6 @@ import (
 )
 
 func TestForExample(t *testing.T) {
-
   fn := func() (err error) {
     ec := errors.New("some tips %v", "here")
     defer ec.Defer(&err)
@@ -202,7 +207,7 @@ func TestForExample(t *testing.T) {
 func TestContainer(t *testing.T) {
   // as a inner errors container
   child := func() (err error) {
-    var ec = errors.New("multiple tasks have errors")
+    ec := errors.New("multiple tasks have errors")
     defer ec.Defer(&err) // package the attached errors as a new one and return it as `err`
 
     for _, r := range []error{io.EOF, io.ErrShortWrite, io.ErrClosedPipe, errors.Internal} {
@@ -233,7 +238,7 @@ to build an error instantly.
 
 ```go
 func TestErrorsTmpl(t *testing.T) {
-var errTmpl = errors.New("expecting %v but got %v")
+  errTmpl := errors.New("expecting %v but got %v")
 
 	var err error
 	err = errTmpl.FormatWith("789", "123")
@@ -242,6 +247,8 @@ var errTmpl = errors.New("expecting %v but got %v")
 	t.Logf("The error is: %v", err)
 }
 ```
+
+`FormatWith` will make new clone from errTmpl so you can use multiple cloned errors thread-safely.
 
 The derived error instance is the descendant of the error template.
 This relation can be tested by `errors.IsDescent(errTempl, err)`

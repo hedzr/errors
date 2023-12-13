@@ -1,5 +1,12 @@
 # CHANGELOG
 
+- v3.3.0
+	- added `Iss(err, errs...)` to test if any of errors are included in 'err'.
+  - improved As/Is/Unwrap to fit for new joint error since go1.20
+  - added causes2.Clear, ...
+  - improved Error() string
+  - reviewed
+
 - v3.1.9
   - fixed error.Is deep test to check two errors' message text contents if matched
   - fixed errors.v3.Join when msg is not empty in an err obj
