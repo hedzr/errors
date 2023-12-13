@@ -48,26 +48,6 @@ func Divide(a, b int) (int, error) {
 	return a / b, nil
 }
 
-func dummy(t *testing.T) error {
-	a, b := 10, 0
-	result, err := Divide(a, b)
-	if err != nil {
-		var divErr *DivisionError
-		switch {
-		case errors.As(err, &divErr):
-			fmt.Printf("%d / %d is not mathematically valid: %s\n",
-				divErr.IntA, divErr.IntB, divErr.Error())
-		default:
-			fmt.Printf("unexpected division error: %s\n", err)
-			t.Fail()
-		}
-		return err
-	}
-
-	fmt.Printf("%d / %d = %d\n", a, b, result)
-	return err
-}
-
 func dummyV3(t *testing.T) error {
 	a, b := 10, 0
 	result, err := Divide(a, b)
@@ -86,19 +66,6 @@ func dummyV3(t *testing.T) error {
 
 	fmt.Printf("%d / %d = %d\n", a, b, result)
 	return err
-}
-
-func TestCauses2_errors(t *testing.T) {
-	err := io.EOF
-
-	if !errors.Is(err, io.EOF) {
-		t.Fail()
-	}
-
-	err = dummy(t)
-	err = fmt.Errorf("wrapped: %w", err)
-	t.Logf("divide: %v", err)
-	t.Logf("Unwrap: %v", errors.Unwrap(err))
 }
 
 func TestCauses2_errorsV3(t *testing.T) {
