@@ -232,7 +232,10 @@ func Iss(err error, targets ...error) (matched bool) { //nolint:revive
 				}
 				return false
 			default:
-				return false
+				// return false
+				//
+				// here is a bug which causes the rest errors expect the first one could never be processed.
+				// this bug might cause the unexpected testing result returned.
 			}
 		}
 	}
