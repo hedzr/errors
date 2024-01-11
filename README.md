@@ -17,12 +17,12 @@ Wrapped errors and more for golang developing (not just for go1.11, go1.13, and 
 
 - Simple migrating way from std errors: all of standard functions have been copied to
 - Better `New()`:
-	- format message inline: `err := errors.New("hello %s", "world")`
-	- format with `WithXXX`: `err := errors.New(errors.WithErrors(errs...))`
-	- cascade format: `err := errors.New().WithErrors(errs...)`
-	- Stacktrace awareness
-	- Container for canning errors: [Error Container (Inner/Nested)](#error-container-innernested)
-	- error template: [Format message instantly but the text template can be given at beginning](#error-template)
+  - format message inline: `err := errors.New("hello %s", "world")`
+  - format with `WithXXX`: `err := errors.New(errors.WithErrors(errs...))`
+  - cascade format: `err := errors.New().WithErrors(errs...)`
+  - Stacktrace awareness
+  - Container for canning errors: [Error Container (Inner/Nested)](#error-container-innernested)
+  - error template: [Format message instantly but the text template can be given at beginning](#error-template)
 - Codes: treat a number as an error object
 - Unwrap inner canned errors one by one
 - No mental burden
@@ -31,51 +31,20 @@ Wrapped errors and more for golang developing (not just for go1.11, go1.13, and 
 
 ## History
 
+- v3.3.1
+  - fixed Iss() couldn't test the others except the first error.
+
 - v3.3.0
-	- added `Iss(err, errs...)` to test if any of errors are included in 'err'.
+  - added `Iss(err, errs...)` to test if any of errors are included in 'err'.
   - improved As/Is/Unwrap to fit for new joint error since go1.20
   - added causes2.Clear, ...
   - improved Error() string
-  - reviewed
+  - reviewed and re-published this repo from v3.3
 
 - v3.1.9
-	- fixed error.Is deep test to check two errors' message text contents if matched
-	- fixed errors.v3.Join when msg is not empty in an err obj
-	- fixed causes.WithErrors(): err obj has been ignored even if its message is not empty
-
-- v3.1.6
-	- improved/fixed the formatting algorithm on error object
-	- added more builtin error codes, such as IllegalState
-	- improved godoc
-	- added TestCodeRegister
-	- added integral value as suffix of Code error formatted output.
-
-- v3.1.5
-	- fixed `errors.New("").Attach(errs...)` don't skip the `empty` error.  
-	  **Attach ignores an error only if it is nil**.
-	- fixed the emptiness test for `WithStackInfo`.
-	- cleanup an unused `if len(errs) > 0`.
-	- added `WithMaxObjectStringLength(maxObjectStringLen)` for long formatting data/taggedData by
-	  WithData/WithTaggedData
-
-- v3.1.3
-	- better output of sites and taggedSites  
-	  indent and multi-line outputs while formatting with `%+v`
-
-- v3.1.1
-	- better message format for a nested error, see [Better format](#better-format-for-a-nested-error)
-
-- v3.1.0
-	- added `Join()` to compliant with go1.20 errors.Join
-	- reviewed all of testcases
-
-- v3.0.21
-	- add: `RegisterCode()` at top level for initialize user-defined Coded decl
-	- godoc and fix/imp Attach() to copy inner errors' StackTrace
-	- fix Is(): Is(err, errors.BadRequest) might be dead lock or cannot return the test result probably
-	- new lint + fmr
-	- imp: remove redundant codes
-	- update withStackInfo.Stack with WithData() - specially for defer recover codes
+  - fixed error.Is deep test to check two errors' message text contents if matched
+  - fixed errors.v3.Join when msg is not empty in an err obj
+  - fixed causes.WithErrors(): err obj has been ignored even if its message is not empty
 
 - OLDER in [CHANGELOG](https://github.com/hedzr/errors/blob/master/CHANGELOG)
 
@@ -83,7 +52,7 @@ Wrapped errors and more for golang developing (not just for go1.11, go1.13, and 
 
 These features are supported for compatibilities.
 
-#### stdlib `errors' compatibilities
+### stdlib `errors' compatibilities
 
 - `func As(err error, target interface{}) bool`
 - `func Is(err, target error) bool`
@@ -91,17 +60,17 @@ These features are supported for compatibilities.
 - `func Unwrap(err error) error`
 - `func Join(errs ...error) error`
 
-#### `pkg/errors` compatibilities
+### `pkg/errors` compatibilities
 
 - `func Wrap(err error, message string) error`
 - `func Cause(err error) error`: unwraps recursively, just like Unwrap()
 - [x] `func Cause1(err error) error`: unwraps just one level
 - `func WithCause(cause error, message string, args ...interface{}) error`, = `Wrap`
 - supports Stacktrace
-	- in an error by `Wrap()`, stacktrace wrapped;
-	- for your error, attached by `WithStack(cause error)`;
+  - in an error by `Wrap()`, stacktrace wrapped;
+  - for your error, attached by `WithStack(cause error)`;
 
-#### Some Enhancements
+### Some Enhancements
 
 - `Iss(err error, errs ...error) bool`
 - `AsSlice(errs []error, target interface{}) bool`
@@ -240,11 +209,11 @@ to build an error instantly.
 func TestErrorsTmpl(t *testing.T) {
   errTmpl := errors.New("expecting %v but got %v")
 
-	var err error
-	err = errTmpl.FormatWith("789", "123")
-	t.Logf("The error is: %v", err)
-	err = errTmpl.FormatWith(true, false)
-	t.Logf("The error is: %v", err)
+  var err error
+  err = errTmpl.FormatWith("789", "123")
+  t.Logf("The error is: %v", err)
+  err = errTmpl.FormatWith(true, false)
+  t.Logf("The error is: %v", err)
 }
 ```
 
@@ -255,11 +224,11 @@ This relation can be tested by `errors.IsDescent(errTempl, err)`
 
 ```go
 func TestIsDescended(t *testing.T) {
-	err3 := New("any error tmpl with %v")
-	err4 := err3.FormatWith("huahua")
-	if !IsDescended(err3, err4) {
-		t.Fatalf("bad test on IsDescended(err3, err4)")
-	}
+  err3 := New("any error tmpl with %v")
+  err4 := err3.FormatWith("huahua")
+  if !IsDescended(err3, err4) {
+    t.Fatalf("bad test on IsDescended(err3, err4)")
+  }
 }
 ```
 
@@ -269,13 +238,13 @@ Since v3.1.1, the better message format will be formatted at Printf("%+v").
 
 ```go
 func TestAs_betterFormat(t *testing.T) {
-	var err = New("Have errors").WithErrors(io.EOF, io.ErrShortWrite, io.ErrNoProgress)
-	t.Logf("%v\n", err)
-
-	var nestNestErr = New("Errors FOUND:").WithErrors(err, io.EOF)
-	var nnnErr = New("Nested Errors:").WithErrors(nestNestErr, strconv.ErrRange)
-	t.Logf("%v\n", nnnErr)
-	t.Logf("%+v\n", nnnErr)
+  var err = New("Have errors").WithErrors(io.EOF, io.ErrShortWrite, io.ErrNoProgress)
+  t.Logf("%v\n", err)
+  
+  var nestNestErr = New("Errors FOUND:").WithErrors(err, io.EOF)
+  var nnnErr = New("Nested Errors:").WithErrors(nestNestErr, strconv.ErrRange)
+  t.Logf("%v\n", nnnErr)
+  t.Logf("%+v\n", nnnErr)
 }
 ```
 
@@ -295,11 +264,11 @@ The output is:
           - value out of range
         
         gopkg.in/hedzr/errors%2ev3.TestAs_betterFormat
-        	/Volumes/VolHack/work/godev/cmdr-series/libs/errors/causes_test.go:26
+          /Volumes/VolHack/work/godev/cmdr-series/libs/errors/causes_test.go:26
         testing.tRunner
-        	/usr/local/go/src/testing/testing.go:1576
+          /usr/local/go/src/testing/testing.go:1576
         runtime.goexit
-        	/usr/local/go/src/runtime/asm_amd64.s:1598
+          /usr/local/go/src/runtime/asm_amd64.s:1598
 --- PASS: TestAs_betterFormat (0.00s)
 PASS
 ```

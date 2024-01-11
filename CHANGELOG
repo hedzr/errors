@@ -1,16 +1,19 @@
 # CHANGELOG
 
+- v3.3.1
+  - fixed Iss() couldn't test the others except the first error.
+
 - v3.3.0
-	- added `Iss(err, errs...)` to test if any of errors are included in 'err'.
+  - added `Iss(err, errs...)` to test if any of errors are included in 'err'.
   - improved As/Is/Unwrap to fit for new joint error since go1.20
   - added causes2.Clear, ...
   - improved Error() string
-  - reviewed
+  - reviewed and re-published this repo from v3.3
 
 - v3.1.9
   - fixed error.Is deep test to check two errors' message text contents if matched
   - fixed errors.v3.Join when msg is not empty in an err obj
-  - fixed causes.WithErrors(): err obj has been ignored even if its message is not empty
+  - fixed causes.WithErrors() - err obj has been ignored even if its message is not empty
 
 - v3.1.6
   - improved/fixed the formatting algorithm on error object
@@ -36,20 +39,20 @@
   - added `Join()` to compliant with go1.20 errors.Join
   - reviewed all of testcases
 
-- v3.0.21 ..
-    - add: `RegisterCode()` at top level for initialize user-defined Coded decl
-    - godoc and fix/imp Attach() to copy inner errors' StackTrace
-    - fix Is(): Is(err, errors.BadRequest) might be dead lock or cannot return the test result probably
-    - new lint + fmr
-    - imp: remove redundant codes
-    - update withStackInfo.Stack with WithData() - specially for defer recover codes
+- v3.0.21
+  - added RegisterCode() at top level for initialize user-defined Coded decl.
+  - godoc and fix/imp Attach() to copy inner errors' StackTrace
+  - fix Is() - Is(err, errors.BadRequest) might be dead lock or cannot return the test result probably
+  - new lint + fmt.
+  - imp - remove redundant codes
+  - update withStackInfo.Stack with WithData() - specially for defer recover codes
 
 - v3.0.15
   - fix: make Is() work for go1.12 and below
 
 - v3.0.13
-  - fea: IsDescended for error template test
-  - fix: code and causes are present at same time
+  - fea - IsDescended for error template test
+  - fix - code and causes are present at same time
 
 - v3.0.11
   - changed the `FormatWith` interface to support error template feature.
@@ -58,7 +61,7 @@
   - support go1.11-17,18+
 
 - v3.0.9
-  - fix: WithErrors will check IsEmpty on an error container and avoid adding it if empty.
+  - fix - WithErrors will check IsEmpty on an error container and avoid adding it if empty.
 
 - v3.0.8
   - restore error message template
