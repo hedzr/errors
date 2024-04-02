@@ -1,5 +1,8 @@
 # CHANGELOG
 
+- v3.3.2
+  - fixed/improved Attach() - attaching itself is denied now
+
 - v3.3.1
   - fixed Iss() couldn't test the others except the first error.
 
