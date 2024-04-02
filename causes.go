@@ -121,6 +121,9 @@ func (w *causes2) Attach(errs ...error) {
 
 	for _, e := range errs {
 		if e != nil {
+			if x, ok := e.(*causes2); ok && x == w {
+				continue
+			}
 			w.Causers = append(w.Causers, e)
 		}
 	}

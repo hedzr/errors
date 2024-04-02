@@ -122,13 +122,16 @@ func (w *WithStackInfo) Attach(errs ...error) {
 
 	for _, e := range errs {
 		if e != nil {
+			if x, ok := e.(*WithStackInfo); ok && x == w {
+				continue
+			}
 			w.Causers = append(w.Causers, e)
 		}
 	}
 
 	for _, e := range errs {
-		if e1, ok := e.(*WithStackInfo); ok {
-			w.Stack = e1.Stack
+		if x, ok := e.(*WithStackInfo); ok && x != w {
+			w.Stack = x.Stack
 		}
 	}
 }
@@ -250,7 +253,11 @@ func (w *WithStackInfo) Defer(err *error) { //nolint:gocritic
 	if w.IsEmpty() {
 		*err = nil
 	} else {
-		*err = w // no inner errors attached into an error container, that assumed 'is empty'
+		if len(w.Causers) == 1 && w.Code == OK && len(w.liveArgs) == 0 {
+			*err = w.Causers[0]
+		} else {
+			*err = w // no inner errors attached into an error container, that assumed 'is empty'
+		}
 	}
 }
 
