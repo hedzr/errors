@@ -182,15 +182,16 @@ func IsStd(err, target error) bool { //nolint:revive
 	}
 }
 
-func Iss(err error, targets ...error) (matched bool) { //nolint:revive
+func Iss(errChecking error, targets ...error) (matched bool) { //nolint:revive
 	if targets == nil {
-		return err == nil
+		return errChecking == nil
 	}
-	if err == nil {
+	if errChecking == nil {
 		return true
 	}
 
 	for _, target := range targets {
+		err := errChecking
 		isComparable := reflect.TypeOf(target).Comparable()
 		tv := reflect.ValueOf(target)
 		// target is not Code-based, try convert source err with target's type, and test whether its plain text message is equal
@@ -198,6 +199,7 @@ func Iss(err error, targets ...error) (matched bool) { //nolint:revive
 		if !isNil(tv) {
 			savedMsg = target.Error()
 		}
+	outer:
 		for {
 			if isComparable && err == target {
 				return true
@@ -206,7 +208,8 @@ func Iss(err error, targets ...error) (matched bool) { //nolint:revive
 				return true
 			}
 			if _, ok := target.(Code); !ok {
-				if ok = As(err, &target); ok && !isNil(reflect.ValueOf(target)) && strings.EqualFold(target.Error(), savedMsg) {
+				var tgt error
+				if ok = As(err, &tgt); ok && !isNil(reflect.ValueOf(tgt)) && strings.EqualFold(tgt.Error(), savedMsg) {
 					return true
 				}
 			}
@@ -222,7 +225,7 @@ func Iss(err error, targets ...error) (matched bool) { //nolint:revive
 			case interface{ Unwrap() error }:
 				err = x.Unwrap() //nolint:revive
 				if err == nil {
-					return false
+					break outer
 				}
 			case interface{ Unwrap() []error }:
 				for _, err := range x.Unwrap() {
@@ -230,8 +233,9 @@ func Iss(err error, targets ...error) (matched bool) { //nolint:revive
 						return true
 					}
 				}
-				return false
+				break outer
 			default:
+				break outer
 				// return false
 				//
 				// here is a bug which causes the rest errors expect the first one could never be processed.

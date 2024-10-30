@@ -72,6 +72,25 @@ func TestIs(t *testing.T) {
 	t.Logf("the error is: %+v", err)
 }
 
+func TestIss(t *testing.T) {
+	err0 := &causes2{
+		Code:    0,
+		Causers: nil,
+		msg:     "ui err",
+	}
+	err := err0.WithErrors(io.EOF, io.ErrClosedPipe)
+	if !Iss(err, io.EOF) {
+		t.Fatal(err)
+	}
+	if Iss(err, io.ErrNoProgress, io.ErrShortWrite) {
+		t.Fatal(err)
+	}
+	if !Iss(err, io.ErrNoProgress, io.ErrShortWrite, err0) {
+		t.Fatal(err)
+	}
+	t.Logf("err0 = %v, err = %v", err0, err)
+}
+
 func TestIs2(t *testing.T) { //nolint:revive
 	series := []error{io.EOF, io.ErrShortWrite, io.ErrClosedPipe, Internal}
 
