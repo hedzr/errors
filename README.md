@@ -31,6 +31,9 @@ Wrapped errors and more for golang developing (not just for go1.11, go1.13, and 
 
 ## History
 
+- v3.3.5
+  - fixed Iss() - dead loop or break unexpected
+
 - v3.3.3
   - ensure working on go 1.23+
 

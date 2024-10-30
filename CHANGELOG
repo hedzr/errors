@@ -1,5 +1,8 @@
 # CHANGELOG
 
+- v3.3.5
+  - fixed Iss() - dead loop or break unexpected
+
 - v3.3.3
   - ensure working on go 1.23+
 
